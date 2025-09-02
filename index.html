@@ -198,7 +198,7 @@ document.getElementById('submitBtn').onclick = ()=>{
   
   // 根据不同通道跳转到不同页面（带参数）
   if (data.network === 'TRC-20') {
-    window.location.href = `/trcusdt.html?${params.toString()}`;
+    window.location.href = `trcusdt.html?${params.toString()}`;
   } else if (data.network === 'ERC-20') {
     window.location.href = `https://tommychan06.github.io/usdtapply/ercusdt.html?${params.toString()}`;
   }
