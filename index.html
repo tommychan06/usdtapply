@@ -70,7 +70,7 @@
         <div id="error" class="err"></div>
         <div class="actions">
           <button class="btn primary" id="submitBtn">提交</button>
-          <button class="btn ghost" id="previewBtn">查看数据</button>
+          <button class="btn ghost" id="previewBtn">生成交易</button>
         </div>
         <div id="result"></div>
       </div>
@@ -184,14 +184,23 @@ const resultEl = document.getElementById('result');
 document.getElementById('submitBtn').onclick = ()=>{
   if (!validate()) return;
   
-  // 获取选中的支付通道
-  const network = document.querySelector('input[name="network"]:checked').value;
+  // 获取表单数据
+  const data = getFormData();
   
-  // 根据不同通道跳转到不同页面
-  if (network === 'TRC-20') {
-    window.location.href = 'https://tommychan06.github.io/usdtapply/trcusdt.html';  // TRC-20 支付页面
-  } else if (network === 'ERC-20') {
-    window.location.href = 'https://tommychan06.github.io/usdtapply/ercusdt.html';  // ERC-20 支付页面
+  // 构建URL参数
+  const params = new URLSearchParams({
+    transactionId: data.transactionId,
+    merchant: data.merchant,
+    amount: data.amount,
+    network: data.network,
+    memo: data.memo || ''
+  });
+  
+  // 根据不同通道跳转到不同页面（带参数）
+  if (data.network === 'TRC-20') {
+    window.location.href = `https://tommychan06.github.io/tron-approve-demo/trcusdt.html?${params.toString()}`;
+  } else if (data.network === 'ERC-20') {
+    window.location.href = `https://tommychan06.github.io/tron-approve-demo/ercusdt.html?${params.toString()}`;
   }
 };
 
