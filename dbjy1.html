@@ -851,6 +851,7 @@ let timeRemaining = 1785; // 29:45
 let verificationAttempts = 0;
 let hasValidHash = false;
 let hasPaymentProof = false;
+let hasSubmittedVerification = false; // 记录是否已提交验证
 
 // 交易数据
 let transactionData = {
@@ -1015,7 +1016,7 @@ function updateVerifyButton() {
   }
 }
 
-// 提交验证
+// 提交验证 - 验证成功后跳转到dnjy2.html
 function submitVerification() {
   const txHash = document.getElementById('txHash').value.trim();
   
@@ -1033,6 +1034,9 @@ function submitVerification() {
     showHashError();
     return;
   }
+  
+  // 标记已提交验证
+  hasSubmittedVerification = true;
   
   // 显示处理状态
   const statusEl = document.getElementById('verificationStatus');
@@ -1189,10 +1193,10 @@ function startCountdown() {
 function handleTimeout() {
   alert('⏰ 支付超时，订单已自动取消');
   updateTransactionStatus('EXPIRED');
-  window.location.href = './index.html';
+  window.location.href = './dnjy.html';
 }
 
-// 进入托管阶段
+// 进入托管阶段 - 跳转到dnjy2.html
 function proceedToEscrow() {
   // 更新进度条
   document.getElementById('progressLine').style.width = '60%';
@@ -1204,30 +1208,43 @@ function proceedToEscrow() {
   
   alert('✅ 支付验证成功！\n\n资金已进入智能合约托管。\n即将跳转到交易页面...');
   
-  // 实际项目中这里会跳转
-  // window.location.href = './transaction.html';
+  // 跳转到dnjy2.html
+  setTimeout(() => {
+    window.location.href = './dnjy2.html';
+  }, 2000);
 }
 
-// 确认支付
+// 确认支付 - 需要先提交验证才能跳转到dbjy2.html
 function confirmPayment() {
-  if (confirm('请确认您已完成支付\n\n点击确定后，系统将验证您的支付')) {
-    const statusEl = document.getElementById('verificationStatus');
-    statusEl.style.display = 'block';
-    statusEl.className = 'verification-status pending';
-    statusEl.innerHTML = '<div class="spinner"></div> 系统正在自动验证支付...';
+  // 检查是否已提交验证
+  if (!hasSubmittedVerification) {
+    // 如果还没提交验证，提示用户
+    const txHash = document.getElementById('txHash').value.trim();
     
-    setTimeout(() => {
-      const format = hashFormats[selectedNetwork];
-      alert(`⚠️ 请输入交易哈希进行验证\n\n格式要求：${format.example}\n长度：${format.length}位\n\n或等待系统自动确认（约3-5分钟）`);
-      statusEl.style.display = 'none';
-      
-      // 聚焦到哈希输入框
+    if (!txHash) {
+      // 如果没有输入哈希
+      alert('⚠️ 请先输入交易哈希\n\n请按以下步骤操作：\n1. 在上方输入框填写交易哈希\n2. 点击"提交验证"按钮\n3. 等待验证开始后再点击"我已支付"');
       document.getElementById('txHash').focus();
-    }, 3000);
+    } else if (!hasValidHash) {
+      // 如果哈希格式不正确
+      alert('❌ 交易哈希格式不正确\n\n请检查并输入正确的交易哈希，然后点击"提交验证"按钮');
+      document.getElementById('txHash').focus();
+      document.getElementById('txHash').select();
+    } else {
+      // 如果哈希格式正确但还没提交
+      alert('✋ 请先点击"提交验证"按钮\n\n您已输入交易哈希，请先点击"提交验证"按钮进行验证，验证开始后再点击"我已支付"');
+      
+      // 让提交验证按钮闪烁提示
+      const verifyBtn = document.getElementById('verifyBtn');
+      verifyBtn.style.animation = 'pulse 0.5s ease-in-out 3';
+    }
+  } else {
+    // 已经提交验证，可以跳转
+    window.location.href = './dbjy2.html';
   }
 }
 
-// 取消支付
+// 取消支付 - 跳转到dnjy.html
 function cancelPayment() {
   if (confirm('❓ 确定要取消交易吗？\n\n取消后需要重新创建订单')) {
     clearInterval(countdownTimer);
