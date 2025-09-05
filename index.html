@@ -1158,14 +1158,16 @@ function updateRiskAssessment() {
   updateFees();
 }
 
-// 更新费用
+// ★★★ 修复：更新费用函数 ★★★
 function updateFees() {
   const amount = parseFloat(document.getElementById('amount').value) || 0;
   const network = document.getElementById('network').value;
   
+  // 计算服务费（根据风险评分）
   let serviceFeeRate = riskScore < 40 ? 0.005 : riskScore < 70 ? 0.007 : 0.01;
   const serviceFee = amount * serviceFeeRate;
   
+  // 计算网络费
   const networkFees = {
     'TRC20': 1,
     'ERC20': 5,
@@ -1173,13 +1175,18 @@ function updateFees() {
   };
   const networkFee = networkFees[network] || 1;
   
-  const deposit = riskScore > 70 ? amount * 0.05 : 0;
+  // 计算保证金（低/中风险固定5 USDT，高风险按比例）
+  const deposit = amount === 0 ? 0 : (riskScore > 70 ? amount * 0.05 : 5);
   
+  // 计算总额
+  const totalAmount = amount + serviceFee + networkFee + deposit;
+  
+  // 更新页面显示
   document.getElementById('feeAmount').textContent = amount.toFixed(2) + ' USDT';
   document.getElementById('feeService').textContent = serviceFee.toFixed(2) + ' USDT';
   document.getElementById('feeNetwork').textContent = networkFee.toFixed(2) + ' USDT';
   document.getElementById('feeDeposit').textContent = deposit.toFixed(2) + ' USDT';
-  document.getElementById('feeTotal').textContent = (amount + serviceFee + networkFee + deposit).toFixed(2) + ' USDT';
+  document.getElementById('feeTotal').textContent = totalAmount.toFixed(2) + ' USDT';
 }
 
 // 保存草稿
@@ -1205,7 +1212,7 @@ function saveDraft() {
   alert('草稿已保存');
 }
 
-// 提交表单 - 删除了限额检查
+// ★★★ 核心修复：提交表单函数 ★★★
 function handleFormSubmit(e) {
   e.preventDefault();
   
@@ -1223,8 +1230,6 @@ function handleFormSubmit(e) {
     return;
   }
   
-  // ★★★ 已删除限额检查代码 ★★★
-  
   // 高风险警告
   if (riskScore > 70) {
     if (!confirm(`⚠️ 风险提示\n\n当前交易风险评分：${riskScore}\n建议谨慎交易。是否继续？`)) {
@@ -1232,16 +1237,53 @@ function handleFormSubmit(e) {
     }
   }
   
+  // ★★★ 计算所有费用 ★★★
+  const network = document.getElementById('network').value;
+  
+  // 计算服务费（根据风险评分）
+  let serviceFeeRate = riskScore < 40 ? 0.005 : riskScore < 70 ? 0.007 : 0.01;
+  const serviceFee = amount * serviceFeeRate;
+  
+  // 计算网络费
+  const networkFees = {
+    'TRC20': 1,
+    'ERC20': 5,
+    'BEP20': 0.5
+  };
+  const networkFee = networkFees[network] || 1;
+  
+  // 计算保证金（低/中风险固定5 USDT，高风险按比例）
+  const deposit = riskScore > 70 ? amount * 0.05 : 5;
+  
+  // 计算总额
+  const totalAmount = amount + serviceFee + networkFee + deposit;
+  
+  console.log('费用计算:', {
+    amount: amount,
+    serviceFee: serviceFee,
+    networkFee: networkFee,
+    deposit: deposit,
+    totalAmount: totalAmount,
+    riskScore: riskScore
+  });
+  
   // 生成交易ID
   const txId = 'ESC' + Date.now().toString(36).toUpperCase();
   
+  // ★★★ 创建包含所有费用信息的交易对象 ★★★
   const transaction = {
     id: txId,
     role: currentRole,
     userAddress: currentUserAddress,
+    userScore: 80,  // 用户信誉分
     counterpartyAddress: document.getElementById('counterpartyAddress').value,
+    counterpartyScore: 80,  // 对方信誉分
     amount: amount,
-    network: document.getElementById('network').value,
+    serviceFee: serviceFee,      // ✅ 服务费
+    networkFee: networkFee,      // ✅ 网络费
+    deposit: deposit,            // ✅ 保证金
+    totalAmount: totalAmount,    // ✅ 总额
+    network: network,
     escrowPeriod: document.getElementById('escrowPeriod').value,
     transactionType: document.getElementById('transactionType').value,
     description: document.getElementById('description').value,
@@ -1250,14 +1292,16 @@ function handleFormSubmit(e) {
     createdAt: new Date().toISOString()
   };
   
+  console.log('保存的交易数据:', transaction);
+  
   // 保存到sessionStorage用于页面间传递数据
   sessionStorage.setItem('currentTransaction', JSON.stringify(transaction));
   
   // 同时保存到localStorage以便持久化
   localStorage.setItem('latestTransaction', JSON.stringify(transaction));
   
-  // 显示成功提示
-  alert(`交易创建成功！\n交易ID: ${txId}\n\n即将跳转到支付页面...`);
+  // 显示成功提示（包含费用明细）
+  alert(`交易创建成功！\n\n交易ID: ${txId}\n交易金额: ${amount.toFixed(2)} USDT\n服务费: ${serviceFee.toFixed(2)} USDT\n网络费: ${networkFee.toFixed(2)} USDT\n保证金: ${deposit.toFixed(2)} USDT\n总计: ${totalAmount.toFixed(2)} USDT\n\n即将跳转到支付页面...`);
   
   // 跳转到第二个页面
   setTimeout(() => {
