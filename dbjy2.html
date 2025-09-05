@@ -688,7 +688,7 @@
             <div class="timeline-dot"></div>
             <div class="timeline-time" id="verifyTimeTimeline">--</div>
             <div class="timeline-title">链上验证</div>
-            <div class="timeline-desc">19个区块确认</div>
+            <div class="timeline-desc" id="blockConfirmDesc">19个区块确认</div>
           </div>
           
           <div class="timeline-item active">
@@ -941,6 +941,10 @@
               <span id="serviceFee">-- USDT</span>
             </div>
             <div class="detail-row">
+              <span style="color:var(--text-muted);">网络费</span>
+              <span id="networkFee">-- USDT</span>
+            </div>
+            <div class="detail-row">
               <span style="color:var(--text-muted);">保证金</span>
               <span id="depositAmount">-- USDT</span>
             </div>
@@ -966,11 +970,15 @@
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">托管合约</span>
-              <span style="font-family:monospace;font-size:10px;">TRX8d...29dK2</span>
+              <span style="font-family:monospace;font-size:10px;" id="escrowContract">--</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">确认数</span>
-              <span style="color:var(--success);">19 确认</span>
+              <span style="color:var(--success);" id="confirmations">-- 确认</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">验证状态</span>
+              <span id="verificationStatusDisplay">--</span>
             </div>
           </div>
         </div>
@@ -1022,6 +1030,8 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       transactionData = JSON.parse(savedData);
       
+      console.log('加载的交易数据:', transactionData); // 调试用
+      
       // ★★★ 动态更新页面 ★★★
       updatePageWithTransactionData(transactionData);
       
@@ -1047,6 +1057,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ★★★ 新增：更新页面数据函数 ★★★
 function updatePageWithTransactionData(data) {
+  console.log('更新页面数据:', data); // 调试用
+  
   // 更新面包屑导航
   document.getElementById('breadcrumbTxId').textContent = data.id || 'ESC--';
   
@@ -1061,12 +1073,17 @@ function updatePageWithTransactionData(data) {
   const roleText = data.role === 'buyer' ? '买方' : '卖方';
   document.getElementById('createDesc').textContent = `${roleText}发起担保交易`;
   
-  // 更新支付信息
+  // 更新支付信息 - 使用实际总额
   if (data.paymentTime) {
     const payDate = new Date(data.paymentTime);
     document.getElementById('paymentTimeTimeline').textContent = formatDateTime(payDate);
   }
-  document.getElementById('paymentDesc').textContent = (data.totalAmount || 0).toFixed(2) + ' USDT';
+  
+  // ★★★ 修复：正确计算并显示支付金额 ★★★
+  const totalForDisplay = parseFloat(data.totalAmount) || 
+    (parseFloat(data.amount || 0) + parseFloat(data.serviceFee || 0) + 
+     parseFloat(data.networkFee || 0) + parseFloat(data.deposit || 0));
+  document.getElementById('paymentDesc').textContent = totalForDisplay.toFixed(2) + ' USDT';
   
   // 更新验证时间（支付时间后1分钟）
   if (data.verificationTime) {
@@ -1100,14 +1117,14 @@ function updatePageWithTransactionData(data) {
   document.getElementById('escrowPeriodDetail').textContent = 
     escrowPeriodMap[data.escrowPeriod] || data.escrowPeriod + '小时' || '--';
   
-  // 更新交易双方地址和信誉分
+  // ★★★ 修复：更新交易双方地址和信誉分 ★★★
   if (data.role === 'buyer') {
     // 买方是用户自己
     const buyerAddr = data.userAddress || '--';
     document.getElementById('buyerAddress').textContent = 
       buyerAddr.length > 10 ? buyerAddr.substring(0, 4) + '...' + buyerAddr.substring(buyerAddr.length - 4) : buyerAddr;
     
-    // 用户信誉分（固定80分或从数据读取）
+    // 用户信誉分（从第一个页面传递的是80分）
     const buyerScore = data.userScore || 80;
     document.getElementById('buyerRep').textContent = '⭐ ' + buyerScore + '分';
     
@@ -1116,7 +1133,7 @@ function updatePageWithTransactionData(data) {
     document.getElementById('sellerAddress').textContent = 
       sellerAddr.length > 10 ? sellerAddr.substring(0, 4) + '...' + sellerAddr.substring(sellerAddr.length - 4) : sellerAddr;
     
-    // 对方信誉分（固定80分或从数据读取）
+    // 对方信誉分（也是80分）
     const sellerScore = data.counterpartyScore || 80;
     document.getElementById('sellerRep').textContent = '⭐ ' + sellerScore + '分';
     
@@ -1131,7 +1148,6 @@ function updatePageWithTransactionData(data) {
     document.getElementById('sellerAddress').textContent = 
       sellerAddr.length > 10 ? sellerAddr.substring(0, 4) + '...' + sellerAddr.substring(sellerAddr.length - 4) : sellerAddr;
     
-    // 用户信誉分
     const sellerScore = data.userScore || 80;
     document.getElementById('sellerRep').textContent = '⭐ ' + sellerScore + '分';
     
@@ -1140,7 +1156,6 @@ function updatePageWithTransactionData(data) {
     document.getElementById('buyerAddress').textContent = 
       buyerAddr.length > 10 ? buyerAddr.substring(0, 4) + '...' + buyerAddr.substring(buyerAddr.length - 4) : buyerAddr;
     
-    // 对方信誉分
     const buyerScore = data.counterpartyScore || 80;
     document.getElementById('buyerRep').textContent = '⭐ ' + buyerScore + '分';
     
@@ -1151,17 +1166,31 @@ function updatePageWithTransactionData(data) {
     document.getElementById('otherName2').textContent = '买方';
   }
   
-  // 更新资金信息
-  document.getElementById('txAmount').textContent = 
-    (data.amount || 0).toFixed(2) + ' USDT';
-  document.getElementById('serviceFee').textContent = 
-    (data.serviceFee || 0).toFixed(2) + ' USDT';
-  document.getElementById('depositAmount').textContent = 
-    (data.deposit || 0).toFixed(2) + ' USDT';
-  document.getElementById('totalAmount').textContent = 
-    (data.totalAmount || 0).toFixed(2) + ' USDT';
+  // ★★★ 修复：更新资金信息 - 确保所有金额正确显示 ★★★
+  const amount = parseFloat(data.amount) || 0;
+  const serviceFee = parseFloat(data.serviceFee) || 0;
+  const networkFee = parseFloat(data.networkFee) || 0;
+  const deposit = parseFloat(data.deposit) || 0;
   
-  // 更新区块链信息
+  console.log('金额详情:', {amount, serviceFee, networkFee, deposit}); // 调试用
+  
+  // 显示各项费用
+  document.getElementById('txAmount').textContent = amount.toFixed(2) + ' USDT';
+  document.getElementById('serviceFee').textContent = serviceFee.toFixed(2) + ' USDT';
+  document.getElementById('networkFee').textContent = networkFee.toFixed(2) + ' USDT';
+  document.getElementById('depositAmount').textContent = deposit.toFixed(2) + ' USDT';
+  
+  // 计算并显示托管总额
+  const calculatedTotal = amount + serviceFee + networkFee + deposit;
+  
+  // 如果传输的总额与计算的总额不一致，使用传输的值
+  const finalTotal = data.totalAmount ? parseFloat(data.totalAmount) : calculatedTotal;
+  
+  console.log('总额计算:', {calculatedTotal, dataTotal: data.totalAmount, finalTotal}); // 调试用
+  
+  document.getElementById('totalAmount').textContent = finalTotal.toFixed(2) + ' USDT';
+  
+  // ★★★ 更新区块链信息 ★★★
   document.getElementById('networkType').textContent = 
     networkTypeMap[data.network] || data.network || '--';
   
@@ -1173,6 +1202,61 @@ function updatePageWithTransactionData(data) {
     document.getElementById('txHashShort').textContent = shortHash;
     document.getElementById('txHashShort').title = hash; // 鼠标悬停显示完整哈希
   }
+  
+  // 生成托管合约地址
+  const escrowContract = generateEscrowContract(data.network);
+  document.getElementById('escrowContract').textContent = escrowContract;
+  
+  // 计算确认数
+  const confirmations = calculateConfirmations(data.paymentTime, data.network);
+  document.getElementById('confirmations').textContent = confirmations + ' 确认';
+  document.getElementById('blockConfirmDesc').textContent = confirmations + '个区块确认';
+  
+  // 显示验证状态
+  if (data.verificationStatus === 'SUCCESS') {
+    document.getElementById('verificationStatusDisplay').innerHTML = 
+      '<span style="color:var(--success);">✅ 已验证</span>';
+  } else if (data.verificationStatus === 'PENDING') {
+    document.getElementById('verificationStatusDisplay').innerHTML = 
+      '<span style="color:var(--warning);">⏳ 验证中</span>';
+  } else {
+    document.getElementById('verificationStatusDisplay').innerHTML = 
+      '<span style="color:var(--text-muted);">待验证</span>';
+  }
+}
+
+// ★★★ 新增：辅助函数 ★★★
+// 生成托管合约地址（模拟）
+function generateEscrowContract(network) {
+  if (!network) return 'TRX8d...29dK2';
+  
+  const contracts = {
+    'TRC20': 'TRX8d...29dK2',
+    'ERC20': '0x8d29...dK2F',
+    'BEP20': '0x8d29...dK2F'
+  };
+  
+  return contracts[network] || 'TRX8d...29dK2';
+}
+
+// 计算区块确认数（模拟）
+function calculateConfirmations(paymentTime, network) {
+  if (!paymentTime) return 0;
+  
+  const blockTimes = {
+    'TRC20': 3,    // 3秒一个块
+    'ERC20': 15,   // 15秒一个块
+    'BEP20': 3     // 3秒一个块
+  };
+  
+  const blockTime = blockTimes[network] || 3;
+  const payTime = new Date(paymentTime).getTime();
+  const now = Date.now();
+  const elapsed = Math.floor((now - payTime) / 1000); // 秒
+  const confirmations = Math.floor(elapsed / blockTime);
+  
+  // 最少返回19个确认
+  return Math.max(19, confirmations);
 }
 
 // ★★★ 新增：计算托管剩余时间 ★★★
