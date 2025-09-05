@@ -736,7 +736,7 @@
         <input type="text" 
                id="walletAddress" 
                class="login-input-field" 
-               placeholder="请输入USDT钱包地址 (TRC20/ERC20/BEP20)">
+               placeholder="请输入USDT钱包地址 (TRC20: T开头34位 / ERC20/BEP20: 0x开头42位)">
       </div>
       <div class="login-buttons">
         <button class="login-btn primary" id="loginBtn" onclick="handleLogin()">
@@ -752,7 +752,7 @@
     
     <div class="login-tips">
       <strong>💡 提示：</strong>
-      • 支持 TRC-20、ERC-20、BEP-20 网络钱包地址<br>
+      • 支持 TRC-20 (波场，T开头34位)、ERC-20 (以太坊，0x开头42位)、BEP-20 (币安智能链，0x开头42位) 网络钱包地址<br>
       • 无需私钥或助记词，仅使用公开地址<br>
       • 您的资产始终在您的钱包中，平台仅提供担保服务
     </div>
@@ -787,7 +787,7 @@
       <form id="escrowForm">
         <div class="form-group">
           <label>对方钱包地址 <span class="required">*</span></label>
-          <input type="text" id="counterpartyAddress" placeholder="输入TRC20/ERC20地址" onblur="checkAddress(this.value)">
+          <input type="text" id="counterpartyAddress" placeholder="输入对方钱包地址 (TRC20: T开头 / ERC20/BEP20: 0x开头)" onblur="checkAddress(this.value)">
           <div id="addressWarning" style="display:none;margin-top:8px;padding:8px;background:rgba(239,68,68,0.1);border-radius:6px;font-size:12px;color:var(--danger);">
             ⚠️ 该地址存在风险记录
           </div>
@@ -1002,6 +1002,13 @@ let riskScore = 25;
 let currentUserAddress = '';
 let isLoggedIn = false;
 
+// 示例钱包地址（用于测试）
+const exampleAddresses = {
+  TRC20: 'TN8Rf5PbEXe4XZDGt5H7dQBWoAMphDpg8K',
+  ERC20: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4',
+  BEP20: '0x8617E340b3D01FA5f11f306f4090FD50E238070D'
+};
+
 // 页面加载时初始化
 window.addEventListener('DOMContentLoaded', function() {
   // 初始化
@@ -1022,6 +1029,27 @@ window.addEventListener('DOMContentLoaded', function() {
   startLiveUpdates();
 });
 
+// 验证钱包地址格式
+function isValidWalletAddress(address) {
+  // TRC-20 地址：以T开头，长度34位，包含字母数字
+  const trc20Pattern = /^T[A-Za-z0-9]{33}$/;
+  
+  // ERC-20/BEP-20 地址：以0x开头，长度42位，包含十六进制字符
+  const erc20Pattern = /^0x[a-fA-F0-9]{40}$/;
+  
+  return trc20Pattern.test(address) || erc20Pattern.test(address);
+}
+
+// 检测地址类型
+function detectAddressType(address) {
+  if (address.startsWith('T') && address.length === 34) {
+    return 'TRC-20';
+  } else if (address.startsWith('0x') && address.length === 42) {
+    return 'ERC-20/BEP-20';
+  }
+  return 'Unknown';
+}
+
 // 登入功能 - 固定信誉分为80，KYC为L1
 function handleLogin() {
   const addressInput = document.getElementById('walletAddress');
@@ -1032,10 +1060,24 @@ function handleLogin() {
     return;
   }
   
-  if (address.length < 10) {
-    alert('请输入有效的钱包地址');
+  // ★★★ 验证钱包地址格式 ★★★
+  if (!isValidWalletAddress(address)) {
+    const exampleAddresses = 
+      '支持的钱包地址格式：\n\n' +
+      '• TRC-20 (波场): 以T开头，34位\n' +
+      '  示例: TN8Rf5PbEXe4XZDGt5H7dQBWoAMphDpg8K\n\n' +
+      '• ERC-20 (以太坊): 以0x开头，42位\n' +
+      '  示例: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4\n\n' +
+      '• BEP-20 (币安链): 以0x开头，42位\n' +
+      '  示例: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4\n\n' +
+      '请检查您的钱包地址格式是否正确！';
+    alert(exampleAddresses);
     return;
   }
+  
+  // 检测地址类型
+  const addressType = detectAddressType(address);
+  console.log('钱包地址类型:', addressType);
   
   // 保存地址并设置登录状态
   currentUserAddress = address;
@@ -1056,9 +1098,9 @@ function handleLogin() {
   document.getElementById('userScore').textContent = '80';
   document.getElementById('kycLevel').textContent = '1';
   
-  // 显示成功提示
+  // 显示成功提示（包含地址类型）
   setTimeout(() => {
-    alert('登录成功！欢迎使用易趣SafePay担保交易平台');
+    alert(`登录成功！\n\n钱包地址类型：${addressType}\n钱包地址：${shortAddress}\n\n欢迎使用易趣SafePay担保交易平台`);
   }, 300);
 }
 
@@ -1098,11 +1140,23 @@ function selectRole(role, element) {
 function checkAddress(address) {
   if (!address || address.length < 20) return;
   
+  // ★★★ 先验证地址格式 ★★★
+  if (!isValidWalletAddress(address)) {
+    document.getElementById('addressWarning').innerHTML = 
+      '⚠️ 无效的钱包地址格式！请输入正确的TRC-20、ERC-20或BEP-20地址';
+    document.getElementById('addressWarning').style.display = 'block';
+    document.getElementById('addressRisk').textContent = '格式错误';
+    document.getElementById('addressRisk').style.color = 'var(--danger)';
+    return;
+  }
+  
   setTimeout(() => {
     const riskyAddresses = ['TRX123', 'TRY456'];
     const isRisky = riskyAddresses.some(risky => address.includes(risky));
     
     if (isRisky) {
+      document.getElementById('addressWarning').innerHTML = 
+        '⚠️ 该地址存在风险记录';
       document.getElementById('addressWarning').style.display = 'block';
       document.getElementById('addressRisk').textContent = '⚠️ 高风险';
       document.getElementById('addressRisk').style.color = 'var(--danger)';
@@ -1222,11 +1276,33 @@ function handleFormSubmit(e) {
     return;
   }
   
+  // ★★★ 验证对方钱包地址格式 ★★★
+  const counterpartyAddress = document.getElementById('counterpartyAddress').value.trim();
+  if (!counterpartyAddress) {
+    alert('请输入对方钱包地址');
+    document.getElementById('counterpartyAddress').focus();
+    return;
+  }
+  
+  if (!isValidWalletAddress(counterpartyAddress)) {
+    alert('对方钱包地址格式无效！\n\n请确保地址格式正确：\n• TRC-20: T开头，34位\n• ERC-20/BEP-20: 0x开头，42位');
+    document.getElementById('counterpartyAddress').focus();
+    return;
+  }
+  
   const amount = parseFloat(document.getElementById('amount').value);
   
   // 只检查最小金额
   if (amount < 10) {
     alert('最小交易金额为 10 USDT');
+    return;
+  }
+  
+  // 验证描述
+  const description = document.getElementById('description').value.trim();
+  if (description.length < 30) {
+    alert('交易描述至少需要30个字符，请详细描述交易内容');
+    document.getElementById('description').focus();
     return;
   }
   
@@ -1276,7 +1352,7 @@ function handleFormSubmit(e) {
     role: currentRole,
     userAddress: currentUserAddress,
     userScore: 80,  // 用户信誉分
-    counterpartyAddress: document.getElementById('counterpartyAddress').value,
+    counterpartyAddress: counterpartyAddress,  // 使用验证过的地址
     counterpartyScore: 80,  // 对方信誉分
     amount: amount,
     serviceFee: serviceFee,      // ✅ 服务费
@@ -1286,7 +1362,7 @@ function handleFormSubmit(e) {
     network: network,
     escrowPeriod: document.getElementById('escrowPeriod').value,
     transactionType: document.getElementById('transactionType').value,
-    description: document.getElementById('description').value,
+    description: description,  // 使用验证过的描述
     riskScore: riskScore,
     status: 'CREATED',
     createdAt: new Date().toISOString()
