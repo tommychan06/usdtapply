@@ -1,225 +1,1150 @@
-<!doctype html>
+!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>USDT 支付主页</title>
+<title>易趣SafePay - 安全支付验证</title>
 <style>
-  :root{--bg:#0f172a;--card:#0b1225;--muted:#94a3b8;--text:#e2e8f0;--pri:#3b82f6}
-  *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#0b1020,#0f172a);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text)}
-  .wrap{max-width:860px;margin:40px auto;padding:16px}
-  .card{background:rgba(255,255,255,.04);backdrop-filter: blur(6px); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,.35)}
-  h1{margin:.2rem 0 1rem;font-size:24px}
-  .row{display:flex;gap:16px;margin-bottom:16px}
-  .col{flex:1;min-width:0}
-  label{display:block;margin-bottom:8px;color:var(--muted);font-size:14px}
-  input,select,textarea{width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,.12);background:#0b1020;color:var(--text);border-radius:12px;outline:none;box-sizing:border-box}
-  input:focus,select:focus,textarea:focus{border-color:var(--pri)}
-  select{height:46px}
-  input[type="number"],input[type="text"]{height:46px}
-  .muted{color:var(--muted);font-size:13px}
-  .channel-box{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:11px 12px;box-sizing:border-box;height:46px;display:flex;align-items:center}
-  .radio-group{display:flex;gap:30px;width:100%}
-  .radio-item{display:flex;align-items:center;gap:8px;cursor:pointer}
-  .radio-item input[type="radio"]{width:18px;height:18px;accent-color:var(--pri);cursor:pointer;margin:0}
-  .radio-item label{cursor:pointer;font-size:14px;margin:0}
-  .actions{display:flex;gap:10px;justify-content:center;margin-top:20px}
-  .btn{padding:12px 24px;border:none;border-radius:12px;cursor:pointer;font-size:16px}
-  .btn.primary{background:var(--pri);color:#fff}
-  .btn.ghost{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.15)}
-  .help{margin-top:10px;color:#93c5fd;font-size:13px}
-  .err{margin-top:8px;color:#fda4af;font-size:13px}
-  .success{margin-top:10px;padding:12px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;color:#86efac;font-size:14px}
-  footer{margin-top:18px;color:var(--muted);font-size:12px}
-  .footer-section{margin-top:40px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);text-align:center}
-  .footer-links{display:flex;justify-content:center;gap:20px;margin-bottom:15px;flex-wrap:wrap}
-  .footer-links a{color:var(--muted);text-decoration:none;font-size:13px;transition:color .2s}
-  .footer-links a:hover{color:var(--text)}
-  .footer-info{color:var(--muted);font-size:12px;line-height:1.8}
-  .footer-info span{margin:0 8px}
+  :root{
+    --bg-dark:#0a0e1a;
+    --bg-card:#131825;
+    --bg-hover:#1a2235;
+    --border:#2a3245;
+    --text-primary:#ffffff;
+    --text-secondary:#94a3b8;
+    --text-muted:#64748b;
+    --primary:#3b82f6;
+    --primary-dark:#2563eb;
+    --success:#10b981;
+    --warning:#f59e0b;
+    --danger:#ef4444;
+    --info:#06b6d4;
+  }
+  
+  *{margin:0;padding:0;box-sizing:border-box}
+  
+  body{
+    background:var(--bg-dark);
+    background-image:radial-gradient(circle at 20% 80%, #1e40af15 0%, transparent 50%),
+                     radial-gradient(circle at 80% 20%, #7c3aed15 0%, transparent 50%);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    color:var(--text-primary);
+    min-height:100vh;
+  }
+  
+  .container{
+    max-width:1200px;
+    margin:0 auto;
+    padding:24px;
+  }
+  
+  /* 顶部进度条 */
+  .progress-header{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:24px;
+    margin-bottom:32px;
+  }
+  
+  .progress-steps{
+    display:flex;
+    justify-content:space-between;
+    position:relative;
+    margin-bottom:16px;
+  }
+  
+  .progress-line-bg{
+    position:absolute;
+    top:20px;
+    left:0;
+    right:0;
+    height:2px;
+    background:var(--border);
+  }
+  
+  .progress-line{
+    position:absolute;
+    top:20px;
+    left:0;
+    height:2px;
+    background:linear-gradient(90deg, var(--primary), var(--info));
+    transition:width 0.5s;
+  }
+  
+  .step{
+    position:relative;
+    text-align:center;
+    flex:1;
+  }
+  
+  .step-circle{
+    width:40px;
+    height:40px;
+    margin:0 auto 8px;
+    background:var(--bg-card);
+    border:2px solid var(--border);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    font-size:14px;
+    position:relative;
+    z-index:1;
+  }
+  
+  .step.completed .step-circle{
+    background:var(--success);
+    border-color:var(--success);
+    color:white;
+  }
+  
+  .step.active .step-circle{
+    background:var(--primary);
+    border-color:var(--primary);
+    color:white;
+    box-shadow:0 0 0 8px rgba(59,130,246,0.1);
+    animation:pulse 2s infinite;
+  }
+  
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(59,130,246,0.4)}
+    70%{box-shadow:0 0 0 15px rgba(59,130,246,0)}
+    100%{box-shadow:0 0 0 0 rgba(59,130,246,0)}
+  }
+  
+  .step-label{
+    font-size:12px;
+    color:var(--text-muted);
+  }
+  
+  .step.active .step-label{
+    color:var(--text-primary);
+    font-weight:500;
+  }
+  
+  /* 交易状态栏 */
+  .status-bar{
+    display:flex;
+    justify-content:space-between;
+    padding:12px;
+    background:var(--bg-hover);
+    border-radius:10px;
+  }
+  
+  .status-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+  }
+  
+  .status-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--success);
+  }
+  
+  /* 主布局 */
+  .main-layout{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:24px;
+  }
+  
+  .card{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:28px;
+  }
+  
+  .card-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:24px;
+  }
+  
+  .card-title{
+    font-size:20px;
+    font-weight:600;
+  }
+  
+  /* 支付方式选择 */
+  .payment-methods{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+    gap:12px;
+    margin-bottom:24px;
+  }
+  
+  .payment-method{
+    padding:16px;
+    background:var(--bg-hover);
+    border:2px solid var(--border);
+    border-radius:12px;
+    cursor:pointer;
+    transition:all 0.3s;
+    text-align:center;
+  }
+  
+  .payment-method:hover{
+    border-color:var(--primary);
+    background:rgba(59,130,246,0.05);
+  }
+  
+  .payment-method.selected{
+    border-color:var(--primary);
+    background:rgba(59,130,246,0.1);
+  }
+  
+  .payment-method-name{
+    font-size:14px;
+    font-weight:600;
+    margin-top:8px;
+  }
+  
+  .payment-method-fee{
+    font-size:11px;
+    color:var(--text-muted);
+    margin-top:4px;
+  }
+  
+  /* 支付信息 */
+  .payment-info{
+    background:linear-gradient(135deg, #1e40af, #7c3aed);
+    border-radius:16px;
+    padding:24px;
+    margin-bottom:24px;
+    position:relative;
+    overflow:hidden;
+  }
+  
+  .payment-info::before{
+    content:'';
+    position:absolute;
+    top:-50%;
+    right:-50%;
+    width:200%;
+    height:200%;
+    background:radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation:rotate 20s linear infinite;
+  }
+  
+  @keyframes rotate{
+    to{transform:rotate(360deg)}
+  }
+  
+  .payment-amount{
+    font-size:36px;
+    font-weight:700;
+    margin-bottom:8px;
+    position:relative;
+    z-index:1;
+  }
+  
+  .payment-network{
+    display:inline-block;
+    padding:6px 12px;
+    background:rgba(255,255,255,0.2);
+    border-radius:8px;
+    font-size:12px;
+    font-weight:600;
+    position:relative;
+    z-index:1;
+  }
+  
+  /* 收款地址 */
+  .address-section{
+    margin-bottom:24px;
+  }
+  
+  .address-display{
+    display:flex;
+    align-items:center;
+    padding:16px;
+    background:var(--bg-hover);
+    border:1px solid var(--border);
+    border-radius:12px;
+    margin-bottom:12px;
+  }
+  
+  .address-text{
+    flex:1;
+    font-family:'Courier New', monospace;
+    font-size:14px;
+    word-break:break-all;
+    line-height:1.6;
+  }
+  
+  .copy-btn{
+    padding:8px 16px;
+    background:var(--primary);
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13px;
+    font-weight:600;
+    transition:all 0.3s;
+    white-space:nowrap;
+  }
+  
+  .copy-btn:hover{
+    background:var(--primary-dark);
+  }
+  
+  .copy-btn.copied{
+    background:var(--success);
+  }
+  
+  /* 验证输入 */
+  .verification-section{
+    background:var(--bg-hover);
+    border-radius:12px;
+    padding:20px;
+    margin-bottom:24px;
+  }
+  
+  .verification-title{
+    font-size:16px;
+    font-weight:600;
+    margin-bottom:16px;
+  }
+  
+  .verification-input{
+    display:flex;
+    gap:12px;
+    margin-bottom:12px;
+  }
+  
+  .verification-input input{
+    flex:1;
+    padding:12px;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--text-primary);
+    font-family:'Courier New', monospace;
+  }
+  
+  .verify-btn{
+    padding:12px 24px;
+    background:var(--success);
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+    transition:all 0.3s;
+  }
+  
+  .verify-btn:hover{
+    background:#059669;
+  }
+  
+  /* 验证状态 */
+  .verification-status{
+    padding:12px;
+    border-radius:8px;
+    margin-top:12px;
+    font-size:13px;
+    display:none;
+  }
+  
+  .verification-status.pending{
+    display:block;
+    background:rgba(245,158,11,0.1);
+    border:1px solid rgba(245,158,11,0.3);
+    color:var(--warning);
+  }
+  
+  .verification-status.success{
+    display:block;
+    background:rgba(16,185,129,0.1);
+    border:1px solid rgba(16,185,129,0.3);
+    color:var(--success);
+  }
+  
+  .verification-status.error{
+    display:block;
+    background:rgba(239,68,68,0.1);
+    border:1px solid rgba(239,68,68,0.3);
+    color:var(--danger);
+  }
+  
+  /* 倒计时 */
+  .countdown-section{
+    background:rgba(245,158,11,0.05);
+    border:1px solid rgba(245,158,11,0.2);
+    border-radius:12px;
+    padding:20px;
+    text-align:center;
+    margin-bottom:24px;
+  }
+  
+  .countdown-label{
+    font-size:14px;
+    color:var(--text-secondary);
+    margin-bottom:8px;
+  }
+  
+  .countdown-timer{
+    font-size:32px;
+    font-weight:700;
+    color:var(--warning);
+    font-family:'Courier New', monospace;
+  }
+  
+  .countdown-warning{
+    font-size:12px;
+    color:var(--text-muted);
+    margin-top:8px;
+  }
+  
+  /* 支付证明 */
+  .proof-upload{
+    background:var(--bg-hover);
+    border:2px dashed var(--border);
+    border-radius:12px;
+    padding:24px;
+    text-align:center;
+    cursor:pointer;
+    transition:all 0.3s;
+  }
+  
+  .proof-upload:hover{
+    border-color:var(--primary);
+    background:rgba(59,130,246,0.05);
+  }
+  
+  .upload-icon{
+    font-size:32px;
+    margin-bottom:12px;
+  }
+  
+  .upload-text{
+    font-size:14px;
+    color:var(--text-secondary);
+    margin-bottom:8px;
+  }
+  
+  .upload-hint{
+    font-size:12px;
+    color:var(--text-muted);
+  }
+  
+  /* 交易详情 */
+  .detail-list{
+    background:var(--bg-hover);
+    border-radius:12px;
+    padding:20px;
+  }
+  
+  .detail-item{
+    display:flex;
+    justify-content:space-between;
+    padding:12px 0;
+    border-bottom:1px solid var(--border);
+    font-size:14px;
+  }
+  
+  .detail-item:last-child{
+    border-bottom:none;
+  }
+  
+  .detail-label{
+    color:var(--text-muted);
+  }
+  
+  .detail-value{
+    color:var(--text-primary);
+    font-weight:500;
+  }
+  
+  /* 安全提示 */
+  .security-notice{
+    background:rgba(59,130,246,0.05);
+    border:1px solid rgba(59,130,246,0.2);
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:24px;
+  }
+  
+  .notice-header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:12px;
+  }
+  
+  .notice-icon{
+    font-size:20px;
+  }
+  
+  .notice-title{
+    font-size:14px;
+    font-weight:600;
+  }
+  
+  .notice-list{
+    list-style:none;
+    padding-left:32px;
+    font-size:13px;
+    color:var(--text-secondary);
+    line-height:1.8;
+  }
+  
+  .notice-list li{
+    position:relative;
+    padding-left:20px;
+  }
+  
+  .notice-list li:before{
+    content:'✓';
+    position:absolute;
+    left:0;
+    color:var(--primary);
+  }
+  
+  /* 按钮组 */
+  .btn-group{
+    display:flex;
+    gap:12px;
+    margin-top:24px;
+  }
+  
+  .btn{
+    flex:1;
+    padding:14px 24px;
+    border:none;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.3s;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  
+  .btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.3);
+  }
+  
+  .btn-primary{
+    background:linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color:white;
+  }
+  
+  .btn-secondary{
+    background:var(--bg-hover);
+    color:var(--text-primary);
+    border:1px solid var(--border);
+  }
+  
+  .btn-danger{
+    background:var(--danger);
+    color:white;
+  }
+  
+  /* 加载动画 */
+  .spinner{
+    width:20px;
+    height:20px;
+    border:2px solid var(--border);
+    border-top-color:var(--primary);
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    display:inline-block;
+  }
+  
+  @keyframes spin{
+    to{transform:rotate(360deg)}
+  }
+  
+  /* 响应式 */
+  @media (max-width:968px){
+    .main-layout{
+      grid-template-columns:1fr;
+    }
+  }
+  
+  @media (max-width:640px){
+    .payment-methods{
+      grid-template-columns:1fr;
+    }
+    .btn-group{
+      flex-direction:column;
+    }
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1 style="text-align:center;font-size:32px;margin-bottom:25px;color:var(--text);text-shadow:0 2px 10px rgba(0,0,0,.5);">易趣USDT支付平台</h1>
-  <div class="card">
-    <h1>USDT 授权/支付</h1>
-    <div class="row">
-      <div class="col">
-        <label>支付项目</label>
-        <select id="merchantSelect"></select>
-        <label style="margin-top:15px;">支付通道 (USDT)</label>
-        <div class="channel-box">
-          <div class="radio-group">
-            <div class="radio-item">
-              <input type="radio" id="trc20" name="network" value="TRC-20" checked>
-              <label for="trc20">TRC-20</label>
-            </div>
-            <div class="radio-item">
-              <input type="radio" id="erc20" name="network" value="ERC-20">
-              <label for="erc20">ERC-20</label>
-            </div>
+<div class="container">
+  <!-- 进度条 -->
+  <div class="progress-header">
+    <div class="progress-steps">
+      <div class="progress-line-bg"></div>
+      <div class="progress-line" id="progressLine" style="width:40%"></div>
+      
+      <div class="step completed">
+        <div class="step-circle">✓</div>
+        <div class="step-label">创建订单</div>
+      </div>
+      <div class="step active">
+        <div class="step-circle">2</div>
+        <div class="step-label">支付验证</div>
+      </div>
+      <div class="step">
+        <div class="step-circle">3</div>
+        <div class="step-label">资金托管</div>
+      </div>
+      <div class="step">
+        <div class="step-circle">4</div>
+        <div class="step-label">交易进行</div>
+      </div>
+      <div class="step">
+        <div class="step-circle">5</div>
+        <div class="step-label">完成结算</div>
+      </div>
+    </div>
+    
+    <div class="status-bar">
+      <div class="status-item">
+        <span class="status-dot"></span>
+        <span>订单状态：待支付</span>
+      </div>
+      <div class="status-item">
+        <span>订单号：<span id="orderId">--</span></span>
+      </div>
+      <div class="status-item">
+        <span>创建时间：<span id="createTime">--</span></span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="main-layout">
+    <!-- 左侧主要内容 -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">🔐 安全支付验证</h2>
+          <span style="padding:6px 12px;background:rgba(245,158,11,0.1);color:var(--warning);border-radius:20px;font-size:12px;font-weight:600;">
+            等待支付
+          </span>
+        </div>
+        
+        <!-- 支付方式 -->
+        <div class="payment-methods">
+          <div class="payment-method" id="method-TRC20" onclick="selectPaymentMethod('TRC20', this)">
+            <div style="font-size:24px;">🔷</div>
+            <div class="payment-method-name">TRC-20</div>
+            <div class="payment-method-fee">手续费 ~1 USDT</div>
+          </div>
+          <div class="payment-method" id="method-ERC20" onclick="selectPaymentMethod('ERC20', this)">
+            <div style="font-size:24px;">🔹</div>
+            <div class="payment-method-name">ERC-20</div>
+            <div class="payment-method-fee">手续费 ~5 USDT</div>
+          </div>
+          <div class="payment-method" id="method-BEP20" onclick="selectPaymentMethod('BEP20', this)">
+            <div style="font-size:24px;">🟡</div>
+            <div class="payment-method-name">BEP-20</div>
+            <div class="payment-method-fee">手续费 ~0.5 USDT</div>
+          </div>
+        </div>
+        
+        <!-- 支付信息 -->
+        <div class="payment-info">
+          <div class="payment-amount" id="paymentAmount">0.00 USDT</div>
+          <span class="payment-network" id="paymentNetwork">-- Network</span>
+        </div>
+        
+        <!-- 收款地址 -->
+        <div class="address-section">
+          <label style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;display:block;">
+            平台托管地址（请仔细核对）
+          </label>
+          <div class="address-display">
+            <span class="address-text" id="paymentAddress">--</span>
+            <button class="copy-btn" onclick="copyAddress()">复制地址</button>
+          </div>
+          <div style="padding:8px 12px;background:rgba(16,185,129,0.1);border-radius:8px;font-size:12px;color:var(--success);display:flex;align-items:center;gap:8px;">
+            <span>✓</span>
+            <span>已验证的官方托管地址</span>
+          </div>
+        </div>
+        
+        <!-- 交易验证 -->
+        <div class="verification-section">
+          <h3 class="verification-title">🔍 交易验证</h3>
+          <div class="verification-input">
+            <input type="text" id="txHash" placeholder="输入交易哈希 (Transaction Hash)">
+            <button class="verify-btn" onclick="verifyTransaction()">
+              验证交易
+            </button>
+          </div>
+          <div class="verification-status" id="verificationStatus">
+            <div class="spinner"></div> 正在查询区块链...
+          </div>
+        </div>
+        
+        <!-- 支付证明上传 -->
+        <div class="proof-upload" onclick="document.getElementById('proofFile').click()">
+          <div class="upload-icon">📸</div>
+          <div class="upload-text">点击上传支付截图（可选）</div>
+          <div class="upload-hint">支持 JPG、PNG 格式，最大 5MB</div>
+          <input type="file" id="proofFile" style="display:none" accept="image/*">
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="cancelPayment()">
+            ❌ 取消交易
+          </button>
+          <button class="btn btn-primary" onclick="confirmPayment()">
+            ✅ 我已支付
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 右侧信息 -->
+    <div>
+      <!-- 倒计时 -->
+      <div class="countdown-section">
+        <div class="countdown-label">⏱️ 支付倒计时</div>
+        <div class="countdown-timer" id="countdown">29:59</div>
+        <div class="countdown-warning">超时后订单将自动取消</div>
+      </div>
+      
+      <!-- 交易详情 -->
+      <div class="card">
+        <h3 style="font-size:16px;margin-bottom:20px;">📋 交易详情</h3>
+        <div class="detail-list">
+          <div class="detail-item">
+            <span class="detail-label">交易编号</span>
+            <span class="detail-value" id="transactionId" style="font-family:monospace;font-size:12px;">--</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">交易类型</span>
+            <span class="detail-value" id="transactionType">--</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">交易角色</span>
+            <span class="detail-value" id="userRole">--</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">对方地址</span>
+            <span class="detail-value" id="counterpartyAddr" style="font-family:monospace;font-size:12px;">--</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">交易金额</span>
+            <span class="detail-value" id="transactionAmount">0.00 USDT</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">服务费</span>
+            <span class="detail-value" id="serviceFee">0.00 USDT</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">网络费</span>
+            <span class="detail-value" id="networkFee">~1.00 USDT</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">保证金</span>
+            <span class="detail-value" id="depositAmount">0.00 USDT</span>
+          </div>
+          <div class="detail-item" style="border-top:1px solid var(--border);padding-top:16px;margin-top:8px;">
+            <span class="detail-label"><strong>应付总额</strong></span>
+            <span class="detail-value" id="totalPayment" style="color:var(--primary);font-size:18px;font-weight:700;">0.00 USDT</span>
           </div>
         </div>
       </div>
-      <div class="col">
-        <label>支付金额（USDT）</label>
-        <input id="amount" type="number" step="0.01" min="0" placeholder="例如 19.99">
-        <label style="margin-top:10px;">备注（可选）</label>
-        <input id="memo" type="text" maxlength="64" placeholder="订单号 / 说明">
-        <div id="error" class="err"></div>
-        <div class="actions">
-          <button class="btn primary" id="submitBtn">提交</button>
-          <button class="btn ghost" id="previewBtn">生成交易</button>
+      
+      <!-- 安全提示 -->
+      <div class="security-notice">
+        <div class="notice-header">
+          <span class="notice-icon">🛡️</span>
+          <span class="notice-title">安全提示</span>
         </div>
-        <div id="result"></div>
-      </div>
-    </div>
-    <footer>选择支付通道后点击提交将跳转到对应的支付页面。</footer>
-  </div>
-  
-  <div class="footer-section">
-    <div class="footer-links">
-      <a href="">关于我们</a>&nbsp;
-      <a href="">服务条款</a>&nbsp;
-      <a href="">隐私政策</a>&nbsp;
-      <a href="">帮助中心</a>&nbsp;
-      <a href="">联系客服</a>
-    </div>
-    <div class="footer-info">
-      <div>© 2025 易趣支付平台 版权所有</div>
-      <div>
-        <span>京ICP备2024000001号-1</span>
-        <span>|</span>
-        <span>京公网安备11010802024000号</span>
-      </div>
-      <div>
-        <span>营业执照</span>
-        <span>|</span>
-        <span>增值电信业务经营许可证：京B2-20240001</span>
-      </div>
-      <div style="margin-top:10px;">
-        <span>客服邮箱：tommyc061990@gmail.com</span>
-      </div>
-      <div style="margin-top:10px;font-size:11px;">
-        风险提示：数字货币交易具有一定风险，请谨慎操作
+        <ul class="notice-list">
+          <li>请确认收款地址为官方托管地址</li>
+          <li>转账金额必须与应付金额完全一致</li>
+          <li>选择正确的网络避免资产损失</li>
+          <li>保存好交易哈希作为支付凭证</li>
+          <li>如有疑问请联系在线客服</li>
+        </ul>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// ===== 1) 商户配置 =====
-const MERCHANTS = [
-  { id: "shopA", name: "担保交易" },
-  { id: "shopB", name: "购买数据" },
-  { id: "shopC", name: "定制服务" },
-  { id: "shopD", name: "其他" },
-];
+// 全局变量
+let selectedNetwork = 'TRC20';
+let countdownTimer;
+let timeRemaining = 1799; // 30分钟
+let verificationAttempts = 0;
+let transactionData = {};
 
-// 默认选中的商户
-let selectedId = MERCHANTS[0].id;
-
-// ===== 2) 渲染商户下拉 =====
-const sel = document.getElementById('merchantSelect');
-function renderMerchants(){
-  sel.innerHTML = '';
-  MERCHANTS.forEach(m=>{
-    const opt = document.createElement('option');
-    opt.value = m.id; 
-    opt.textContent = m.name;
-    if (m.id === selectedId) opt.selected = true;
-    sel.appendChild(opt);
-  });
-}
-renderMerchants();
-sel.onchange = e => { selectedId = e.target.value; };
-
-// ===== 3) 获取表单数据 =====
-function getFormData(){
-  const amt = document.getElementById('amount').value.trim();
-  const memo = document.getElementById('memo').value.trim();
-  const merchant = MERCHANTS.find(x=>x.id===selectedId);
-  const network = document.querySelector('input[name="network"]:checked').value;
-  
-  // 生成交易流水号
-  const timestamp = new Date();
-  const year = timestamp.getFullYear();
-  const month = String(timestamp.getMonth() + 1).padStart(2, '0');
-  const day = String(timestamp.getDate()).padStart(2, '0');
-  const hours = String(timestamp.getHours()).padStart(2, '0');
-  const minutes = String(timestamp.getMinutes()).padStart(2, '0');
-  const seconds = String(timestamp.getSeconds()).padStart(2, '0');
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  const transactionId = `USDT${year}${month}${day}${hours}${minutes}${seconds}${random}`;
-  
-  return {
-    transactionId: transactionId,
-    merchant: merchant ? merchant.name : '',
-    merchantId: selectedId,
-    network: network,
-    amount: amt,
-    memo: memo,
-    timestamp: timestamp.toLocaleString('zh-CN')
-  };
-}
-
-// ===== 4) 校验 =====
-const errEl = document.getElementById('error');
-function validate(){
-  const amtStr = document.getElementById('amount').value.trim();
-  if (!amtStr){ errEl.textContent = '请输入金额'; return false; }
-  const amt = Number(amtStr);
-  if (Number.isNaN(amt) || amt <= 0){ errEl.textContent = '金额须为大于 0 的数字'; return false; }
-  // 保留两位小数
-  if (!/^\d+(\.\d{1,2})?$/.test(amtStr)){ errEl.textContent = '金额最多保留两位小数'; return false; }
-  errEl.textContent = '';
-  return true;
-}
-
-// ===== 5) 按钮功能 =====
-const resultEl = document.getElementById('result');
-
-// 提交按钮 - 根据选择的通道跳转到不同页面
-document.getElementById('submitBtn').onclick = ()=>{
-  if (!validate()) return;
-  
-  // 获取表单数据
-  const data = getFormData();
-  
-  // 构建URL参数
-  const params = new URLSearchParams({
-    transactionId: data.transactionId,
-    merchant: data.merchant,
-    amount: data.amount,
-    network: data.network,
-    memo: data.memo || ''
-  });
-  
-  // 根据不同通道跳转到不同页面（带参数）
-  if (data.network === 'TRC-20') {
-    window.location.href = `https://tommychan06.github.io/usdtapply/trcusdt.html?${params.toString()}`;
-  } else if (data.network === 'ERC-20') {
-    window.location.href = `https://tommychan06.github.io/usdtapply/ercusdt.html?${params.toString()}`;
+// 网络配置
+const networks = {
+  'TRC20': {
+    name: 'TRC-20',
+    address: 'TLDSPMN8HoVVRzxgn7Cm3F8FR6r9uZHESn',
+    fee: 1,
+    confirmations: 19,
+    blockTime: 3
+  },
+  'ERC20': {
+    name: 'ERC-20',
+    address: '0x4287869bdaD2Be58b64dcc03F065fB70C4fAFCF2',
+    fee: 5,
+    confirmations: 12,
+    blockTime: 15
+  },
+  'BEP20': {
+    name: 'BEP-20',
+    address: '0x4287869bdaD2Be58b64dcc03F065fB70C4fAFCF2',
+    fee: 0.5,
+    confirmations: 15,
+    blockTime: 3
   }
 };
 
-// 查看数据按钮
-document.getElementById('previewBtn').onclick = ()=>{
-  if (!validate()) return;
-  const data = getFormData();
-  
-  // 显示当前表单数据
-  resultEl.innerHTML = `<div class="help" style="margin-top:10px;">
-    <strong>当前交易：</strong><br>
-    交易流水号：<span style="color:#3b82f6;font-weight:bold">${data.transactionId}</span><br>
-    项目：${data.merchant}<br>
-    支付通道：${data.network}<br>
-    金额：${data.amount} USDT<br>
-    备注：${data.memo || '无'}<br>
-    时间：${data.timestamp}
-  </div>`;
+// 交易类型映射
+const transactionTypeMap = {
+  'goods': '实物商品',
+  'digital': '数字商品',
+  'service': '服务类',
+  'other': '其他'
 };
+
+// 角色映射
+const roleMap = {
+  'buyer': '买方',
+  'seller': '卖方'
+};
+
+// 初始化
+document.addEventListener('DOMContentLoaded', function() {
+  loadTransactionData();
+  startCountdown();
+});
+
+// 加载交易数据
+function loadTransactionData() {
+  // 从sessionStorage获取数据
+  const storedData = sessionStorage.getItem('currentTransaction');
+  
+  if (!storedData) {
+    // 如果没有数据，尝试从localStorage获取
+    const localData = localStorage.getItem('latestTransaction');
+    if (localData) {
+      transactionData = JSON.parse(localData);
+    } else {
+      alert('交易数据丢失，请重新创建交易');
+      window.location.href = './index.html'; // 返回第一个页面
+      return;
+    }
+  } else {
+    transactionData = JSON.parse(storedData);
+  }
+  
+  // 更新页面显示
+  updatePageWithTransactionData();
+}
+
+// 更新页面显示
+function updatePageWithTransactionData() {
+  // 基本信息
+  document.getElementById('orderId').textContent = transactionData.id || 'ESC' + Date.now().toString(36).toUpperCase();
+  document.getElementById('createTime').textContent = formatDateTime(transactionData.createdAt);
+  document.getElementById('transactionId').textContent = (transactionData.id || 'ESC2025...').substring(0, 12) + '...';
+  
+  // 交易信息
+  document.getElementById('transactionType').textContent = transactionTypeMap[transactionData.transactionType] || '商品购买';
+  document.getElementById('userRole').textContent = roleMap[transactionData.role] || '买方';
+  
+  // 地址信息
+  const counterpartyAddress = transactionData.counterpartyAddress || 'TRY7...3aM5';
+  document.getElementById('counterpartyAddr').textContent = 
+    counterpartyAddress.length > 12 ? 
+    counterpartyAddress.substring(0, 6) + '...' + counterpartyAddress.substring(counterpartyAddress.length - 4) : 
+    counterpartyAddress;
+  
+  // 金额信息
+  const amount = parseFloat(transactionData.amount) || 0;
+  const riskScore = transactionData.riskScore || 25;
+  
+  // 计算费用
+  const serviceFeeRate = riskScore < 40 ? 0.005 : riskScore < 70 ? 0.007 : 0.01;
+  const serviceFee = amount * serviceFeeRate;
+  const deposit = riskScore > 70 ? amount * 0.05 : 0;
+  
+  // 选择网络
+  selectedNetwork = transactionData.network || 'TRC20';
+  const networkFee = networks[selectedNetwork].fee;
+  
+  // 更新显示
+  document.getElementById('transactionAmount').textContent = amount.toFixed(2) + ' USDT';
+  document.getElementById('serviceFee').textContent = serviceFee.toFixed(2) + ' USDT';
+  document.getElementById('networkFee').textContent = '~' + networkFee.toFixed(2) + ' USDT';
+  document.getElementById('depositAmount').textContent = deposit.toFixed(2) + ' USDT';
+  
+  const total = amount + serviceFee + networkFee + deposit;
+  document.getElementById('totalPayment').textContent = total.toFixed(2) + ' USDT';
+  document.getElementById('paymentAmount').textContent = total.toFixed(2) + ' USDT';
+  
+  // 选择对应的支付方式
+  selectPaymentMethod(selectedNetwork);
+  
+  // 自动选中对应的网络按钮
+  const methodElement = document.getElementById('method-' + selectedNetwork);
+  if (methodElement) {
+    selectPaymentMethod(selectedNetwork, methodElement);
+  }
+}
+
+// 格式化日期时间
+function formatDateTime(dateString) {
+  if (!dateString) {
+    return new Date().toLocaleString('zh-CN');
+  }
+  return new Date(dateString).toLocaleString('zh-CN');
+}
+
+// 选择支付方式
+function selectPaymentMethod(network, element) {
+  selectedNetwork = network;
+  
+  // 更新UI
+  document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+  
+  if (element) {
+    element.classList.add('selected');
+  } else {
+    // 如果没有传入element，找到对应的元素
+    const methodElement = document.getElementById('method-' + network);
+    if (methodElement) {
+      methodElement.classList.add('selected');
+    }
+  }
+  
+  // 更新地址和网络显示
+  const networkInfo = networks[network];
+  document.getElementById('paymentAddress').textContent = networkInfo.address;
+  document.getElementById('paymentNetwork').textContent = networkInfo.name + ' Network';
+  
+  // 更新网络费用
+  document.getElementById('networkFee').textContent = '~' + networkInfo.fee.toFixed(2) + ' USDT';
+  
+  // 重新计算总额
+  const amount = parseFloat(transactionData.amount) || 0;
+  const riskScore = transactionData.riskScore || 25;
+  const serviceFeeRate = riskScore < 40 ? 0.005 : riskScore < 70 ? 0.007 : 0.01;
+  const serviceFee = amount * serviceFeeRate;
+  const deposit = riskScore > 70 ? amount * 0.05 : 0;
+  const total = amount + serviceFee + networkInfo.fee + deposit;
+  
+  document.getElementById('totalPayment').textContent = total.toFixed(2) + ' USDT';
+  document.getElementById('paymentAmount').textContent = total.toFixed(2) + ' USDT';
+}
+
+// 复制地址
+function copyAddress() {
+  const address = document.getElementById('paymentAddress').textContent;
+  navigator.clipboard.writeText(address).then(() => {
+    const btn = event.target;
+    btn.textContent = '已复制';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '复制地址';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// 倒计时
+function startCountdown() {
+  countdownTimer = setInterval(() => {
+    if (timeRemaining <= 0) {
+      clearInterval(countdownTimer);
+      handleTimeout();
+      return;
+    }
+    
+    timeRemaining--;
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+    document.getElementById('countdown').textContent = 
+      `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    // 最后5分钟警告
+    if (timeRemaining === 300) {
+      alert('⚠️ 支付时间仅剩5分钟，请尽快完成支付！');
+    }
+  }, 1000);
+}
+
+// 超时处理
+function handleTimeout() {
+  alert('支付超时，订单已自动取消');
+  updateTransactionStatus('EXPIRED');
+  window.location.href = './index.html';
+}
+
+// 验证交易
+async function verifyTransaction() {
+  const txHash = document.getElementById('txHash').value.trim();
+  
+  if (!txHash) {
+    alert('请输入交易哈希');
+    return;
+  }
+  
+  if (txHash.length < 64) {
+    alert('交易哈希格式不正确');
+    return;
+  }
+  
+  const statusEl = document.getElementById('verificationStatus');
+  statusEl.className = 'verification-status pending';
+  statusEl.innerHTML = '<div class="spinner"></div> 正在查询区块链...';
+  
+  // 模拟区块链查询
+  setTimeout(() => {
+    verificationAttempts++;
+    
+    const isValid = txHash.startsWith('0x') || txHash.startsWith('TX');
+    const confirmations = Math.floor(Math.random() * 20);
+    const requiredConfirmations = networks[selectedNetwork].confirmations;
+    
+    if (isValid && confirmations >= requiredConfirmations) {
+      statusEl.className = 'verification-status success';
+      statusEl.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span>✅</span>
+          <div>
+            <div>交易验证成功！</div>
+            <div style="font-size:11px;margin-top:4px;">
+              确认数：${confirmations}/${requiredConfirmations} | 
+              金额：${document.getElementById('totalPayment').textContent} | 
+              状态：已确认
+            </div>
+          </div>
+        </div>
+      `;
+      
+      setTimeout(() => {
+        proceedToEscrow();
+      }, 2000);
+      
+    } else if (confirmations < requiredConfirmations) {
+      statusEl.className = 'verification-status pending';
+      statusEl.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span>⏳</span>
+          <div>
+            <div>交易已提交，等待确认</div>
+            <div style="font-size:11px;margin-top:4px;">
+              当前确认数：${confirmations}/${requiredConfirmations} | 
+              预计${networks[selectedNetwork].blockTime}分钟后完成
+            </div>
+          </div>
+        </div>
+      `;
+      
+      setTimeout(() => verifyTransaction(), 10000);
+      
+    } else {
+      statusEl.className = 'verification-status error';
+      statusEl.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span>❌</span>
+          <div>
+            <div>交易验证失败</div>
+            <div style="font-size:11px;margin-top:4px;">
+              未找到交易或金额不匹配，请检查后重试
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }, 2000);
+}
+
+// 进入托管阶段
+function proceedToEscrow() {
+  document.getElementById('progressLine').style.width = '60%';
+  document.querySelectorAll('.step')[1].classList.remove('active');
+  document.querySelectorAll('.step')[1].classList.add('completed');
+  document.querySelectorAll('.step')[2].classList.add('active');
+  
+  updateTransactionStatus('ESCROWED');
+  
+  alert('支付验证成功！\n资金已进入智能合约托管。\n\n即将跳转到交易页面...');
+  
+  // 这里可以跳转到下一个页面
+  // window.location.href = './transaction.html';
+}
+
+// 确认支付
+function confirmPayment() {
+  if (confirm('请确认您已完成支付\n\n点击确定后，系统将验证您的支付')) {
+    const statusEl = document.getElementById('verificationStatus');
+    statusEl.className = 'verification-status pending';
+    statusEl.innerHTML = '<div class="spinner"></div> 系统正在自动验证支付...';
+    
+    setTimeout(() => {
+      alert('请输入交易哈希进行验证，或等待系统自动确认（约3-5分钟）');
+      statusEl.className = 'verification-status';
+      statusEl.style.display = 'none';
+    }, 3000);
+  }
+}
+
+// 取消支付
+function cancelPayment() {
+  if (confirm('确定要取消交易吗？\n\n取消后需要重新创建订单')) {
+    clearInterval(countdownTimer);
+    updateTransactionStatus('CANCELLED');
+    alert('交易已取消');
+    window.location.href = './index.html';
+  }
+}
+
+// 更新交易状态
+function updateTransactionStatus(status) {
+  transactionData.status = status;
+  transactionData.updatedAt = new Date().toISOString();
+  sessionStorage.setItem('currentTransaction', JSON.stringify(transactionData));
+  localStorage.setItem('latestTransaction', JSON.stringify(transactionData));
+}
+
+// 文件上传处理
+document.getElementById('proofFile').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    if (file.size > 5 * 1024 * 1024) {
+      alert('文件大小不能超过5MB');
+      return;
+    }
+    
+    document.querySelector('.proof-upload').innerHTML = `
+      <div style="color:var(--success);">
+        <div style="font-size:32px;">✅</div>
+        <div style="margin-top:8px;">支付截图已上传</div>
+        <div style="font-size:12px;margin-top:4px;color:var(--text-muted);">${file.name}</div>
+      </div>
+    `;
+  }
+});
 </script>
 </body>
 </html>
