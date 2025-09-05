@@ -325,15 +325,54 @@
     flex:1;
     padding:12px;
     background:var(--bg-card);
-    border:1px solid var(--border);
+    border:2px solid var(--border);
     border-radius:10px;
     color:var(--text-primary);
     font-family:'Courier New', monospace;
+    font-size:13px;
+    transition:all 0.3s;
+  }
+  
+  .verification-input input:focus{
+    outline:none;
+    border-color:var(--primary);
+  }
+  
+  .verification-input input.error{
+    border-color:var(--danger);
+    background:rgba(239,68,68,0.05);
+  }
+  
+  .verification-input input.success{
+    border-color:var(--success);
+    background:rgba(16,185,129,0.05);
+  }
+  
+  /* 错误提示 */
+  .hash-error-msg{
+    font-size:12px;
+    color:var(--danger);
+    margin-top:-8px;
+    margin-bottom:12px;
+    padding-left:4px;
+    display:none;
+    animation:fadeIn 0.3s;
+  }
+  
+  .hash-error-msg.show{
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  
+  @keyframes fadeIn{
+    from{opacity:0}
+    to{opacity:1}
   }
   
   .verify-btn{
     padding:12px 24px;
-    background:var(--success);
+    background:#666;
     color:white;
     border:none;
     border-radius:10px;
@@ -342,8 +381,19 @@
     transition:all 0.3s;
   }
   
-  .verify-btn:hover{
+  .verify-btn:hover:not(:disabled){
     background:#059669;
+    transform:translateY(-1px);
+  }
+  
+  .verify-btn:disabled{
+    cursor:not-allowed;
+    opacity:0.5;
+  }
+  
+  .verify-btn.active{
+    background:var(--success);
+    opacity:1;
   }
   
   /* 验证状态 */
@@ -682,24 +732,31 @@
         
         <!-- 交易验证 -->
         <div class="verification-section">
-          <h3 class="verification-title">🔍 交易验证</h3>
+          <h3 class="verification-title">🔍 支付验证</h3>
           <div class="verification-input">
-            <input type="text" id="txHash" placeholder="输入交易哈希 (Transaction Hash)">
-            <button class="verify-btn" onclick="verifyTransaction()">
-              验证交易
-            </button>
+            <input type="text" id="txHash" placeholder="输入TRC-20交易哈希 (64位十六进制)" maxlength="66">
           </div>
-          <div class="verification-status" id="verificationStatus">
-            <div class="spinner"></div> 正在查询区块链...
+          <div class="hash-error-msg" id="hashError">
+            <span>⚠️</span>
+            <span id="hashErrorText">哈希格式不正确，请检查输入</span>
           </div>
-        </div>
-        
-        <!-- 支付证明上传 -->
-        <div class="proof-upload" onclick="document.getElementById('proofFile').click()">
-          <div class="upload-icon">📸</div>
-          <div class="upload-text">点击上传支付截图（可选）</div>
-          <div class="upload-hint">支持 JPG、PNG 格式，最大 5MB</div>
-          <input type="file" id="proofFile" style="display:none" accept="image/*">
+          
+          <!-- 支付截图上传 -->
+          <div class="proof-upload" id="proofUpload" onclick="document.getElementById('proofFile').click()">
+            <div class="upload-icon">📸</div>
+            <div class="upload-text">点击上传支付截图（可选）</div>
+            <div class="upload-hint">支持 JPG、PNG 格式，最大 5MB</div>
+            <input type="file" id="proofFile" style="display:none" accept="image/*">
+          </div>
+          
+          <!-- 验证按钮 -->
+          <button class="verify-btn" id="verifyBtn" onclick="submitVerification()" disabled style="width:100%;margin-top:16px;">
+            提交验证
+          </button>
+          
+          <div class="verification-status" id="verificationStatus" style="display:none;">
+            <div class="spinner"></div> 正在处理...
+          </div>
         </div>
         
         <!-- 操作按钮 -->
@@ -776,7 +833,9 @@
           <li>请确认收款地址为官方托管地址</li>
           <li>转账金额必须与应付金额完全一致</li>
           <li>选择正确的网络避免资产损失</li>
-          <li>保存好交易哈希作为支付凭证</li>
+          <li>请保存好交易哈希作为支付凭证</li>
+          <li>支付截图可选择性上传辅助验证</li>
+          <li>客服将在3-5分钟内完成人工验证</li>
           <li>如有疑问请联系在线客服</li>
         </ul>
       </div>
@@ -790,6 +849,10 @@ let selectedNetwork = 'TRC20';
 let countdownTimer;
 let timeRemaining = 1785; // 29:45
 let verificationAttempts = 0;
+let hasValidHash = false;
+let hasPaymentProof = false;
+
+// 交易数据
 let transactionData = {
   id: 'ESC2025ABC123',
   amount: 150,
@@ -824,24 +887,206 @@ const networks = {
   }
 };
 
-// 交易类型映射
-const transactionTypeMap = {
-  'goods': '实物商品',
-  'digital': '数字商品',
-  'service': '服务类',
-  'other': '其他'
-};
-
-// 角色映射
-const roleMap = {
-  'buyer': '买方',
-  'seller': '卖方'
+// 哈希格式验证规则
+const hashFormats = {
+  'TRC20': {
+    pattern: /^[a-fA-F0-9]{64}$/,
+    length: 64,
+    example: '64位十六进制字符',
+    placeholder: '输入TRC-20交易哈希 (64位十六进制)'
+  },
+  'ERC20': {
+    pattern: /^0x[a-fA-F0-9]{64}$/,
+    length: 66,
+    example: '0x开头 + 64位十六进制',
+    placeholder: '输入ERC-20交易哈希 (0x开头，共66位)'
+  },
+  'BEP20': {
+    pattern: /^0x[a-fA-F0-9]{64}$/,
+    length: 66,
+    example: '0x开头 + 64位十六进制',
+    placeholder: '输入BEP-20交易哈希 (0x开头，共66位)'
+  }
 };
 
 // 初始化
 document.addEventListener('DOMContentLoaded', function() {
   startCountdown();
+  initHashValidation();
+  updateHashFormat();
 });
+
+// 初始化哈希验证
+function initHashValidation() {
+  const txHashInput = document.getElementById('txHash');
+  
+  // 输入事件
+  txHashInput.addEventListener('input', function(e) {
+    validateHashInput(this.value);
+  });
+  
+  // 粘贴事件
+  txHashInput.addEventListener('paste', function(e) {
+    setTimeout(() => {
+      validateHashInput(this.value);
+    }, 10);
+  });
+  
+  // 失焦事件
+  txHashInput.addEventListener('blur', function(e) {
+    if (this.value && !hasValidHash) {
+      showHashError();
+    }
+  });
+}
+
+// 验证哈希输入
+function validateHashInput(value) {
+  const txHash = value.trim();
+  const inputEl = document.getElementById('txHash');
+  const errorEl = document.getElementById('hashError');
+  const format = hashFormats[selectedNetwork];
+  
+  // 清除之前的状态
+  inputEl.classList.remove('error', 'success');
+  errorEl.classList.remove('show');
+  
+  if (txHash.length === 0) {
+    hasValidHash = false;
+    updateVerifyButton();
+    return;
+  }
+  
+  // 检查是否符合格式
+  if (format.pattern.test(txHash)) {
+    // 格式正确
+    inputEl.classList.add('success');
+    hasValidHash = true;
+  } else {
+    // 格式错误
+    hasValidHash = false;
+    
+    // 只在接近预期长度时显示错误
+    if (txHash.length >= format.length - 5) {
+      inputEl.classList.add('error');
+      showHashError();
+    }
+  }
+  
+  updateVerifyButton();
+}
+
+// 显示哈希错误
+function showHashError() {
+  const errorEl = document.getElementById('hashError');
+  const errorText = document.getElementById('hashErrorText');
+  const format = hashFormats[selectedNetwork];
+  
+  errorText.textContent = `请输入正确的${networks[selectedNetwork].name}交易哈希 (${format.example})`;
+  errorEl.classList.add('show');
+}
+
+// 更新哈希格式
+function updateHashFormat() {
+  const format = hashFormats[selectedNetwork];
+  document.getElementById('txHash').placeholder = format.placeholder;
+  document.getElementById('txHash').maxLength = format.length;
+}
+
+// 验证哈希格式
+function validateHash(hash, network) {
+  if (!hash || !hash.trim()) return false;
+  const format = hashFormats[network];
+  return format.pattern.test(hash.trim());
+}
+
+// 更新验证按钮状态
+function updateVerifyButton() {
+  const verifyBtn = document.getElementById('verifyBtn');
+  
+  if (hasValidHash) {
+    verifyBtn.disabled = false;
+    verifyBtn.classList.add('active');
+    verifyBtn.innerHTML = '✓ 提交验证';
+  } else {
+    verifyBtn.disabled = true;
+    verifyBtn.classList.remove('active');
+    verifyBtn.innerHTML = '提交验证';
+  }
+}
+
+// 提交验证
+function submitVerification() {
+  const txHash = document.getElementById('txHash').value.trim();
+  
+  if (!txHash) {
+    alert('❌ 请输入交易哈希');
+    document.getElementById('txHash').focus();
+    return;
+  }
+  
+  // 再次验证哈希格式
+  if (!validateHash(txHash, selectedNetwork)) {
+    const format = hashFormats[selectedNetwork];
+    alert(`❌ 交易哈希格式不正确！\n\n请输入有效的${networks[selectedNetwork].name}网络交易哈希。\n\n格式要求：${format.example}\n长度要求：${format.length}位`);
+    document.getElementById('txHash').classList.add('error');
+    showHashError();
+    return;
+  }
+  
+  // 显示处理状态
+  const statusEl = document.getElementById('verificationStatus');
+  statusEl.style.display = 'block';
+  statusEl.className = 'verification-status pending';
+  statusEl.innerHTML = '<div class="spinner"></div> 正在提交验证资料...';
+  
+  // 禁用输入和按钮
+  document.getElementById('txHash').disabled = true;
+  document.getElementById('verifyBtn').disabled = true;
+  
+  // 模拟提交过程
+  setTimeout(() => {
+    statusEl.className = 'verification-status success';
+    statusEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:20px;">👨‍💼</span>
+        <div>
+          <div style="font-weight:600;color:var(--success);">平台客服 KF0531 已接收验证请求</div>
+          <div style="font-size:11px;margin-top:4px;color:var(--text-secondary);">
+            正在验证哈希: ${txHash.substring(0, 10)}...${txHash.substring(txHash.length - 8)}
+          </div>
+          <div style="font-size:11px;margin-top:2px;color:var(--text-secondary);">
+            预计 3-5 分钟内完成人工审核，请耐心等待
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // 更新按钮状态
+    document.getElementById('verifyBtn').innerHTML = '⏳ 已提交验证';
+    document.getElementById('verifyBtn').style.background = '#666';
+    
+    // 模拟验证成功
+    setTimeout(() => {
+      statusEl.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:20px;">✅</span>
+          <div>
+            <div style="font-weight:600;color:var(--success);">支付验证成功！</div>
+            <div style="font-size:11px;margin-top:4px;color:var(--text-secondary);">
+              交易哈希已确认 | 金额核对无误 | 即将进入托管阶段
+            </div>
+          </div>
+        </div>
+      `;
+      
+      setTimeout(() => {
+        proceedToEscrow();
+      }, 2000);
+    }, 15000); // 15秒后验证成功
+    
+  }, 1500);
+}
 
 // 选择支付方式
 function selectPaymentMethod(network, element) {
@@ -867,6 +1112,15 @@ function selectPaymentMethod(network, element) {
   // 更新网络费用
   document.getElementById('networkFee').textContent = '~' + networkInfo.fee.toFixed(2) + ' USDT';
   
+  // 更新哈希输入框
+  updateHashFormat();
+  
+  // 清空并重新验证当前输入
+  const txHashInput = document.getElementById('txHash');
+  if (txHashInput.value) {
+    validateHashInput(txHashInput.value);
+  }
+  
   // 重新计算总额
   const amount = parseFloat(transactionData.amount) || 0;
   const riskScore = transactionData.riskScore || 25;
@@ -884,7 +1138,23 @@ function copyAddress() {
   const address = document.getElementById('paymentAddress').textContent;
   navigator.clipboard.writeText(address).then(() => {
     const btn = event.target;
-    btn.textContent = '已复制';
+    btn.textContent = '✓ 已复制';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '复制地址';
+      btn.classList.remove('copied');
+    }, 2000);
+  }).catch(() => {
+    // 降级方案
+    const tempInput = document.createElement('input');
+    tempInput.value = address;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+    
+    const btn = event.target;
+    btn.textContent = '✓ 已复制';
     btn.classList.add('copied');
     setTimeout(() => {
       btn.textContent = '复制地址';
@@ -917,444 +1187,62 @@ function startCountdown() {
 
 // 超时处理
 function handleTimeout() {
-  alert('支付超时，订单已自动取消');
+  alert('⏰ 支付超时，订单已自动取消');
+  updateTransactionStatus('EXPIRED');
   window.location.href = './index.html';
-}
-
-// 区块链API配置
-const API_CONFIG = {
-  TRON: {
-    mainnet: 'https://api.trongrid.io',
-    testnet: 'https://api.shasta.trongrid.io',
-    scan: 'https://apilist.tronscanapi.com'
-  },
-  ETHEREUM: {
-    mainnet: 'https://api.etherscan.io/api',
-    infura: 'https://mainnet.infura.io/v3/YOUR_PROJECT_ID',
-    alchemy: 'https://eth-mainnet.g.alchemy.com/v2/YOUR_API_KEY'
-  },
-  BSC: {
-    mainnet: 'https://api.bscscan.com/api',
-    rpc: 'https://bsc-dataseed.binance.org'
-  }
-};
-
-// USDT合约地址
-const USDT_CONTRACTS = {
-  TRC20: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
-  ERC20: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-  BEP20: '0x55d398326f99059fF775485246999027B3197955'
-};
-
-// 验证交易
-async function verifyTransaction() {
-  const txHash = document.getElementById('txHash').value.trim();
-  
-  if (!txHash) {
-    alert('请输入交易哈希');
-    return;
-  }
-  
-  // 验证哈希格式
-  if (!validateTxHashFormat(txHash, selectedNetwork)) {
-    alert('交易哈希格式不正确');
-    return;
-  }
-  
-  const statusEl = document.getElementById('verificationStatus');
-  statusEl.className = 'verification-status pending';
-  statusEl.innerHTML = '<div class="spinner"></div> 正在查询区块链...';
-  
-  try {
-    verificationAttempts++;
-    
-    // 根据网络调用相应的验证API
-    let verificationResult;
-    switch(selectedNetwork) {
-      case 'TRC20':
-        verificationResult = await verifyTronTransaction(txHash);
-        break;
-      case 'ERC20':
-        verificationResult = await verifyEthereumTransaction(txHash);
-        break;
-      case 'BEP20':
-        verificationResult = await verifyBSCTransaction(txHash);
-        break;
-      default:
-        throw new Error('不支持的网络');
-    }
-    
-    displayVerificationResult(verificationResult, statusEl);
-    
-  } catch (error) {
-    console.error('验证交易失败:', error);
-    statusEl.className = 'verification-status error';
-    statusEl.innerHTML = `
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span>❌</span>
-        <div>
-          <div>查询失败: ${error.message}</div>
-          <div style="font-size:11px;margin-top:4px;">
-            请检查网络连接或稍后重试
-          </div>
-        </div>
-      </div>
-    `;
-  }
-}
-
-// 验证交易哈希格式
-function validateTxHashFormat(txHash, network) {
-  switch(network) {
-    case 'TRC20':
-      return /^[a-fA-F0-9]{64}$/.test(txHash);
-    case 'ERC20':
-    case 'BEP20':
-      return /^0x[a-fA-F0-9]{64}$/.test(txHash);
-    default:
-      return false;
-  }
-}
-
-// 验证Tron交易
-async function verifyTronTransaction(txHash) {
-  try {
-    // 使用TronGrid API查询交易
-    const response = await fetch(`${API_CONFIG.TRON.mainnet}/wallet/gettransactionbyid`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        value: txHash
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error('TronGrid API请求失败');
-    }
-    
-    const txData = await response.json();
-    
-    if (!txData.txID) {
-      throw new Error('交易不存在');
-    }
-    
-    // 获取交易确认信息
-    const confirmResponse = await fetch(`${API_CONFIG.TRON.mainnet}/wallet/gettransactioninfobyid`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        value: txHash
-      })
-    });
-    
-    const confirmData = await confirmResponse.json();
-    
-    // 解析交易信息
-    return parseTronTransaction(txData, confirmData);
-    
-  } catch (error) {
-    // 备用：使用TronScan API
-    try {
-      const scanResponse = await fetch(`${API_CONFIG.TRON.scan}/api/transaction-info?hash=${txHash}`);
-      const scanData = await scanResponse.json();
-      
-      if (scanData.code !== 200) {
-        throw new Error('交易未找到');
-      }
-      
-      return parseTronScanTransaction(scanData.data);
-    } catch (scanError) {
-      throw new Error('Tron交易验证失败');
-    }
-  }
-}
-
-// 验证以太坊交易
-async function verifyEthereumTransaction(txHash) {
-  try {
-    // 使用Etherscan API
-    const response = await fetch(
-      `${API_CONFIG.ETHEREUM.mainnet}?module=proxy&action=eth_getTransactionByHash&txhash=${txHash}&apikey=YourApiKeyToken`
-    );
-    
-    const data = await response.json();
-    
-    if (data.error) {
-      throw new Error(data.error.message);
-    }
-    
-    if (!data.result) {
-      throw new Error('交易不存在');
-    }
-    
-    // 获取交易回执
-    const receiptResponse = await fetch(
-      `${API_CONFIG.ETHEREUM.mainnet}?module=proxy&action=eth_getTransactionReceipt&txhash=${txHash}&apikey=YourApiKeyToken`
-    );
-    
-    const receiptData = await receiptResponse.json();
-    
-    // 获取当前区块高度
-    const blockResponse = await fetch(
-      `${API_CONFIG.ETHEREUM.mainnet}?module=proxy&action=eth_blockNumber&apikey=YourApiKeyToken`
-    );
-    
-    const blockData = await blockResponse.json();
-    
-    return parseEthereumTransaction(data.result, receiptData.result, blockData.result);
-    
-  } catch (error) {
-    throw new Error('Ethereum交易验证失败: ' + error.message);
-  }
-}
-
-// 验证BSC交易
-async function verifyBSCTransaction(txHash) {
-  try {
-    // 使用BSCScan API
-    const response = await fetch(
-      `${API_CONFIG.BSC.mainnet}?module=proxy&action=eth_getTransactionByHash&txhash=${txHash}&apikey=YourApiKeyToken`
-    );
-    
-    const data = await response.json();
-    
-    if (data.error) {
-      throw new Error(data.error.message);
-    }
-    
-    if (!data.result) {
-      throw new Error('交易不存在');
-    }
-    
-    // 获取交易回执
-    const receiptResponse = await fetch(
-      `${API_CONFIG.BSC.mainnet}?module=proxy&action=eth_getTransactionReceipt&txhash=${txHash}&apikey=YourApiKeyToken`
-    );
-    
-    const receiptData = await receiptResponse.json();
-    
-    // 获取当前区块高度
-    const blockResponse = await fetch(
-      `${API_CONFIG.BSC.mainnet}?module=proxy&action=eth_blockNumber&apikey=YourApiKeyToken`
-    );
-    
-    const blockData = await blockResponse.json();
-    
-    return parseBSCTransaction(data.result, receiptData.result, blockData.result);
-    
-  } catch (error) {
-    throw new Error('BSC交易验证失败: ' + error.message);
-  }
-}
-
-// 解析Tron交易
-function parseTronTransaction(txData, confirmData) {
-  const contract = txData.raw_data.contract[0];
-  const parameter = contract.parameter.value;
-  
-  // 检查是否是USDT转账
-  let amount = 0;
-  let toAddress = '';
-  let fromAddress = '';
-  
-  if (contract.type === 'TriggerSmartContract' && 
-      parameter.contract_address === USDT_CONTRACTS.TRC20) {
-    // 解析USDT转账
-    const data = parameter.data;
-    // USDT有6位小数
-    amount = parseInt(data.substring(64, 128), 16) / 1000000;
-    toAddress = '41' + data.substring(32, 64);
-    fromAddress = parameter.owner_address;
-  }
-  
-  const confirmations = confirmData.blockNumber ? 
-    (confirmData.unfreeze?.length || 0) : 0;
-  
-  return {
-    success: true,
-    txHash: txData.txID,
-    amount: amount,
-    toAddress: toAddress,
-    fromAddress: fromAddress,
-    confirmations: confirmations,
-    requiredConfirmations: networks[selectedNetwork].confirmations,
-    status: confirmData.receipt?.result === 'SUCCESS' ? 'SUCCESS' : 'PENDING',
-    blockNumber: confirmData.blockNumber
-  };
-}
-
-// 解析以太坊交易
-function parseEthereumTransaction(txData, receiptData, currentBlock) {
-  let amount = 0;
-  let toAddress = txData.to;
-  let fromAddress = txData.from;
-  
-  // 检查是否是USDT转账
-  if (txData.to?.toLowerCase() === USDT_CONTRACTS.ERC20.toLowerCase()) {
-    // 解析input data获取USDT转账信息
-    const input = txData.input;
-    if (input.startsWith('0xa9059cbb')) { // transfer function signature
-      toAddress = '0x' + input.substring(34, 74);
-      amount = parseInt(input.substring(74, 138), 16) / 1000000; // USDT 6位小数
-    }
-  }
-  
-  const confirmations = receiptData && receiptData.blockNumber ? 
-    parseInt(currentBlock, 16) - parseInt(receiptData.blockNumber, 16) + 1 : 0;
-  
-  return {
-    success: true,
-    txHash: txData.hash,
-    amount: amount,
-    toAddress: toAddress,
-    fromAddress: fromAddress,
-    confirmations: confirmations,
-    requiredConfirmations: networks[selectedNetwork].confirmations,
-    status: receiptData?.status === '0x1' ? 'SUCCESS' : 'FAILED',
-    blockNumber: receiptData?.blockNumber
-  };
-}
-
-// 解析BSC交易
-function parseBSCTransaction(txData, receiptData, currentBlock) {
-  let amount = 0;
-  let toAddress = txData.to;
-  let fromAddress = txData.from;
-  
-  // 检查是否是USDT转账
-  if (txData.to?.toLowerCase() === USDT_CONTRACTS.BEP20.toLowerCase()) {
-    const input = txData.input;
-    if (input.startsWith('0xa9059cbb')) {
-      toAddress = '0x' + input.substring(34, 74);
-      amount = parseInt(input.substring(74, 138), 16) / 1000000000000000000; // USDT 18位小数
-    }
-  }
-  
-  const confirmations = receiptData && receiptData.blockNumber ? 
-    parseInt(currentBlock, 16) - parseInt(receiptData.blockNumber, 16) + 1 : 0;
-  
-  return {
-    success: true,
-    txHash: txData.hash,
-    amount: amount,
-    toAddress: toAddress,
-    fromAddress: fromAddress,
-    confirmations: confirmations,
-    requiredConfirmations: networks[selectedNetwork].confirmations,
-    status: receiptData?.status === '0x1' ? 'SUCCESS' : 'FAILED',
-    blockNumber: receiptData?.blockNumber
-  };
-}
-
-// 显示验证结果
-function displayVerificationResult(result, statusEl) {
-  const expectedAmount = parseFloat(document.getElementById('totalPayment').textContent);
-  const expectedAddress = networks[selectedNetwork].address.toLowerCase();
-  const receivedAddress = result.toAddress.toLowerCase();
-  
-  // 验证金额和地址
-  const amountMatch = Math.abs(result.amount - expectedAmount) < 0.01; // 允许0.01的误差
-  const addressMatch = receivedAddress === expectedAddress;
-  
-  if (result.status === 'SUCCESS' && 
-      amountMatch && 
-      addressMatch && 
-      result.confirmations >= result.requiredConfirmations) {
-    
-    statusEl.className = 'verification-status success';
-    statusEl.innerHTML = `
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span>✅</span>
-        <div>
-          <div>交易验证成功！</div>
-          <div style="font-size:11px;margin-top:4px;">
-            确认数：${result.confirmations}/${result.requiredConfirmations} | 
-            金额：${result.amount} USDT | 
-            状态：已确认
-          </div>
-        </div>
-      </div>
-    `;
-    
-    setTimeout(() => {
-      proceedToEscrow();
-    }, 2000);
-    
-  } else if (result.confirmations < result.requiredConfirmations) {
-    statusEl.className = 'verification-status pending';
-    statusEl.innerHTML = `
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span>⏳</span>
-        <div>
-          <div>交易已提交，等待确认</div>
-          <div style="font-size:11px;margin-top:4px;">
-            当前确认数：${result.confirmations}/${result.requiredConfirmations} | 
-            预计${networks[selectedNetwork].blockTime}分钟后完成
-          </div>
-        </div>
-      </div>
-    `;
-    
-    // 30秒后重新验证
-    setTimeout(() => verifyTransaction(), 30000);
-    
-  } else {
-    let errorMsg = '交易验证失败：';
-    if (!amountMatch) errorMsg += `金额不匹配(期望${expectedAmount}, 实际${result.amount}) `;
-    if (!addressMatch) errorMsg += `地址不匹配 `;
-    if (result.status !== 'SUCCESS') errorMsg += `交易失败 `;
-    
-    statusEl.className = 'verification-status error';
-    statusEl.innerHTML = `
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span>❌</span>
-        <div>
-          <div>${errorMsg}</div>
-          <div style="font-size:11px;margin-top:4px;">
-            请检查交易详情后重试
-          </div>
-        </div>
-      </div>
-    `;
-  }
 }
 
 // 进入托管阶段
 function proceedToEscrow() {
+  // 更新进度条
   document.getElementById('progressLine').style.width = '60%';
   document.querySelectorAll('.step')[1].classList.remove('active');
   document.querySelectorAll('.step')[1].classList.add('completed');
   document.querySelectorAll('.step')[2].classList.add('active');
   
-  alert('支付验证成功！\n资金已进入智能合约托管。\n\n即将跳转到交易页面...');
+  updateTransactionStatus('ESCROWED');
+  
+  alert('✅ 支付验证成功！\n\n资金已进入智能合约托管。\n即将跳转到交易页面...');
+  
+  // 实际项目中这里会跳转
+  // window.location.href = './transaction.html';
 }
 
 // 确认支付
 function confirmPayment() {
   if (confirm('请确认您已完成支付\n\n点击确定后，系统将验证您的支付')) {
     const statusEl = document.getElementById('verificationStatus');
+    statusEl.style.display = 'block';
     statusEl.className = 'verification-status pending';
     statusEl.innerHTML = '<div class="spinner"></div> 系统正在自动验证支付...';
     
     setTimeout(() => {
-      alert('请输入交易哈希进行验证，或等待系统自动确认（约3-5分钟）');
-      statusEl.className = 'verification-status';
+      const format = hashFormats[selectedNetwork];
+      alert(`⚠️ 请输入交易哈希进行验证\n\n格式要求：${format.example}\n长度：${format.length}位\n\n或等待系统自动确认（约3-5分钟）`);
       statusEl.style.display = 'none';
+      
+      // 聚焦到哈希输入框
+      document.getElementById('txHash').focus();
     }, 3000);
   }
 }
 
 // 取消支付
 function cancelPayment() {
-  if (confirm('确定要取消交易吗？\n\n取消后需要重新创建订单')) {
+  if (confirm('❓ 确定要取消交易吗？\n\n取消后需要重新创建订单')) {
     clearInterval(countdownTimer);
-    alert('交易已取消');
+    updateTransactionStatus('CANCELLED');
+    alert('❌ 交易已取消');
     window.location.href = './index.html';
   }
+}
+
+// 更新交易状态
+function updateTransactionStatus(status) {
+  transactionData.status = status;
+  transactionData.updatedAt = new Date().toISOString();
+  sessionStorage.setItem('currentTransaction', JSON.stringify(transactionData));
+  localStorage.setItem('latestTransaction', JSON.stringify(transactionData));
 }
 
 // 文件上传处理
@@ -1362,17 +1250,30 @@ document.getElementById('proofFile').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (file) {
     if (file.size > 5 * 1024 * 1024) {
-      alert('文件大小不能超过5MB');
+      alert('❌ 文件大小不能超过5MB');
       return;
     }
     
-    document.querySelector('.proof-upload').innerHTML = `
-      <div style="color:var(--success);">
+    // 更新上传区域显示
+    const proofUpload = document.getElementById('proofUpload');
+    proofUpload.innerHTML = `
+      <div style="color:var(--success);text-align:center;">
         <div style="font-size:32px;">✅</div>
-        <div style="margin-top:8px;">支付截图已上传</div>
+        <div style="margin-top:8px;font-weight:600;">支付截图已上传</div>
         <div style="font-size:12px;margin-top:4px;color:var(--text-muted);">${file.name}</div>
+        <div style="font-size:11px;margin-top:4px;color:var(--text-secondary);">点击可重新上传</div>
       </div>
+      <input type="file" id="proofFileNew" style="display:none" accept="image/*">
     `;
+    
+    // 重新绑定点击事件
+    proofUpload.onclick = () => {
+      const newInput = document.getElementById('proofFileNew') || document.getElementById('proofFile');
+      if (newInput) newInput.click();
+    };
+    
+    // 更新状态
+    hasPaymentProof = true;
   }
 });
 </script>
