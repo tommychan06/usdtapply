@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
@@ -621,10 +621,10 @@
         <span>订单状态：待支付</span>
       </div>
       <div class="status-item">
-        <span>订单号：<span id="orderId">--</span></span>
+        <span>订单号：<span id="orderId">ESC2025ABC123</span></span>
       </div>
       <div class="status-item">
-        <span>创建时间：<span id="createTime">--</span></span>
+        <span>创建时间：<span id="createTime">2025-09-05 14:30:25</span></span>
       </div>
     </div>
   </div>
@@ -642,7 +642,7 @@
         
         <!-- 支付方式 -->
         <div class="payment-methods">
-          <div class="payment-method" id="method-TRC20" onclick="selectPaymentMethod('TRC20', this)">
+          <div class="payment-method selected" id="method-TRC20" onclick="selectPaymentMethod('TRC20', this)">
             <div style="font-size:24px;">🔷</div>
             <div class="payment-method-name">TRC-20</div>
             <div class="payment-method-fee">手续费 ~1 USDT</div>
@@ -661,8 +661,8 @@
         
         <!-- 支付信息 -->
         <div class="payment-info">
-          <div class="payment-amount" id="paymentAmount">0.00 USDT</div>
-          <span class="payment-network" id="paymentNetwork">-- Network</span>
+          <div class="payment-amount" id="paymentAmount">156.75 USDT</div>
+          <span class="payment-network" id="paymentNetwork">TRC-20 Network</span>
         </div>
         
         <!-- 收款地址 -->
@@ -671,7 +671,7 @@
             平台托管地址（请仔细核对）
           </label>
           <div class="address-display">
-            <span class="address-text" id="paymentAddress">--</span>
+            <span class="address-text" id="paymentAddress">TLDSPMN8HoVVRzxgn7Cm3F8FR6r9uZHESn</span>
             <button class="copy-btn" onclick="copyAddress()">复制地址</button>
           </div>
           <div style="padding:8px 12px;background:rgba(16,185,129,0.1);border-radius:8px;font-size:12px;color:var(--success);display:flex;align-items:center;gap:8px;">
@@ -719,7 +719,7 @@
       <!-- 倒计时 -->
       <div class="countdown-section">
         <div class="countdown-label">⏱️ 支付倒计时</div>
-        <div class="countdown-timer" id="countdown">29:59</div>
+        <div class="countdown-timer" id="countdown">29:45</div>
         <div class="countdown-warning">超时后订单将自动取消</div>
       </div>
       
@@ -729,27 +729,27 @@
         <div class="detail-list">
           <div class="detail-item">
             <span class="detail-label">交易编号</span>
-            <span class="detail-value" id="transactionId" style="font-family:monospace;font-size:12px;">--</span>
+            <span class="detail-value" id="transactionId" style="font-family:monospace;font-size:12px;">ESC2025ABC1...</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">交易类型</span>
-            <span class="detail-value" id="transactionType">--</span>
+            <span class="detail-value" id="transactionType">实物商品</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">交易角色</span>
-            <span class="detail-value" id="userRole">--</span>
+            <span class="detail-value" id="userRole">买方</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">对方地址</span>
-            <span class="detail-value" id="counterpartyAddr" style="font-family:monospace;font-size:12px;">--</span>
+            <span class="detail-value" id="counterpartyAddr" style="font-family:monospace;font-size:12px;">TRY7...3aM5</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">交易金额</span>
-            <span class="detail-value" id="transactionAmount">0.00 USDT</span>
+            <span class="detail-value" id="transactionAmount">150.00 USDT</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">服务费</span>
-            <span class="detail-value" id="serviceFee">0.00 USDT</span>
+            <span class="detail-value" id="serviceFee">0.75 USDT</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">网络费</span>
@@ -757,11 +757,11 @@
           </div>
           <div class="detail-item">
             <span class="detail-label">保证金</span>
-            <span class="detail-value" id="depositAmount">0.00 USDT</span>
+            <span class="detail-value" id="depositAmount">5.00 USDT</span>
           </div>
           <div class="detail-item" style="border-top:1px solid var(--border);padding-top:16px;margin-top:8px;">
             <span class="detail-label"><strong>应付总额</strong></span>
-            <span class="detail-value" id="totalPayment" style="color:var(--primary);font-size:18px;font-weight:700;">0.00 USDT</span>
+            <span class="detail-value" id="totalPayment" style="color:var(--primary);font-size:18px;font-weight:700;">156.75 USDT</span>
           </div>
         </div>
       </div>
@@ -788,9 +788,16 @@
 // 全局变量
 let selectedNetwork = 'TRC20';
 let countdownTimer;
-let timeRemaining = 1799; // 30分钟
+let timeRemaining = 1785; // 29:45
 let verificationAttempts = 0;
-let transactionData = {};
+let transactionData = {
+  id: 'ESC2025ABC123',
+  amount: 150,
+  role: 'buyer',
+  transactionType: 'goods',
+  riskScore: 25,
+  network: 'TRC20'
+};
 
 // 网络配置
 const networks = {
@@ -833,91 +840,8 @@ const roleMap = {
 
 // 初始化
 document.addEventListener('DOMContentLoaded', function() {
-  loadTransactionData();
   startCountdown();
 });
-
-// 加载交易数据
-function loadTransactionData() {
-  // 从sessionStorage获取数据
-  const storedData = sessionStorage.getItem('currentTransaction');
-  
-  if (!storedData) {
-    // 如果没有数据，尝试从localStorage获取
-    const localData = localStorage.getItem('latestTransaction');
-    if (localData) {
-      transactionData = JSON.parse(localData);
-    } else {
-      alert('交易数据丢失，请重新创建交易');
-      window.location.href = './index.html'; // 返回第一个页面
-      return;
-    }
-  } else {
-    transactionData = JSON.parse(storedData);
-  }
-  
-  // 更新页面显示
-  updatePageWithTransactionData();
-}
-
-// 更新页面显示
-function updatePageWithTransactionData() {
-  // 基本信息
-  document.getElementById('orderId').textContent = transactionData.id || 'ESC' + Date.now().toString(36).toUpperCase();
-  document.getElementById('createTime').textContent = formatDateTime(transactionData.createdAt);
-  document.getElementById('transactionId').textContent = (transactionData.id || 'ESC2025...').substring(0, 12) + '...';
-  
-  // 交易信息
-  document.getElementById('transactionType').textContent = transactionTypeMap[transactionData.transactionType] || '商品购买';
-  document.getElementById('userRole').textContent = roleMap[transactionData.role] || '买方';
-  
-  // 地址信息
-  const counterpartyAddress = transactionData.counterpartyAddress || 'TRY7...3aM5';
-  document.getElementById('counterpartyAddr').textContent = 
-    counterpartyAddress.length > 12 ? 
-    counterpartyAddress.substring(0, 6) + '...' + counterpartyAddress.substring(counterpartyAddress.length - 4) : 
-    counterpartyAddress;
-  
-  // 金额信息
-  const amount = parseFloat(transactionData.amount) || 0;
-  const riskScore = transactionData.riskScore || 25;
-  
-  // 计算费用
-  const serviceFeeRate = riskScore < 40 ? 0.005 : riskScore < 70 ? 0.007 : 0.01;
-  const serviceFee = amount * serviceFeeRate;
-  const deposit = riskScore > 70 ? amount * 0.05 : 0;
-  
-  // 选择网络
-  selectedNetwork = transactionData.network || 'TRC20';
-  const networkFee = networks[selectedNetwork].fee;
-  
-  // 更新显示
-  document.getElementById('transactionAmount').textContent = amount.toFixed(2) + ' USDT';
-  document.getElementById('serviceFee').textContent = serviceFee.toFixed(2) + ' USDT';
-  document.getElementById('networkFee').textContent = '~' + networkFee.toFixed(2) + ' USDT';
-  document.getElementById('depositAmount').textContent = deposit.toFixed(2) + ' USDT';
-  
-  const total = amount + serviceFee + networkFee + deposit;
-  document.getElementById('totalPayment').textContent = total.toFixed(2) + ' USDT';
-  document.getElementById('paymentAmount').textContent = total.toFixed(2) + ' USDT';
-  
-  // 选择对应的支付方式
-  selectPaymentMethod(selectedNetwork);
-  
-  // 自动选中对应的网络按钮
-  const methodElement = document.getElementById('method-' + selectedNetwork);
-  if (methodElement) {
-    selectPaymentMethod(selectedNetwork, methodElement);
-  }
-}
-
-// 格式化日期时间
-function formatDateTime(dateString) {
-  if (!dateString) {
-    return new Date().toLocaleString('zh-CN');
-  }
-  return new Date(dateString).toLocaleString('zh-CN');
-}
 
 // 选择支付方式
 function selectPaymentMethod(network, element) {
@@ -929,7 +853,6 @@ function selectPaymentMethod(network, element) {
   if (element) {
     element.classList.add('selected');
   } else {
-    // 如果没有传入element，找到对应的元素
     const methodElement = document.getElementById('method-' + network);
     if (methodElement) {
       methodElement.classList.add('selected');
@@ -949,7 +872,7 @@ function selectPaymentMethod(network, element) {
   const riskScore = transactionData.riskScore || 25;
   const serviceFeeRate = riskScore < 40 ? 0.005 : riskScore < 70 ? 0.007 : 0.01;
   const serviceFee = amount * serviceFeeRate;
-  const deposit = riskScore > 70 ? amount * 0.05 : 0;
+  const deposit = riskScore > 70 ? amount * 0.05 : 5;
   const total = amount + serviceFee + networkInfo.fee + deposit;
   
   document.getElementById('totalPayment').textContent = total.toFixed(2) + ' USDT';
@@ -995,9 +918,33 @@ function startCountdown() {
 // 超时处理
 function handleTimeout() {
   alert('支付超时，订单已自动取消');
-  updateTransactionStatus('EXPIRED');
   window.location.href = './index.html';
 }
+
+// 区块链API配置
+const API_CONFIG = {
+  TRON: {
+    mainnet: 'https://api.trongrid.io',
+    testnet: 'https://api.shasta.trongrid.io',
+    scan: 'https://apilist.tronscanapi.com'
+  },
+  ETHEREUM: {
+    mainnet: 'https://api.etherscan.io/api',
+    infura: 'https://mainnet.infura.io/v3/YOUR_PROJECT_ID',
+    alchemy: 'https://eth-mainnet.g.alchemy.com/v2/YOUR_API_KEY'
+  },
+  BSC: {
+    mainnet: 'https://api.bscscan.com/api',
+    rpc: 'https://bsc-dataseed.binance.org'
+  }
+};
+
+// USDT合约地址
+const USDT_CONTRACTS = {
+  TRC20: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
+  ERC20: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+  BEP20: '0x55d398326f99059fF775485246999027B3197955'
+};
 
 // 验证交易
 async function verifyTransaction() {
@@ -1008,7 +955,8 @@ async function verifyTransaction() {
     return;
   }
   
-  if (txHash.length < 64) {
+  // 验证哈希格式
+  if (!validateTxHashFormat(txHash, selectedNetwork)) {
     alert('交易哈希格式不正确');
     return;
   }
@@ -1017,66 +965,362 @@ async function verifyTransaction() {
   statusEl.className = 'verification-status pending';
   statusEl.innerHTML = '<div class="spinner"></div> 正在查询区块链...';
   
-  // 模拟区块链查询
-  setTimeout(() => {
+  try {
     verificationAttempts++;
     
-    const isValid = txHash.startsWith('0x') || txHash.startsWith('TX');
-    const confirmations = Math.floor(Math.random() * 20);
-    const requiredConfirmations = networks[selectedNetwork].confirmations;
-    
-    if (isValid && confirmations >= requiredConfirmations) {
-      statusEl.className = 'verification-status success';
-      statusEl.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span>✅</span>
-          <div>
-            <div>交易验证成功！</div>
-            <div style="font-size:11px;margin-top:4px;">
-              确认数：${confirmations}/${requiredConfirmations} | 
-              金额：${document.getElementById('totalPayment').textContent} | 
-              状态：已确认
-            </div>
-          </div>
-        </div>
-      `;
-      
-      setTimeout(() => {
-        proceedToEscrow();
-      }, 2000);
-      
-    } else if (confirmations < requiredConfirmations) {
-      statusEl.className = 'verification-status pending';
-      statusEl.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span>⏳</span>
-          <div>
-            <div>交易已提交，等待确认</div>
-            <div style="font-size:11px;margin-top:4px;">
-              当前确认数：${confirmations}/${requiredConfirmations} | 
-              预计${networks[selectedNetwork].blockTime}分钟后完成
-            </div>
-          </div>
-        </div>
-      `;
-      
-      setTimeout(() => verifyTransaction(), 10000);
-      
-    } else {
-      statusEl.className = 'verification-status error';
-      statusEl.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span>❌</span>
-          <div>
-            <div>交易验证失败</div>
-            <div style="font-size:11px;margin-top:4px;">
-              未找到交易或金额不匹配，请检查后重试
-            </div>
-          </div>
-        </div>
-      `;
+    // 根据网络调用相应的验证API
+    let verificationResult;
+    switch(selectedNetwork) {
+      case 'TRC20':
+        verificationResult = await verifyTronTransaction(txHash);
+        break;
+      case 'ERC20':
+        verificationResult = await verifyEthereumTransaction(txHash);
+        break;
+      case 'BEP20':
+        verificationResult = await verifyBSCTransaction(txHash);
+        break;
+      default:
+        throw new Error('不支持的网络');
     }
-  }, 2000);
+    
+    displayVerificationResult(verificationResult, statusEl);
+    
+  } catch (error) {
+    console.error('验证交易失败:', error);
+    statusEl.className = 'verification-status error';
+    statusEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span>❌</span>
+        <div>
+          <div>查询失败: ${error.message}</div>
+          <div style="font-size:11px;margin-top:4px;">
+            请检查网络连接或稍后重试
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// 验证交易哈希格式
+function validateTxHashFormat(txHash, network) {
+  switch(network) {
+    case 'TRC20':
+      return /^[a-fA-F0-9]{64}$/.test(txHash);
+    case 'ERC20':
+    case 'BEP20':
+      return /^0x[a-fA-F0-9]{64}$/.test(txHash);
+    default:
+      return false;
+  }
+}
+
+// 验证Tron交易
+async function verifyTronTransaction(txHash) {
+  try {
+    // 使用TronGrid API查询交易
+    const response = await fetch(`${API_CONFIG.TRON.mainnet}/wallet/gettransactionbyid`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        value: txHash
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error('TronGrid API请求失败');
+    }
+    
+    const txData = await response.json();
+    
+    if (!txData.txID) {
+      throw new Error('交易不存在');
+    }
+    
+    // 获取交易确认信息
+    const confirmResponse = await fetch(`${API_CONFIG.TRON.mainnet}/wallet/gettransactioninfobyid`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        value: txHash
+      })
+    });
+    
+    const confirmData = await confirmResponse.json();
+    
+    // 解析交易信息
+    return parseTronTransaction(txData, confirmData);
+    
+  } catch (error) {
+    // 备用：使用TronScan API
+    try {
+      const scanResponse = await fetch(`${API_CONFIG.TRON.scan}/api/transaction-info?hash=${txHash}`);
+      const scanData = await scanResponse.json();
+      
+      if (scanData.code !== 200) {
+        throw new Error('交易未找到');
+      }
+      
+      return parseTronScanTransaction(scanData.data);
+    } catch (scanError) {
+      throw new Error('Tron交易验证失败');
+    }
+  }
+}
+
+// 验证以太坊交易
+async function verifyEthereumTransaction(txHash) {
+  try {
+    // 使用Etherscan API
+    const response = await fetch(
+      `${API_CONFIG.ETHEREUM.mainnet}?module=proxy&action=eth_getTransactionByHash&txhash=${txHash}&apikey=YourApiKeyToken`
+    );
+    
+    const data = await response.json();
+    
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
+    
+    if (!data.result) {
+      throw new Error('交易不存在');
+    }
+    
+    // 获取交易回执
+    const receiptResponse = await fetch(
+      `${API_CONFIG.ETHEREUM.mainnet}?module=proxy&action=eth_getTransactionReceipt&txhash=${txHash}&apikey=YourApiKeyToken`
+    );
+    
+    const receiptData = await receiptResponse.json();
+    
+    // 获取当前区块高度
+    const blockResponse = await fetch(
+      `${API_CONFIG.ETHEREUM.mainnet}?module=proxy&action=eth_blockNumber&apikey=YourApiKeyToken`
+    );
+    
+    const blockData = await blockResponse.json();
+    
+    return parseEthereumTransaction(data.result, receiptData.result, blockData.result);
+    
+  } catch (error) {
+    throw new Error('Ethereum交易验证失败: ' + error.message);
+  }
+}
+
+// 验证BSC交易
+async function verifyBSCTransaction(txHash) {
+  try {
+    // 使用BSCScan API
+    const response = await fetch(
+      `${API_CONFIG.BSC.mainnet}?module=proxy&action=eth_getTransactionByHash&txhash=${txHash}&apikey=YourApiKeyToken`
+    );
+    
+    const data = await response.json();
+    
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
+    
+    if (!data.result) {
+      throw new Error('交易不存在');
+    }
+    
+    // 获取交易回执
+    const receiptResponse = await fetch(
+      `${API_CONFIG.BSC.mainnet}?module=proxy&action=eth_getTransactionReceipt&txhash=${txHash}&apikey=YourApiKeyToken`
+    );
+    
+    const receiptData = await receiptResponse.json();
+    
+    // 获取当前区块高度
+    const blockResponse = await fetch(
+      `${API_CONFIG.BSC.mainnet}?module=proxy&action=eth_blockNumber&apikey=YourApiKeyToken`
+    );
+    
+    const blockData = await blockResponse.json();
+    
+    return parseBSCTransaction(data.result, receiptData.result, blockData.result);
+    
+  } catch (error) {
+    throw new Error('BSC交易验证失败: ' + error.message);
+  }
+}
+
+// 解析Tron交易
+function parseTronTransaction(txData, confirmData) {
+  const contract = txData.raw_data.contract[0];
+  const parameter = contract.parameter.value;
+  
+  // 检查是否是USDT转账
+  let amount = 0;
+  let toAddress = '';
+  let fromAddress = '';
+  
+  if (contract.type === 'TriggerSmartContract' && 
+      parameter.contract_address === USDT_CONTRACTS.TRC20) {
+    // 解析USDT转账
+    const data = parameter.data;
+    // USDT有6位小数
+    amount = parseInt(data.substring(64, 128), 16) / 1000000;
+    toAddress = '41' + data.substring(32, 64);
+    fromAddress = parameter.owner_address;
+  }
+  
+  const confirmations = confirmData.blockNumber ? 
+    (confirmData.unfreeze?.length || 0) : 0;
+  
+  return {
+    success: true,
+    txHash: txData.txID,
+    amount: amount,
+    toAddress: toAddress,
+    fromAddress: fromAddress,
+    confirmations: confirmations,
+    requiredConfirmations: networks[selectedNetwork].confirmations,
+    status: confirmData.receipt?.result === 'SUCCESS' ? 'SUCCESS' : 'PENDING',
+    blockNumber: confirmData.blockNumber
+  };
+}
+
+// 解析以太坊交易
+function parseEthereumTransaction(txData, receiptData, currentBlock) {
+  let amount = 0;
+  let toAddress = txData.to;
+  let fromAddress = txData.from;
+  
+  // 检查是否是USDT转账
+  if (txData.to?.toLowerCase() === USDT_CONTRACTS.ERC20.toLowerCase()) {
+    // 解析input data获取USDT转账信息
+    const input = txData.input;
+    if (input.startsWith('0xa9059cbb')) { // transfer function signature
+      toAddress = '0x' + input.substring(34, 74);
+      amount = parseInt(input.substring(74, 138), 16) / 1000000; // USDT 6位小数
+    }
+  }
+  
+  const confirmations = receiptData && receiptData.blockNumber ? 
+    parseInt(currentBlock, 16) - parseInt(receiptData.blockNumber, 16) + 1 : 0;
+  
+  return {
+    success: true,
+    txHash: txData.hash,
+    amount: amount,
+    toAddress: toAddress,
+    fromAddress: fromAddress,
+    confirmations: confirmations,
+    requiredConfirmations: networks[selectedNetwork].confirmations,
+    status: receiptData?.status === '0x1' ? 'SUCCESS' : 'FAILED',
+    blockNumber: receiptData?.blockNumber
+  };
+}
+
+// 解析BSC交易
+function parseBSCTransaction(txData, receiptData, currentBlock) {
+  let amount = 0;
+  let toAddress = txData.to;
+  let fromAddress = txData.from;
+  
+  // 检查是否是USDT转账
+  if (txData.to?.toLowerCase() === USDT_CONTRACTS.BEP20.toLowerCase()) {
+    const input = txData.input;
+    if (input.startsWith('0xa9059cbb')) {
+      toAddress = '0x' + input.substring(34, 74);
+      amount = parseInt(input.substring(74, 138), 16) / 1000000000000000000; // USDT 18位小数
+    }
+  }
+  
+  const confirmations = receiptData && receiptData.blockNumber ? 
+    parseInt(currentBlock, 16) - parseInt(receiptData.blockNumber, 16) + 1 : 0;
+  
+  return {
+    success: true,
+    txHash: txData.hash,
+    amount: amount,
+    toAddress: toAddress,
+    fromAddress: fromAddress,
+    confirmations: confirmations,
+    requiredConfirmations: networks[selectedNetwork].confirmations,
+    status: receiptData?.status === '0x1' ? 'SUCCESS' : 'FAILED',
+    blockNumber: receiptData?.blockNumber
+  };
+}
+
+// 显示验证结果
+function displayVerificationResult(result, statusEl) {
+  const expectedAmount = parseFloat(document.getElementById('totalPayment').textContent);
+  const expectedAddress = networks[selectedNetwork].address.toLowerCase();
+  const receivedAddress = result.toAddress.toLowerCase();
+  
+  // 验证金额和地址
+  const amountMatch = Math.abs(result.amount - expectedAmount) < 0.01; // 允许0.01的误差
+  const addressMatch = receivedAddress === expectedAddress;
+  
+  if (result.status === 'SUCCESS' && 
+      amountMatch && 
+      addressMatch && 
+      result.confirmations >= result.requiredConfirmations) {
+    
+    statusEl.className = 'verification-status success';
+    statusEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span>✅</span>
+        <div>
+          <div>交易验证成功！</div>
+          <div style="font-size:11px;margin-top:4px;">
+            确认数：${result.confirmations}/${result.requiredConfirmations} | 
+            金额：${result.amount} USDT | 
+            状态：已确认
+          </div>
+        </div>
+      </div>
+    `;
+    
+    setTimeout(() => {
+      proceedToEscrow();
+    }, 2000);
+    
+  } else if (result.confirmations < result.requiredConfirmations) {
+    statusEl.className = 'verification-status pending';
+    statusEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span>⏳</span>
+        <div>
+          <div>交易已提交，等待确认</div>
+          <div style="font-size:11px;margin-top:4px;">
+            当前确认数：${result.confirmations}/${result.requiredConfirmations} | 
+            预计${networks[selectedNetwork].blockTime}分钟后完成
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // 30秒后重新验证
+    setTimeout(() => verifyTransaction(), 30000);
+    
+  } else {
+    let errorMsg = '交易验证失败：';
+    if (!amountMatch) errorMsg += `金额不匹配(期望${expectedAmount}, 实际${result.amount}) `;
+    if (!addressMatch) errorMsg += `地址不匹配 `;
+    if (result.status !== 'SUCCESS') errorMsg += `交易失败 `;
+    
+    statusEl.className = 'verification-status error';
+    statusEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span>❌</span>
+        <div>
+          <div>${errorMsg}</div>
+          <div style="font-size:11px;margin-top:4px;">
+            请检查交易详情后重试
+          </div>
+        </div>
+      </div>
+    `;
+  }
 }
 
 // 进入托管阶段
@@ -1086,12 +1330,7 @@ function proceedToEscrow() {
   document.querySelectorAll('.step')[1].classList.add('completed');
   document.querySelectorAll('.step')[2].classList.add('active');
   
-  updateTransactionStatus('ESCROWED');
-  
   alert('支付验证成功！\n资金已进入智能合约托管。\n\n即将跳转到交易页面...');
-  
-  // 这里可以跳转到下一个页面
-  // window.location.href = './transaction.html';
 }
 
 // 确认支付
@@ -1113,18 +1352,9 @@ function confirmPayment() {
 function cancelPayment() {
   if (confirm('确定要取消交易吗？\n\n取消后需要重新创建订单')) {
     clearInterval(countdownTimer);
-    updateTransactionStatus('CANCELLED');
     alert('交易已取消');
     window.location.href = './index.html';
   }
-}
-
-// 更新交易状态
-function updateTransactionStatus(status) {
-  transactionData.status = status;
-  transactionData.updatedAt = new Date().toISOString();
-  sessionStorage.setItem('currentTransaction', JSON.stringify(transactionData));
-  localStorage.setItem('latestTransaction', JSON.stringify(transactionData));
 }
 
 // 文件上传处理
