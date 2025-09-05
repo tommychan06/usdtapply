@@ -692,10 +692,10 @@
         <span>订单状态：待支付</span>
       </div>
       <div class="status-item">
-        <span>订单号：<span id="orderId">ESC2025ABC123</span></span>
+        <span>订单号：<span id="orderId">--</span></span>
       </div>
       <div class="status-item">
-        <span>创建时间：<span id="createTime">2025-09-05 14:30:25</span></span>
+        <span>创建时间：<span id="createTime">--</span></span>
       </div>
     </div>
   </div>
@@ -713,7 +713,7 @@
         
         <!-- 支付方式 -->
         <div class="payment-methods">
-          <div class="payment-method selected" id="method-TRC20" onclick="selectPaymentMethod('TRC20', this)">
+          <div class="payment-method" id="method-TRC20" onclick="selectPaymentMethod('TRC20', this)">
             <div style="font-size:24px;">🔷</div>
             <div class="payment-method-name">TRC-20</div>
             <div class="payment-method-fee">手续费 ~1 USDT</div>
@@ -732,8 +732,8 @@
         
         <!-- 支付信息 -->
         <div class="payment-info">
-          <div class="payment-amount" id="paymentAmount">156.75 USDT</div>
-          <span class="payment-network" id="paymentNetwork">TRC-20 Network</span>
+          <div class="payment-amount" id="paymentAmount">-- USDT</div>
+          <span class="payment-network" id="paymentNetwork">-- Network</span>
         </div>
         
         <!-- 收款地址 -->
@@ -742,7 +742,7 @@
             平台托管地址（请仔细核对）
           </label>
           <div class="address-display">
-            <span class="address-text" id="paymentAddress">TLDSPMN8HoVVRzxgn7Cm3F8FR6r9uZHESn</span>
+            <span class="address-text" id="paymentAddress">--</span>
             <button class="copy-btn" onclick="copyAddress()">复制地址</button>
           </div>
           <div style="padding:8px 12px;background:rgba(16,185,129,0.1);border-radius:8px;font-size:12px;color:var(--success);display:flex;align-items:center;gap:8px;">
@@ -755,7 +755,7 @@
         <div class="verification-section">
           <h3 class="verification-title">🔍 支付验证</h3>
           <div class="verification-input">
-            <input type="text" id="txHash" placeholder="输入TRC-20交易哈希 (64位十六进制)" maxlength="66">
+            <input type="text" id="txHash" placeholder="输入交易哈希" maxlength="66">
           </div>
           <div class="hash-error-msg" id="hashError">
             <span>⚠️</span>
@@ -807,39 +807,43 @@
         <div class="detail-list">
           <div class="detail-item">
             <span class="detail-label">交易编号</span>
-            <span class="detail-value" id="transactionId" style="font-family:monospace;font-size:12px;">ESC2025ABC1...</span>
+            <span class="detail-value" id="transactionId" style="font-family:monospace;font-size:12px;">--</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">交易类型</span>
-            <span class="detail-value" id="transactionType">实物商品</span>
+            <span class="detail-value" id="transactionType">--</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">交易角色</span>
-            <span class="detail-value" id="userRole">买方</span>
+            <span class="detail-value" id="userRole">--</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">对方地址</span>
-            <span class="detail-value" id="counterpartyAddr" style="font-family:monospace;font-size:12px;">TRY7...3aM5</span>
+            <span class="detail-value" id="counterpartyAddr" style="font-family:monospace;font-size:12px;">--</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">托管期限</span>
+            <span class="detail-value" id="escrowPeriod">--</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">交易金额</span>
-            <span class="detail-value" id="transactionAmount">150.00 USDT</span>
+            <span class="detail-value" id="transactionAmount">-- USDT</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">服务费</span>
-            <span class="detail-value" id="serviceFee">0.75 USDT</span>
+            <span class="detail-value" id="serviceFee">-- USDT</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">网络费</span>
-            <span class="detail-value" id="networkFee">~1.00 USDT</span>
+            <span class="detail-value" id="networkFee">-- USDT</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">保证金</span>
-            <span class="detail-value" id="depositAmount">5.00 USDT</span>
+            <span class="detail-value" id="depositAmount">-- USDT</span>
           </div>
           <div class="detail-item" style="border-top:1px solid var(--border);padding-top:16px;margin-top:8px;">
             <span class="detail-label"><strong>应付总额</strong></span>
-            <span class="detail-value" id="totalPayment" style="color:var(--primary);font-size:18px;font-weight:700;">156.75 USDT</span>
+            <span class="detail-value" id="totalPayment" style="color:var(--primary);font-size:18px;font-weight:700;">-- USDT</span>
           </div>
         </div>
       </div>
@@ -872,13 +876,13 @@ let timeRemaining = 1785; // 29:45
 let verificationAttempts = 0;
 let hasValidHash = false;
 let hasPaymentProof = false;
-let hasSubmittedVerification = false; // 记录是否已提交验证
-let verificationComplete = false; // 记录验证是否完成
+let hasSubmittedVerification = false;
+let verificationComplete = false;
 
-// 交易数据
+// 交易数据 - 默认值
 let transactionData = {
-  id: 'ESC2025ABC123',
-  amount: 150,
+  id: 'ESC' + Date.now().toString(36).toUpperCase(),
+  amount: 0,
   role: 'buyer',
   transactionType: 'goods',
   riskScore: 25,
@@ -887,10 +891,15 @@ let transactionData = {
   hasProof: false,
   verificationStatus: null,
   verificationTime: null,
-  serviceFee: 0.75,
+  serviceFee: 0,
   networkFee: 1,
-  deposit: 5,
-  totalAmount: 156.75
+  deposit: 0,
+  totalAmount: 0,
+  counterpartyAddress: '',
+  escrowPeriod: '72',
+  description: '',
+  userAddress: '',
+  createdAt: new Date().toISOString()
 };
 
 // 网络配置
@@ -940,15 +949,151 @@ const hashFormats = {
   }
 };
 
-// 初始化
+// 交易类型映射
+const transactionTypeMap = {
+  'goods': '实物商品',
+  'digital': '数字商品',
+  'service': '服务类',
+  'other': '其他'
+};
+
+// 托管期限映射
+const escrowPeriodMap = {
+  '24': '24小时 - 快速交易',
+  '72': '3天 - 标准交易',
+  '168': '7天 - 大额交易',
+  '360': '15天 - 定制交易'
+};
+
+// ★★★ 核心修改：初始化时加载传输的数据 ★★★
 document.addEventListener('DOMContentLoaded', function() {
+  // 首先尝试从sessionStorage读取数据
+  let savedData = sessionStorage.getItem('currentTransaction');
+  
+  // 如果sessionStorage没有，尝试localStorage
+  if (!savedData) {
+    savedData = localStorage.getItem('latestTransaction');
+  }
+  
+  if (savedData) {
+    try {
+      const transaction = JSON.parse(savedData);
+      
+      // ★★★ 合并传输的数据到transactionData ★★★
+      transactionData = { ...transactionData, ...transaction };
+      
+      // ★★★ 动态更新页面显示 ★★★
+      updatePageWithTransactionData(transaction);
+      
+    } catch (e) {
+      console.error('解析交易数据失败:', e);
+      // 如果解析失败，使用默认值继续
+    }
+  } else {
+    // 如果没有传输数据，提示用户并跳转回首页
+    alert('⚠️ 未找到交易信息，请重新创建订单');
+    window.location.href = './dnjy.html';
+    return;
+  }
+  
+  // 初始化其他功能
   startCountdown();
   initHashValidation();
   updateHashFormat();
-  
-  // 初始化时禁用"我已支付"按钮
   updateConfirmPaymentButton(false);
 });
+
+// ★★★ 新增：更新页面显示函数 ★★★
+function updatePageWithTransactionData(transaction) {
+  // 更新订单信息
+  if (transaction.id) {
+    document.getElementById('orderId').textContent = transaction.id;
+    document.getElementById('transactionId').textContent = 
+      transaction.id.length > 12 ? transaction.id.substring(0, 10) + '...' : transaction.id;
+  }
+  
+  // 更新创建时间
+  if (transaction.createdAt) {
+    const date = new Date(transaction.createdAt);
+    const formattedDate = date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }).replace(/\//g, '-');
+    document.getElementById('createTime').textContent = formattedDate;
+  }
+  
+  // 更新交易类型
+  if (transaction.transactionType) {
+    document.getElementById('transactionType').textContent = 
+      transactionTypeMap[transaction.transactionType] || transaction.transactionType;
+  }
+  
+  // 更新用户角色
+  if (transaction.role) {
+    document.getElementById('userRole').textContent = 
+      transaction.role === 'buyer' ? '买方' : 
+      transaction.role === 'seller' ? '卖方' : transaction.role;
+  }
+  
+  // 更新对方地址
+  if (transaction.counterpartyAddress) {
+    const addr = transaction.counterpartyAddress;
+    document.getElementById('counterpartyAddr').textContent = 
+      addr.length > 10 ? addr.substring(0, 4) + '...' + addr.substring(addr.length - 4) : addr;
+    document.getElementById('counterpartyAddr').title = addr; // 鼠标悬停显示完整地址
+  }
+  
+  // 更新托管期限
+  if (transaction.escrowPeriod) {
+    document.getElementById('escrowPeriod').textContent = 
+      escrowPeriodMap[transaction.escrowPeriod] || transaction.escrowPeriod + '小时';
+  }
+  
+  // 更新金额信息
+  const amount = parseFloat(transaction.amount) || 0;
+  document.getElementById('transactionAmount').textContent = amount.toFixed(2) + ' USDT';
+  
+  // 计算并更新费用（如果没有传输费用，则重新计算）
+  if (!transaction.serviceFee || !transaction.deposit) {
+    const riskScore = transaction.riskScore || 25;
+    const serviceFeeRate = riskScore < 40 ? 0.005 : riskScore < 70 ? 0.007 : 0.01;
+    transaction.serviceFee = amount * serviceFeeRate;
+    transaction.deposit = riskScore > 70 ? amount * 0.05 : 5;
+  }
+  
+  document.getElementById('serviceFee').textContent = 
+    (transaction.serviceFee || 0).toFixed(2) + ' USDT';
+  document.getElementById('depositAmount').textContent = 
+    (transaction.deposit || 0).toFixed(2) + ' USDT';
+  
+  // 更新网络选择和费用
+  if (transaction.network) {
+    selectedNetwork = transaction.network;
+    const networkInfo = networks[transaction.network];
+    
+    // 自动选择正确的网络
+    selectPaymentMethod(transaction.network);
+    
+    // 更新网络费用
+    transaction.networkFee = networkInfo.fee;
+    document.getElementById('networkFee').textContent = 
+      '~' + networkInfo.fee.toFixed(2) + ' USDT';
+  }
+  
+  // 计算并更新总额
+  const totalAmount = amount + 
+    (transaction.serviceFee || 0) + 
+    (transaction.networkFee || 1) + 
+    (transaction.deposit || 0);
+  
+  transaction.totalAmount = totalAmount;
+  document.getElementById('totalPayment').textContent = totalAmount.toFixed(2) + ' USDT';
+  document.getElementById('paymentAmount').textContent = totalAmount.toFixed(2) + ' USDT';
+}
 
 // 初始化哈希验证
 function initHashValidation() {
@@ -1062,10 +1207,8 @@ function updateConfirmPaymentButton(enable) {
     confirmBtn.disabled = false;
     confirmBtn.innerHTML = '✅ 我已支付';
     confirmBtn.title = '点击确认支付';
-    // 添加脉冲动画提示用户可以点击
     confirmBtn.classList.add('pulse');
     
-    // 3秒后移除动画
     setTimeout(() => {
       confirmBtn.classList.remove('pulse');
     }, 3000);
@@ -1077,7 +1220,7 @@ function updateConfirmPaymentButton(enable) {
   }
 }
 
-// 提交验证 - 不自动跳转
+// 提交验证
 function submitVerification() {
   const txHash = document.getElementById('txHash').value.trim();
   
@@ -1143,7 +1286,7 @@ function submitVerification() {
     transactionData.verificationStatus = 'PENDING';
     updateTransactionStatus('VERIFYING');
     
-    // 15秒后显示验证成功（不自动跳转）
+    // 15秒后显示验证成功
     setTimeout(() => {
       statusEl.innerHTML = `
         <div style="display:flex;align-items:center;gap:12px;">
@@ -1166,7 +1309,7 @@ function submitVerification() {
       transactionData.verificationStatus = 'SUCCESS';
       updateTransactionStatus('VERIFIED');
       
-    }, 15000); // 15秒后验证成功
+    }, 15000);
     
   }, 1500);
 }
@@ -1208,25 +1351,25 @@ function selectPaymentMethod(network, element) {
   
   // 重新计算总额
   const amount = parseFloat(transactionData.amount) || 0;
-  const riskScore = transactionData.riskScore || 25;
-  const serviceFeeRate = riskScore < 40 ? 0.005 : riskScore < 70 ? 0.007 : 0.01;
-  const serviceFee = amount * serviceFeeRate;
-  const deposit = riskScore > 70 ? amount * 0.05 : 5;
-  const total = amount + serviceFee + networkInfo.fee + deposit;
+  const total = amount + 
+    (transactionData.serviceFee || 0) + 
+    networkInfo.fee + 
+    (transactionData.deposit || 0);
   
   transactionData.totalAmount = total;
-  transactionData.serviceFee = serviceFee;
-  transactionData.deposit = deposit;
   
   document.getElementById('totalPayment').textContent = total.toFixed(2) + ' USDT';
   document.getElementById('paymentAmount').textContent = total.toFixed(2) + ' USDT';
-  document.getElementById('serviceFee').textContent = serviceFee.toFixed(2) + ' USDT';
-  document.getElementById('depositAmount').textContent = deposit.toFixed(2) + ' USDT';
 }
 
 // 复制地址
 function copyAddress() {
   const address = document.getElementById('paymentAddress').textContent;
+  if (address === '--') {
+    alert('⚠️ 请先选择支付网络');
+    return;
+  }
+  
   navigator.clipboard.writeText(address).then(() => {
     const btn = event.target;
     btn.textContent = '✓ 已复制';
@@ -1283,13 +1426,11 @@ function handleTimeout() {
   window.location.href = './dnjy.html';
 }
 
-// 确认支付 - 必须先提交验证
+// 确认支付
 function confirmPayment() {
-  // 再次检查是否已提交验证（以防万一）
   if (!hasSubmittedVerification) {
     alert('⚠️ 请先提交验证！\n\n请先点击"提交验证"按钮进行验证，然后才能确认支付。');
     
-    // 让提交验证按钮闪烁提示
     const verifyBtn = document.getElementById('verifyBtn');
     if (!verifyBtn.disabled) {
       verifyBtn.style.animation = 'pulse 0.5s ease-in-out 3';
@@ -1297,7 +1438,6 @@ function confirmPayment() {
         verifyBtn.style.animation = '';
       }, 1500);
     } else {
-      // 如果验证按钮也是禁用的，说明还没输入哈希
       document.getElementById('txHash').focus();
     }
     return;
@@ -1325,7 +1465,7 @@ function saveAndRedirect() {
   window.location.href = './dbjy2.html';
 }
 
-// 取消支付 - 跳转到dnjy.html
+// 取消支付
 function cancelPayment() {
   if (confirm('❓ 确定要取消交易吗？\n\n取消后需要重新创建订单')) {
     clearInterval(countdownTimer);
