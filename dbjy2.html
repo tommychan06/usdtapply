@@ -389,12 +389,6 @@
     background:rgba(59,130,246,0.2);
   }
   
-  .message-time{
-    font-size:10px;
-    color:var(--text-muted);
-    margin-top:4px;
-  }
-  
   .system-message{
     text-align:center;
     margin:16px 0;
@@ -852,33 +846,21 @@
           </div>
           
           <div class="message">
-            <div class="message-avatar" id="otherAvatar">卖</div>
+            <div class="message-avatar" style="background:var(--warning);">客服</div>
             <div class="message-content">
-              <div class="message-name" id="otherName">卖方</div>
-              <div class="message-text">您好，感谢购买！商品已经准备好了。</div>
-              <div class="message-time">14:40</div>
-            </div>
-          </div>
-          
-          <div class="message self">
-            <div class="message-avatar">我</div>
-            <div class="message-content">
-              <div class="message-name">我</div>
-              <div class="message-text">好的，请提供下载链接和密码</div>
-              <div class="message-time">14:42</div>
+              <div class="message-name">客服KF0531</div>
+              <div class="message-text">现在开始交易</div>
             </div>
           </div>
           
           <div class="message">
-            <div class="message-avatar" id="otherAvatar2">卖</div>
+            <div class="message-avatar" style="background:var(--warning);">客服</div>
             <div class="message-content">
-              <div class="message-name" id="otherName2">卖方</div>
+              <div class="message-name">客服KF0531</div>
               <div class="message-text">
-                链接：https://example.com/download<br>
-                密码：ABC123<br>
-                请及时下载，链接24小时有效
+                <strong>交易内容（备注）：</strong><br>
+                <span id="chatTransactionDesc">--</span>
               </div>
-              <div class="message-time">14:43</div>
             </div>
           </div>
           
@@ -1205,7 +1187,7 @@ function exportReceipt() {
           </div>
           <div class="receipt-row">
             <span>托管合约</span>
-            <span style="font-family:monospace;font-size:10px;">${generateEscrowContract(transactionData.network)}</span>
+            <span style="font-family:monospace;font-size:10px;">${generateEscrowContract(transactionData.network, transactionData.id)}</span>
           </div>
           <div class="receipt-row">
             <span>区块确认</span>
@@ -1344,6 +1326,13 @@ function updatePageWithTransactionData(data) {
     document.getElementById('autoProcessAction').textContent = '超时后将自动退款给买方';
   }
   
+  // ★★★ 更新聊天中的交易描述 ★★★
+  if (data.description) {
+    document.getElementById('chatTransactionDesc').textContent = data.description;
+  } else {
+    document.getElementById('chatTransactionDesc').textContent = '暂无交易描述';
+  }
+  
   // 更新交易详情
   document.getElementById('txIdShort').textContent = 
     data.id ? (data.id.length > 12 ? data.id.substring(0, 10) + '...' : data.id) : '--';
@@ -1375,12 +1364,6 @@ function updatePageWithTransactionData(data) {
     // 对方信誉分（也是80分）
     const sellerScore = data.counterpartyScore || 80;
     document.getElementById('sellerRep').textContent = '⭐ ' + sellerScore + '分';
-    
-    // 更新聊天头像和名称
-    document.getElementById('otherAvatar').textContent = '卖';
-    document.getElementById('otherAvatar2').textContent = '卖';
-    document.getElementById('otherName').textContent = '卖方';
-    document.getElementById('otherName2').textContent = '卖方';
   } else {
     // 卖方是用户自己
     const sellerAddr = data.userAddress || '--';
@@ -1397,12 +1380,6 @@ function updatePageWithTransactionData(data) {
     
     const buyerScore = data.counterpartyScore || 80;
     document.getElementById('buyerRep').textContent = '⭐ ' + buyerScore + '分';
-    
-    // 更新聊天头像和名称
-    document.getElementById('otherAvatar').textContent = '买';
-    document.getElementById('otherAvatar2').textContent = '买';
-    document.getElementById('otherName').textContent = '买方';
-    document.getElementById('otherName2').textContent = '买方';
   }
   
   // ★★★ 修复：更新资金信息 - 确保所有金额正确显示 ★★★
@@ -1448,7 +1425,7 @@ function updatePageWithTransactionData(data) {
   }
   
   // 生成托管合约地址
-  const escrowContract = generateEscrowContract(data.network);
+  const escrowContract = generateEscrowContract(data.network, data.id);
   document.getElementById('escrowContract').textContent = escrowContract;
   
   // 计算确认数
@@ -1470,17 +1447,31 @@ function updatePageWithTransactionData(data) {
 }
 
 // ★★★ 新增：辅助函数 ★★★
-// 生成托管合约地址（模拟）
-function generateEscrowContract(network) {
-  if (!network) return 'TRX8d...29dK2';
+// 生成托管合约地址（基于交易ID生成唯一地址）
+function generateEscrowContract(network, txId) {
+  // 使用交易ID生成唯一的合约地址
+  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  let hash = '';
   
-  const contracts = {
-    'TRC20': 'TRX8d...29dK2',
-    'ERC20': '0x8d29...dK2F',
-    'BEP20': '0x8d29...dK2F'
-  };
+  // 基于txId生成伪随机字符
+  const seed = txId ? txId.replace(/[^0-9A-Z]/gi, '') : Date.now().toString();
   
-  return contracts[network] || 'TRX8d...29dK2';
+  for (let i = 0; i < 8; i++) {
+    const index = (seed.charCodeAt(i % seed.length) + i * 7) % chars.length;
+    hash += chars[index];
+  }
+  
+  // 根据不同网络生成不同格式的地址
+  if (network === 'TRC20') {
+    // TRC20地址格式：T开头
+    return `T${hash.substring(0, 4)}...${hash.substring(4, 8)}`;
+  } else if (network === 'ERC20' || network === 'BEP20') {
+    // ERC20/BEP20地址格式：0x开头
+    return `0x${hash.substring(0, 4).toLowerCase()}...${hash.substring(4, 8).toLowerCase()}`;
+  } else {
+    // 默认TRC20格式
+    return `T${hash.substring(0, 4)}...${hash.substring(4, 8)}`;
+  }
 }
 
 // 计算区块确认数（模拟）
@@ -1582,15 +1573,15 @@ function handleAutoRelease() {
 function setupWebSocket() {
   console.log('WebSocket connected');
   
-  // 模拟接收消息
+  // ★★★ 30秒后添加卖方消息 ★★★
   setTimeout(() => {
-    const roleText = transactionData.role === 'buyer' ? '卖方' : '买方';
-    receiveMessage({
-      type: 'system',
-      text: `${roleText}已确认${transactionData.role === 'buyer' ? '发货' : '订单'}`,
-      time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
-    });
-  }, 5000);
+    const sellerMessage = {
+      type: 'seller',
+      text: '现在可以交易了吗？'
+    };
+    
+    receiveMessage(sellerMessage);
+  }, 30000); // 30秒
 }
 
 // 发送消息
@@ -1600,7 +1591,7 @@ function sendMessage() {
   
   if (!message) return;
   
-  // 添加消息到聊天窗口
+  // 添加消息到聊天窗口（不显示时间）
   const messagesContainer = document.getElementById('chatMessages');
   const messageHTML = `
     <div class="message self">
@@ -1608,7 +1599,6 @@ function sendMessage() {
       <div class="message-content">
         <div class="message-name">我</div>
         <div class="message-text">${message}</div>
-        <div class="message-time">${new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}</div>
       </div>
     </div>
   `;
@@ -1618,20 +1608,18 @@ function sendMessage() {
   
   input.value = '';
   
-  // 模拟自动回复
-  if (message.includes('收到') || message.includes('确认')) {
+  // 模拟客服自动回复
+  if (message.includes('客服') || message.includes('帮助')) {
     setTimeout(() => {
-      const roleText = transactionData.role === 'buyer' ? '卖方' : '买方';
       receiveMessage({
-        type: roleText,
-        text: '好的，请确认后尽快点击确认收货按钮',
-        time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
+        type: 'service',
+        text: '您好，客服正在为您服务。请问有什么可以帮助您的？'
       });
     }, 2000);
   }
 }
 
-// 接收消息
+// 接收消息（不显示时间）
 function receiveMessage(data) {
   const messagesContainer = document.getElementById('chatMessages');
   
@@ -1642,17 +1630,38 @@ function receiveMessage(data) {
       </div>
     `;
     messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
-  } else {
-    const avatarText = transactionData.role === 'buyer' ? '卖' : '买';
-    const nameText = transactionData.role === 'buyer' ? '卖方' : '买方';
-    
+  } else if (data.type === 'service') {
+    // 客服消息
     const messageHTML = `
       <div class="message">
-        <div class="message-avatar">${avatarText}</div>
+        <div class="message-avatar" style="background:var(--warning);">客服</div>
         <div class="message-content">
-          <div class="message-name">${nameText}</div>
+          <div class="message-name">客服KF0531</div>
           <div class="message-text">${data.text}</div>
-          <div class="message-time">${data.time}</div>
+        </div>
+      </div>
+    `;
+    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+  } else if (data.type === 'seller') {
+    // 卖方消息
+    const messageHTML = `
+      <div class="message">
+        <div class="message-avatar">卖</div>
+        <div class="message-content">
+          <div class="message-name">卖方</div>
+          <div class="message-text">${data.text}</div>
+        </div>
+      </div>
+    `;
+    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+  } else {
+    // 其他消息类型（保留用于扩展）
+    const messageHTML = `
+      <div class="message">
+        <div class="message-avatar">${data.type === 'buyer' ? '买' : '卖'}</div>
+        <div class="message-content">
+          <div class="message-name">${data.type === 'buyer' ? '买方' : '卖方'}</div>
+          <div class="message-text">${data.text}</div>
         </div>
       </div>
     `;
@@ -1752,8 +1761,7 @@ function submitDispute() {
     
     receiveMessage({
       type: 'system',
-      text: '争议已提交，客服将在24小时内介入处理',
-      time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
+      text: '争议已提交，客服将在24小时内介入处理'
     });
     
     closeDispute();
@@ -1771,8 +1779,7 @@ function extendPeriod() {
     
     receiveMessage({
       type: 'system',
-      text: `${roleText}申请延长托管期限 ${days} 天，等待${otherRole}确认`,
-      time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
+      text: `${roleText}申请延长托管期限 ${days} 天，等待${otherRole}确认`
     });
     
     alert('延长申请已发送给对方，需要对方同意后生效。');
@@ -1787,8 +1794,7 @@ function requestCancel() {
     
     receiveMessage({
       type: 'system',
-      text: `${roleText}申请取消交易，等待${otherRole}确认`,
-      time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
+      text: `${roleText}申请取消交易，等待${otherRole}确认`
     });
     
     alert('取消申请已发送，需要对方同意后交易才会取消。');
@@ -1819,8 +1825,7 @@ function showNotification(message) {
   
   receiveMessage({
     type: 'system',
-    text: message,
-    time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
+    text: message
   });
 }
 
