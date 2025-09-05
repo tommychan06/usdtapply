@@ -1,9 +1,9 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>易趣SafePay - 安全支付验证</title>
+<title>易趣SafePay - 智能USDT担保交易平台</title>
 <style>
   :root{
     --bg-dark:#0a0e1a;
@@ -26,129 +26,247 @@
   body{
     background:var(--bg-dark);
     background-image:radial-gradient(circle at 20% 80%, #1e40af15 0%, transparent 50%),
-                     radial-gradient(circle at 80% 20%, #7c3aed15 0%, transparent 50%);
+                     radial-gradient(circle at 80% 20%, #7c3aed15 0%, transparent 50%),
+                     radial-gradient(circle at 40% 40%, #10b98115 0%, transparent 50%);
     font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
     color:var(--text-primary);
     min-height:100vh;
   }
   
   .container{
-    max-width:1200px;
+    max-width:1280px;
     margin:0 auto;
     padding:24px;
   }
   
-  /* 顶部进度条 */
-  .progress-header{
-    background:var(--bg-card);
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:24px;
-    margin-bottom:32px;
-  }
-  
-  .progress-steps{
+  .navbar{
     display:flex;
     justify-content:space-between;
-    position:relative;
-    margin-bottom:16px;
+    align-items:center;
+    padding:20px 0;
+    margin-bottom:32px;
+    border-bottom:1px solid var(--border);
   }
   
-  .progress-line-bg{
-    position:absolute;
-    top:20px;
-    left:0;
-    right:0;
-    height:2px;
-    background:var(--border);
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:24px;
+    font-weight:700;
   }
   
-  .progress-line{
-    position:absolute;
-    top:20px;
-    left:0;
-    height:2px;
-    background:linear-gradient(90deg, var(--primary), var(--info));
-    transition:width 0.5s;
-  }
-  
-  .step{
-    position:relative;
-    text-align:center;
-    flex:1;
-  }
-  
-  .step-circle{
+  .logo-icon{
     width:40px;
     height:40px;
-    margin:0 auto 8px;
-    background:var(--bg-card);
-    border:2px solid var(--border);
-    border-radius:50%;
+    background:linear-gradient(135deg, var(--primary), var(--info));
+    border-radius:12px;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-weight:bold;
-    font-size:14px;
-    position:relative;
-    z-index:1;
   }
   
-  .step.completed .step-circle{
-    background:var(--success);
-    border-color:var(--success);
-    color:white;
-  }
-  
-  .step.active .step-circle{
-    background:var(--primary);
-    border-color:var(--primary);
-    color:white;
-    box-shadow:0 0 0 8px rgba(59,130,246,0.1);
-    animation:pulse 2s infinite;
-  }
-  
-  @keyframes pulse{
-    0%{box-shadow:0 0 0 0 rgba(59,130,246,0.4)}
-    70%{box-shadow:0 0 0 15px rgba(59,130,246,0)}
-    100%{box-shadow:0 0 0 0 rgba(59,130,246,0)}
-  }
-  
-  .step-label{
-    font-size:12px;
-    color:var(--text-muted);
-  }
-  
-  .step.active .step-label{
-    color:var(--text-primary);
-    font-weight:500;
-  }
-  
-  /* 交易状态栏 */
-  .status-bar{
-    display:flex;
-    justify-content:space-between;
-    padding:12px;
-    background:var(--bg-hover);
-    border-radius:10px;
-  }
-  
-  .status-item{
+  .nav-right{
     display:flex;
     align-items:center;
-    gap:8px;
+    gap:24px;
+  }
+  
+  .user-info{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:8px 16px;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:12px;
+  }
+  
+  .reputation-score{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    padding:4px 8px;
+    background:rgba(16,185,129,0.1);
+    border-radius:6px;
     font-size:13px;
+    color:var(--success);
   }
   
-  .status-dot{
-    width:8px;
-    height:8px;
-    border-radius:50%;
-    background:var(--success);
+  .kyc-badge{
+    padding:4px 8px;
+    background:rgba(59,130,246,0.1);
+    border:1px solid rgba(59,130,246,0.3);
+    border-radius:6px;
+    font-size:11px;
+    color:var(--primary);
+    font-weight:600;
   }
   
-  /* 主布局 */
-  .main-layout{
+  .user-address-display{
+    font-family:monospace;
+    font-size:14px;
+    color:var(--primary);
+  }
+  
+  .login-card{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:32px;
+    margin-bottom:32px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  }
+  
+  .login-card-header{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom:24px;
+  }
+  
+  .login-card-icon{
+    width:56px;
+    height:56px;
+    background:linear-gradient(135deg, var(--primary), var(--info));
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+  }
+  
+  .login-card-title{
+    flex:1;
+  }
+  
+  .login-card-title h2{
+    font-size:22px;
+    font-weight:700;
+    margin-bottom:4px;
+  }
+  
+  .login-card-subtitle{
+    font-size:14px;
+    color:var(--text-secondary);
+  }
+  
+  .login-status-badge{
+    padding:8px 16px;
+    background:rgba(16,185,129,0.1);
+    border:1px solid rgba(16,185,129,0.3);
+    border-radius:10px;
+    color:var(--success);
+    font-weight:600;
+    font-size:14px;
+    display:none;
+  }
+  
+  .login-status-badge.show{
+    display:block;
+  }
+  
+  .login-form-container{
+    display:flex;
+    gap:16px;
+    align-items:center;
+  }
+  
+  .login-input-wrapper{
+    flex:1;
+    position:relative;
+  }
+  
+  .login-input-field{
+    width:100%;
+    padding:14px 16px 14px 48px;
+    background:var(--bg-hover);
+    border:2px solid var(--border);
+    border-radius:12px;
+    color:var(--text-primary);
+    font-size:15px;
+    font-family:monospace;
+    transition:all 0.3s;
+  }
+  
+  .login-input-icon{
+    position:absolute;
+    left:16px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--text-muted);
+    font-size:18px;
+  }
+  
+  .login-input-field:focus{
+    outline:none;
+    border-color:var(--primary);
+    background:rgba(59,130,246,0.05);
+  }
+  
+  .login-input-field:disabled{
+    background:rgba(16,185,129,0.05);
+    border-color:rgba(16,185,129,0.3);
+    color:var(--success);
+    cursor:not-allowed;
+  }
+  
+  .login-buttons{
+    display:flex;
+    gap:12px;
+  }
+  
+  .login-btn{
+    padding:14px 28px;
+    border:none;
+    border-radius:12px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.3s;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    white-space:nowrap;
+  }
+  
+  .login-btn.primary{
+    background:linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color:white;
+  }
+  
+  .login-btn.primary:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(59,130,246,0.3);
+  }
+  
+  .login-btn.secondary{
+    background:linear-gradient(135deg, var(--warning), #dc2626);
+    color:white;
+  }
+  
+  .login-btn.secondary:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(245,158,11,0.3);
+  }
+  
+  .login-btn:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+  }
+  
+  .login-tips{
+    margin-top:20px;
+    padding:16px;
+    background:rgba(59,130,246,0.05);
+    border:1px solid rgba(59,130,246,0.2);
+    border-radius:12px;
+    font-size:13px;
+    line-height:1.8;
+    color:var(--text-secondary);
+  }
+  
+  .main-grid{
     display:grid;
     grid-template-columns:2fr 1fr;
     gap:24px;
@@ -173,15 +291,14 @@
     font-weight:600;
   }
   
-  /* 支付方式选择 */
-  .payment-methods{
+  .role-selector{
     display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns:1fr 1fr;
     gap:12px;
     margin-bottom:24px;
   }
   
-  .payment-method{
+  .role-option{
     padding:16px;
     background:var(--bg-hover);
     border:2px solid var(--border);
@@ -191,335 +308,229 @@
     text-align:center;
   }
   
-  .payment-method:hover{
+  .role-option:hover{
     border-color:var(--primary);
     background:rgba(59,130,246,0.05);
   }
   
-  .payment-method.selected{
+  .role-option.selected{
     border-color:var(--primary);
     background:rgba(59,130,246,0.1);
   }
   
-  .payment-method-name{
-    font-size:14px;
-    font-weight:600;
-    margin-top:8px;
-  }
-  
-  .payment-method-fee{
-    font-size:11px;
-    color:var(--text-muted);
-    margin-top:4px;
-  }
-  
-  /* 支付信息 */
-  .payment-info{
-    background:linear-gradient(135deg, #1e40af, #7c3aed);
-    border-radius:16px;
-    padding:24px;
-    margin-bottom:24px;
-    position:relative;
-    overflow:hidden;
-  }
-  
-  .payment-info::before{
-    content:'';
-    position:absolute;
-    top:-50%;
-    right:-50%;
-    width:200%;
-    height:200%;
-    background:radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    animation:rotate 20s linear infinite;
-  }
-  
-  @keyframes rotate{
-    to{transform:rotate(360deg)}
-  }
-  
-  .payment-amount{
-    font-size:36px;
-    font-weight:700;
+  .role-icon{
+    font-size:28px;
     margin-bottom:8px;
-    position:relative;
-    z-index:1;
   }
   
-  .payment-network{
-    display:inline-block;
-    padding:6px 12px;
-    background:rgba(255,255,255,0.2);
-    border-radius:8px;
+  .role-name{
+    font-weight:600;
+    margin-bottom:4px;
+  }
+  
+  .role-desc{
     font-size:12px;
-    font-weight:600;
-    position:relative;
-    z-index:1;
+    color:var(--text-muted);
   }
   
-  /* 收款地址 */
-  .address-section{
-    margin-bottom:24px;
+  .form-group{
+    margin-bottom:20px;
   }
   
-  .address-display{
-    display:flex;
-    align-items:center;
-    padding:16px;
-    background:var(--bg-hover);
-    border:1px solid var(--border);
-    border-radius:12px;
-    margin-bottom:12px;
+  .form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
   }
   
-  .address-text{
-    flex:1;
-    font-family:'Courier New', monospace;
-    font-size:14px;
-    word-break:break-all;
-    line-height:1.6;
-  }
-  
-  .copy-btn{
-    padding:8px 16px;
-    background:var(--primary);
-    color:white;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
+  label{
+    display:block;
     font-size:13px;
-    font-weight:600;
-    transition:all 0.3s;
-    white-space:nowrap;
+    color:var(--text-secondary);
+    margin-bottom:8px;
+    font-weight:500;
   }
   
-  .copy-btn:hover{
-    background:var(--primary-dark);
-  }
-  
-  .copy-btn.copied{
-    background:var(--success);
-  }
-  
-  /* 验证输入 */
-  .verification-section{
-    background:var(--bg-hover);
-    border-radius:12px;
-    padding:20px;
-    margin-bottom:24px;
-  }
-  
-  .verification-title{
-    font-size:16px;
-    font-weight:600;
-    margin-bottom:16px;
-  }
-  
-  .verification-input{
-    display:flex;
-    gap:12px;
-    margin-bottom:12px;
-  }
-  
-  .verification-input input{
-    flex:1;
-    padding:12px;
-    background:var(--bg-card);
-    border:1px solid var(--border);
-    border-radius:10px;
-    color:var(--text-primary);
-    font-family:'Courier New', monospace;
-  }
-  
-  .verify-btn{
-    padding:12px 24px;
-    background:var(--success);
-    color:white;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-    font-weight:600;
-    transition:all 0.3s;
-  }
-  
-  .verify-btn:hover{
-    background:#059669;
-  }
-  
-  /* 验证状态 */
-  .verification-status{
-    padding:12px;
-    border-radius:8px;
-    margin-top:12px;
-    font-size:13px;
-    display:none;
-  }
-  
-  .verification-status.pending{
-    display:block;
-    background:rgba(245,158,11,0.1);
-    border:1px solid rgba(245,158,11,0.3);
-    color:var(--warning);
-  }
-  
-  .verification-status.success{
-    display:block;
-    background:rgba(16,185,129,0.1);
-    border:1px solid rgba(16,185,129,0.3);
-    color:var(--success);
-  }
-  
-  .verification-status.error{
-    display:block;
-    background:rgba(239,68,68,0.1);
-    border:1px solid rgba(239,68,68,0.3);
+  .required{
     color:var(--danger);
   }
   
-  /* 倒计时 */
-  .countdown-section{
-    background:rgba(245,158,11,0.05);
-    border:1px solid rgba(245,158,11,0.2);
-    border-radius:12px;
-    padding:20px;
-    text-align:center;
-    margin-bottom:24px;
-  }
-  
-  .countdown-label{
-    font-size:14px;
-    color:var(--text-secondary);
-    margin-bottom:8px;
-  }
-  
-  .countdown-timer{
-    font-size:32px;
-    font-weight:700;
-    color:var(--warning);
-    font-family:'Courier New', monospace;
-  }
-  
-  .countdown-warning{
-    font-size:12px;
-    color:var(--text-muted);
-    margin-top:8px;
-  }
-  
-  /* 支付证明 */
-  .proof-upload{
+  input, select, textarea{
+    width:100%;
+    padding:12px 14px;
     background:var(--bg-hover);
-    border:2px dashed var(--border);
-    border-radius:12px;
-    padding:24px;
-    text-align:center;
-    cursor:pointer;
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--text-primary);
+    font-size:14px;
     transition:all 0.3s;
   }
   
-  .proof-upload:hover{
+  input:focus, select:focus, textarea:focus{
+    outline:none;
     border-color:var(--primary);
     background:rgba(59,130,246,0.05);
   }
   
-  .upload-icon{
-    font-size:32px;
-    margin-bottom:12px;
+  textarea{
+    min-height:100px;
+    resize:vertical;
   }
   
-  .upload-text{
-    font-size:14px;
-    color:var(--text-secondary);
-    margin-bottom:8px;
-  }
-  
-  .upload-hint{
-    font-size:12px;
-    color:var(--text-muted);
-  }
-  
-  /* 交易详情 */
-  .detail-list{
+  .risk-assessment{
     background:var(--bg-hover);
     border-radius:12px;
-    padding:20px;
+    padding:16px;
+    margin-bottom:20px;
   }
   
-  .detail-item{
+  .risk-header{
     display:flex;
     justify-content:space-between;
-    padding:12px 0;
-    border-bottom:1px solid var(--border);
-    font-size:14px;
-  }
-  
-  .detail-item:last-child{
-    border-bottom:none;
-  }
-  
-  .detail-label{
-    color:var(--text-muted);
-  }
-  
-  .detail-value{
-    color:var(--text-primary);
-    font-weight:500;
-  }
-  
-  /* 安全提示 */
-  .security-notice{
-    background:rgba(59,130,246,0.05);
-    border:1px solid rgba(59,130,246,0.2);
-    border-radius:12px;
-    padding:16px;
-    margin-bottom:24px;
-  }
-  
-  .notice-header{
-    display:flex;
     align-items:center;
-    gap:12px;
     margin-bottom:12px;
   }
   
-  .notice-icon{
-    font-size:20px;
-  }
-  
-  .notice-title{
+  .risk-title{
     font-size:14px;
     font-weight:600;
   }
   
-  .notice-list{
-    list-style:none;
-    padding-left:32px;
+  .risk-score{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  
+  .risk-value{
+    font-size:20px;
+    font-weight:700;
+  }
+  
+  .risk-level{
+    padding:4px 8px;
+    border-radius:6px;
+    font-size:11px;
+    font-weight:600;
+  }
+  
+  .risk-low{
+    background:rgba(16,185,129,0.1);
+    color:var(--success);
+  }
+  
+  .risk-medium{
+    background:rgba(245,158,11,0.1);
+    color:var(--warning);
+  }
+  
+  .risk-high{
+    background:rgba(239,68,68,0.1);
+    color:var(--danger);
+  }
+  
+  .risk-factors{
+    display:grid;
+    gap:8px;
+  }
+  
+  .risk-factor{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    padding:6px 0;
+    border-bottom:1px solid var(--border);
+  }
+  
+  .risk-factor:last-child{
+    border-bottom:none;
+  }
+  
+  .factor-label{
+    color:var(--text-muted);
+  }
+  
+  .factor-value{
+    font-weight:500;
+  }
+  
+  .fee-breakdown{
+    background:linear-gradient(135deg, rgba(59,130,246,0.05), rgba(6,182,212,0.05));
+    border:1px solid rgba(59,130,246,0.2);
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:20px;
+  }
+  
+  .fee-row{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    font-size:14px;
+  }
+  
+  .fee-row.total{
+    border-top:1px solid rgba(59,130,246,0.2);
+    margin-top:8px;
+    padding-top:12px;
+    font-weight:600;
+    font-size:16px;
+  }
+  
+  .fee-label{
+    color:var(--text-secondary);
+  }
+  
+  .fee-value{
+    color:var(--text-primary);
+    font-family:'Courier New', monospace;
+  }
+  
+  .limit-info{
+    background:rgba(245,158,11,0.05);
+    border:1px solid rgba(245,158,11,0.2);
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  
+  .limit-icon{
+    font-size:20px;
+  }
+  
+  .limit-text{
+    flex:1;
     font-size:13px;
     color:var(--text-secondary);
-    line-height:1.8;
   }
   
-  .notice-list li{
-    position:relative;
-    padding-left:20px;
-  }
-  
-  .notice-list li:before{
-    content:'✓';
-    position:absolute;
-    left:0;
-    color:var(--primary);
-  }
-  
-  /* 按钮组 */
-  .btn-group{
+  .limit-values{
     display:flex;
-    gap:12px;
-    margin-top:24px;
+    gap:16px;
+    font-size:12px;
+  }
+  
+  .limit-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  
+  .limit-label{
+    color:var(--text-muted);
+    margin-bottom:4px;
+  }
+  
+  .limit-amount{
+    color:var(--warning);
+    font-weight:600;
   }
   
   .btn{
-    flex:1;
-    padding:14px 24px;
+    padding:12px 24px;
     border:none;
     border-radius:10px;
     font-size:15px;
@@ -528,7 +539,6 @@
     transition:all 0.3s;
     display:inline-flex;
     align-items:center;
-    justify-content:center;
     gap:8px;
   }
   
@@ -548,237 +558,438 @@
     border:1px solid var(--border);
   }
   
-  .btn-danger{
-    background:var(--danger);
-    color:white;
+  .btn-group{
+    display:flex;
+    gap:12px;
+    justify-content:flex-end;
+    margin-top:24px;
   }
   
-  /* 加载动画 */
-  .spinner{
-    width:20px;
-    height:20px;
-    border:2px solid var(--border);
-    border-top-color:var(--primary);
+  .security-features{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:28px;
+  }
+  
+  .feature-list{
+    display:grid;
+    gap:16px;
+  }
+  
+  .feature-item{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+  }
+  
+  .feature-icon{
+    width:32px;
+    height:32px;
+    background:rgba(16,185,129,0.1);
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  
+  .feature-content{
+    flex:1;
+  }
+  
+  .feature-title{
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:4px;
+  }
+  
+  .feature-desc{
+    font-size:12px;
+    color:var(--text-muted);
+    line-height:1.5;
+  }
+  
+  .live-transactions{
+    margin-top:24px;
+  }
+  
+  .transaction-item{
+    display:flex;
+    align-items:center;
+    padding:12px;
+    background:var(--bg-hover);
+    border-radius:10px;
+    margin-bottom:8px;
+    font-size:13px;
+  }
+  
+  .transaction-status{
+    width:8px;
+    height:8px;
     border-radius:50%;
-    animation:spin 1s linear infinite;
-    display:inline-block;
+    margin-right:12px;
+    flex-shrink:0;
   }
   
-  @keyframes spin{
-    to{transform:rotate(360deg)}
+  .status-active{
+    background:var(--success);
+    animation:pulse 2s infinite;
   }
   
-  /* 响应式 */
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(16,185,129,0.4)}
+    70%{box-shadow:0 0 0 10px rgba(16,185,129,0)}
+    100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}
+  }
+  
+  .transaction-info{
+    flex:1;
+  }
+  
+  .transaction-id{
+    font-family:'Courier New', monospace;
+    color:var(--text-muted);
+  }
+  
+  .transaction-amount{
+    font-weight:600;
+    color:var(--primary);
+  }
+  
   @media (max-width:968px){
-    .main-layout{
+    .main-grid{
       grid-template-columns:1fr;
+    }
+    .login-form-container{
+      flex-direction:column;
+      align-items:stretch;
+    }
+    .login-buttons{
+      width:100%;
+    }
+    .login-btn{
+      flex:1;
     }
   }
   
   @media (max-width:640px){
-    .payment-methods{
+    .form-row{
       grid-template-columns:1fr;
     }
-    .btn-group{
-      flex-direction:column;
+    .role-selector{
+      grid-template-columns:1fr;
     }
+    .nav-right{
+      flex-direction:column;
+      gap:12px;
+    }
+    .login-card-header{
+      flex-direction:column;
+      text-align:center;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 </style>
 </head>
 <body>
+
 <div class="container">
-  <!-- 进度条 -->
-  <div class="progress-header">
-    <div class="progress-steps">
-      <div class="progress-line-bg"></div>
-      <div class="progress-line" id="progressLine" style="width:40%"></div>
-      
-      <div class="step completed">
-        <div class="step-circle">✓</div>
-        <div class="step-label">创建订单</div>
+  <!-- 顶部导航栏 -->
+  <nav class="navbar">
+    <div class="logo">
+      <div class="logo-icon">🔐</div>
+      <span>易趣SafePay</span>
+    </div>
+    <div class="nav-right">
+      <div class="user-info">
+        <div class="reputation-score">
+          <span>⭐</span>
+          <span>信誉分: <span id="userScore">--</span></span>
+        </div>
+        <span class="kyc-badge">KYC L<span id="kycLevel">-</span></span>
+        <span class="user-address-display">用户: <span id="userAddressDisplay">未登录</span></span>
       </div>
-      <div class="step active">
-        <div class="step-circle">2</div>
-        <div class="step-label">支付验证</div>
+    </div>
+  </nav>
+  
+  <!-- 登录卡片 -->
+  <div class="login-card">
+    <div class="login-card-header">
+      <div class="login-card-icon">💼</div>
+      <div class="login-card-title">
+        <h2>钱包地址登录</h2>
+        <p class="login-card-subtitle">输入您的USDT钱包地址以开始使用</p>
       </div>
-      <div class="step">
-        <div class="step-circle">3</div>
-        <div class="step-label">资金托管</div>
-      </div>
-      <div class="step">
-        <div class="step-circle">4</div>
-        <div class="step-label">交易进行</div>
-      </div>
-      <div class="step">
-        <div class="step-circle">5</div>
-        <div class="step-label">完成结算</div>
+      <div class="login-status-badge" id="loginStatusBadge">
+        ✓ 已登录
       </div>
     </div>
     
-    <div class="status-bar">
-      <div class="status-item">
-        <span class="status-dot"></span>
-        <span>订单状态：待支付</span>
+    <div class="login-form-container">
+      <div class="login-input-wrapper">
+        <span class="login-input-icon">💳</span>
+        <input type="text" 
+               id="walletAddress" 
+               class="login-input-field" 
+               placeholder="请输入USDT钱包地址 (TRC20/ERC20/BEP20)">
       </div>
-      <div class="status-item">
-        <span>订单号：<span id="orderId">--</span></span>
+      <div class="login-buttons">
+        <button class="login-btn primary" id="loginBtn" onclick="handleLogin()">
+          <span>🔐</span>
+          <span>登入</span>
+        </button>
+        <button class="login-btn secondary" id="resetBtn" onclick="handleReset()">
+          <span>🔄</span>
+          <span>重新登入</span>
+        </button>
       </div>
-      <div class="status-item">
-        <span>创建时间：<span id="createTime">--</span></span>
-      </div>
+    </div>
+    
+    <div class="login-tips">
+      <strong>💡 提示：</strong>
+      • 支持 TRC-20、ERC-20、BEP-20 网络钱包地址<br>
+      • 无需私钥或助记词，仅使用公开地址<br>
+      • 您的资产始终在您的钱包中，平台仅提供担保服务
     </div>
   </div>
   
-  <div class="main-layout">
+  <!-- 主内容区域 -->
+  <div class="main-grid">
     <!-- 左侧主要内容 -->
-    <div>
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">🔐 安全支付验证</h2>
-          <span style="padding:6px 12px;background:rgba(245,158,11,0.1);color:var(--warning);border-radius:20px;font-size:12px;font-weight:600;">
-            等待支付
-          </span>
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">创建智能担保交易</h2>
+        <span style="padding:6px 12px;background:rgba(16,185,129,0.1);color:var(--success);border-radius:20px;font-size:12px;font-weight:600;">
+          安全模式启用
+        </span>
+      </div>
+      
+      <!-- 角色选择 -->
+      <div class="role-selector">
+        <div class="role-option selected" onclick="selectRole('buyer', this)">
+          <div class="role-icon">🛒</div>
+          <div class="role-name">我是买方</div>
+          <div class="role-desc">购买商品或服务</div>
         </div>
-        
-        <!-- 支付方式 -->
-        <div class="payment-methods">
-          <div class="payment-method" id="method-TRC20" onclick="selectPaymentMethod('TRC20', this)">
-            <div style="font-size:24px;">🔷</div>
-            <div class="payment-method-name">TRC-20</div>
-            <div class="payment-method-fee">手续费 ~1 USDT</div>
-          </div>
-          <div class="payment-method" id="method-ERC20" onclick="selectPaymentMethod('ERC20', this)">
-            <div style="font-size:24px;">🔹</div>
-            <div class="payment-method-name">ERC-20</div>
-            <div class="payment-method-fee">手续费 ~5 USDT</div>
-          </div>
-          <div class="payment-method" id="method-BEP20" onclick="selectPaymentMethod('BEP20', this)">
-            <div style="font-size:24px;">🟡</div>
-            <div class="payment-method-name">BEP-20</div>
-            <div class="payment-method-fee">手续费 ~0.5 USDT</div>
-          </div>
-        </div>
-        
-        <!-- 支付信息 -->
-        <div class="payment-info">
-          <div class="payment-amount" id="paymentAmount">0.00 USDT</div>
-          <span class="payment-network" id="paymentNetwork">-- Network</span>
-        </div>
-        
-        <!-- 收款地址 -->
-        <div class="address-section">
-          <label style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;display:block;">
-            平台托管地址（请仔细核对）
-          </label>
-          <div class="address-display">
-            <span class="address-text" id="paymentAddress">--</span>
-            <button class="copy-btn" onclick="copyAddress()">复制地址</button>
-          </div>
-          <div style="padding:8px 12px;background:rgba(16,185,129,0.1);border-radius:8px;font-size:12px;color:var(--success);display:flex;align-items:center;gap:8px;">
-            <span>✓</span>
-            <span>已验证的官方托管地址</span>
-          </div>
-        </div>
-        
-        <!-- 交易验证 -->
-        <div class="verification-section">
-          <h3 class="verification-title">🔍 交易验证</h3>
-          <div class="verification-input">
-            <input type="text" id="txHash" placeholder="输入交易哈希 (Transaction Hash)">
-            <button class="verify-btn" onclick="verifyTransaction()">
-              验证交易
-            </button>
-          </div>
-          <div class="verification-status" id="verificationStatus">
-            <div class="spinner"></div> 正在查询区块链...
-          </div>
-        </div>
-        
-        <!-- 支付证明上传 -->
-        <div class="proof-upload" onclick="document.getElementById('proofFile').click()">
-          <div class="upload-icon">📸</div>
-          <div class="upload-text">点击上传支付截图（可选）</div>
-          <div class="upload-hint">支持 JPG、PNG 格式，最大 5MB</div>
-          <input type="file" id="proofFile" style="display:none" accept="image/*">
-        </div>
-        
-        <!-- 操作按钮 -->
-        <div class="btn-group">
-          <button class="btn btn-secondary" onclick="cancelPayment()">
-            ❌ 取消交易
-          </button>
-          <button class="btn btn-primary" onclick="confirmPayment()">
-            ✅ 我已支付
-          </button>
+        <div class="role-option" onclick="selectRole('seller', this)">
+          <div class="role-icon">💼</div>
+          <div class="role-name">我是卖方</div>
+          <div class="role-desc">出售商品或服务</div>
         </div>
       </div>
+      
+      <!-- 交易表单 -->
+      <form id="escrowForm">
+        <div class="form-group">
+          <label>对方钱包地址 <span class="required">*</span></label>
+          <input type="text" id="counterpartyAddress" placeholder="输入TRC20/ERC20地址" onblur="checkAddress(this.value)">
+          <div id="addressWarning" style="display:none;margin-top:8px;padding:8px;background:rgba(239,68,68,0.1);border-radius:6px;font-size:12px;color:var(--danger);">
+            ⚠️ 该地址存在风险记录
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>交易金额 (USDT) <span class="required">*</span></label>
+            <input type="number" id="amount" step="0.01" min="10" placeholder="最低 10 USDT" oninput="updateRiskAssessment()">
+          </div>
+          <div class="form-group">
+            <label>选择网络 <span class="required">*</span></label>
+            <select id="network" onchange="updateFees()">
+              <option value="TRC20">TRC-20 (推荐)</option>
+              <option value="ERC20">ERC-20</option>
+              <option value="BEP20">BEP-20</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>托管期限 <span class="required">*</span></label>
+            <select id="escrowPeriod">
+              <option value="24">24小时 - 快速交易</option>
+              <option value="72" selected>3天 - 标准交易</option>
+              <option value="168">7天 - 大额交易</option>
+              <option value="360">15天 - 定制交易</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>交易类型</label>
+            <select id="transactionType" onchange="updateRiskAssessment()">
+              <option value="goods">实物商品</option>
+              <option value="digital">数字商品</option>
+              <option value="service">服务类</option>
+              <option value="other">其他</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>交易描述 <span class="required">*</span></label>
+          <textarea id="description" placeholder="详细描述交易内容，便于争议处理（至少30字）" minlength="30"></textarea>
+        </div>
+        
+        <!-- 风险评估 -->
+        <div class="risk-assessment">
+          <div class="risk-header">
+            <span class="risk-title">🛡️ 风险评估</span>
+            <div class="risk-score">
+              <span class="risk-value" id="riskScore">25</span>
+              <span class="risk-level risk-low" id="riskLevel">低风险</span>
+            </div>
+          </div>
+          <div class="risk-factors">
+            <div class="risk-factor">
+              <span class="factor-label">对方信誉</span>
+              <span class="factor-value" id="counterpartyRep">待验证</span>
+            </div>
+            <div class="risk-factor">
+              <span class="factor-label">交易金额</span>
+              <span class="factor-value" id="amountRisk">正常</span>
+            </div>
+            <div class="risk-factor">
+              <span class="factor-label">交易频率</span>
+              <span class="factor-value">正常</span>
+            </div>
+            <div class="risk-factor">
+              <span class="factor-label">地址风险</span>
+              <span class="factor-value" id="addressRisk">待检测</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 限额提示 - 更新为新的限额 -->
+        <div class="limit-info">
+          <span class="limit-icon">⚠️</span>
+          <div class="limit-text">
+            您的当前交易限额（基于KYC等级和信誉分）
+          </div>
+          <div class="limit-values">
+            <div class="limit-item">
+              <span class="limit-label">单笔</span>
+              <span class="limit-amount">$50,000</span>
+            </div>
+            <div class="limit-item">
+              <span class="limit-label">每日</span>
+              <span class="limit-amount">$500,000</span>
+            </div>
+            <div class="limit-item">
+              <span class="limit-label">每月</span>
+              <span class="limit-amount">$10,000,000</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 费用明细 -->
+        <div class="fee-breakdown">
+          <div class="fee-row">
+            <span class="fee-label">交易金额</span>
+            <span class="fee-value" id="feeAmount">0.00 USDT</span>
+          </div>
+          <div class="fee-row">
+            <span class="fee-label">平台服务费 (0.5%-1%)</span>
+            <span class="fee-value" id="feeService">0.00 USDT</span>
+          </div>
+          <div class="fee-row">
+            <span class="fee-label">网络手续费（预估）</span>
+            <span class="fee-value" id="feeNetwork">1.00 USDT</span>
+          </div>
+          <div class="fee-row">
+            <span class="fee-label">风险保证金（可退）</span>
+            <span class="fee-value" id="feeDeposit">0.00 USDT</span>
+          </div>
+          <div class="fee-row total">
+            <span class="fee-label">需支付总额</span>
+            <span class="fee-value" id="feeTotal">0.00 USDT</span>
+          </div>
+        </div>
+        
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary" onclick="saveDraft()">
+            💾 保存草稿
+          </button>
+          <button type="submit" class="btn btn-primary">
+            🚀 创建担保交易
+          </button>
+        </div>
+      </form>
     </div>
     
     <!-- 右侧信息 -->
     <div>
-      <!-- 倒计时 -->
-      <div class="countdown-section">
-        <div class="countdown-label">⏱️ 支付倒计时</div>
-        <div class="countdown-timer" id="countdown">29:59</div>
-        <div class="countdown-warning">超时后订单将自动取消</div>
-      </div>
-      
-      <!-- 交易详情 -->
-      <div class="card">
-        <h3 style="font-size:16px;margin-bottom:20px;">📋 交易详情</h3>
-        <div class="detail-list">
-          <div class="detail-item">
-            <span class="detail-label">交易编号</span>
-            <span class="detail-value" id="transactionId" style="font-family:monospace;font-size:12px;">--</span>
+      <!-- 安全特性 -->
+      <div class="security-features">
+        <h3 style="font-size:18px;margin-bottom:20px;">🔒 安全保障</h3>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div class="feature-content">
+              <div class="feature-title">智能合约托管</div>
+              <div class="feature-desc">资金锁定在智能合约，任何一方无法单独提取</div>
+            </div>
           </div>
-          <div class="detail-item">
-            <span class="detail-label">交易类型</span>
-            <span class="detail-value" id="transactionType">--</span>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div class="feature-content">
+              <div class="feature-title">链上验证</div>
+              <div class="feature-desc">所有交易都经过区块链验证，确保真实性</div>
+            </div>
           </div>
-          <div class="detail-item">
-            <span class="detail-label">交易角色</span>
-            <span class="detail-value" id="userRole">--</span>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div class="feature-content">
+              <div class="feature-title">争议仲裁</div>
+              <div class="feature-desc">专业团队介入，基于证据链公正裁决</div>
+            </div>
           </div>
-          <div class="detail-item">
-            <span class="detail-label">对方地址</span>
-            <span class="detail-value" id="counterpartyAddr" style="font-family:monospace;font-size:12px;">--</span>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div class="feature-content">
+              <div class="feature-title">时效保护</div>
+              <div class="feature-desc">超时自动处理，避免资金长期冻结</div>
+            </div>
           </div>
-          <div class="detail-item">
-            <span class="detail-label">交易金额</span>
-            <span class="detail-value" id="transactionAmount">0.00 USDT</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">服务费</span>
-            <span class="detail-value" id="serviceFee">0.00 USDT</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">网络费</span>
-            <span class="detail-value" id="networkFee">~1.00 USDT</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">保证金</span>
-            <span class="detail-value" id="depositAmount">0.00 USDT</span>
-          </div>
-          <div class="detail-item" style="border-top:1px solid var(--border);padding-top:16px;margin-top:8px;">
-            <span class="detail-label"><strong>应付总额</strong></span>
-            <span class="detail-value" id="totalPayment" style="color:var(--primary);font-size:18px;font-weight:700;">0.00 USDT</span>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div class="feature-content">
+              <div class="feature-title">信誉系统</div>
+              <div class="feature-desc">基于历史交易的动态信誉评分机制</div>
+            </div>
           </div>
         </div>
       </div>
       
-      <!-- 安全提示 -->
-      <div class="security-notice">
-        <div class="notice-header">
-          <span class="notice-icon">🛡️</span>
-          <span class="notice-title">安全提示</span>
+      <!-- 实时交易 -->
+      <div class="card live-transactions">
+        <h3 style="font-size:16px;margin-bottom:16px;">📊 实时交易动态</h3>
+        <div id="liveTransactions">
+          <div class="transaction-item">
+            <span class="transaction-status status-active"></span>
+            <div class="transaction-info">
+              <div class="transaction-id">TX#7F9A...3D2E</div>
+              <div><span class="transaction-amount">500 USDT</span> • 刚刚</div>
+            </div>
+          </div>
+          <div class="transaction-item">
+            <span class="transaction-status status-active"></span>
+            <div class="transaction-info">
+              <div class="transaction-id">TX#8B3C...9A1F</div>
+              <div><span class="transaction-amount">1,200 USDT</span> • 2分钟前</div>
+            </div>
+          </div>
+          <div class="transaction-item">
+            <span class="transaction-status status-active"></span>
+            <div class="transaction-info">
+              <div class="transaction-id">TX#5D2E...7C4B</div>
+              <div><span class="transaction-amount">89 USDT</span> • 5分钟前</div>
+            </div>
+          </div>
         </div>
-        <ul class="notice-list">
-          <li>请确认收款地址为官方托管地址</li>
-          <li>转账金额必须与应付金额完全一致</li>
-          <li>选择正确的网络避免资产损失</li>
-          <li>保存好交易哈希作为支付凭证</li>
-          <li>如有疑问请联系在线客服</li>
-        </ul>
       </div>
     </div>
   </div>
@@ -786,365 +997,302 @@
 
 <script>
 // 全局变量
-let selectedNetwork = 'TRC20';
-let countdownTimer;
-let timeRemaining = 1799; // 30分钟
-let verificationAttempts = 0;
-let transactionData = {};
+let currentRole = 'buyer';
+let riskScore = 25;
+let currentUserAddress = '';
+let isLoggedIn = false;
 
-// 网络配置
-const networks = {
-  'TRC20': {
-    name: 'TRC-20',
-    address: 'TLDSPMN8HoVVRzxgn7Cm3F8FR6r9uZHESn',
-    fee: 1,
-    confirmations: 19,
-    blockTime: 3
-  },
-  'ERC20': {
-    name: 'ERC-20',
-    address: '0x4287869bdaD2Be58b64dcc03F065fB70C4fAFCF2',
-    fee: 5,
-    confirmations: 12,
-    blockTime: 15
-  },
-  'BEP20': {
-    name: 'BEP-20',
-    address: '0x4287869bdaD2Be58b64dcc03F065fB70C4fAFCF2',
-    fee: 0.5,
-    confirmations: 15,
-    blockTime: 3
-  }
-};
-
-// 交易类型映射
-const transactionTypeMap = {
-  'goods': '实物商品',
-  'digital': '数字商品',
-  'service': '服务类',
-  'other': '其他'
-};
-
-// 角色映射
-const roleMap = {
-  'buyer': '买方',
-  'seller': '卖方'
-};
-
-// 初始化
-document.addEventListener('DOMContentLoaded', function() {
-  loadTransactionData();
-  startCountdown();
+// 页面加载时初始化
+window.addEventListener('DOMContentLoaded', function() {
+  // 初始化
+  document.getElementById('walletAddress').value = '';
+  
+  // 监听回车键
+  document.getElementById('walletAddress').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && !isLoggedIn) {
+      handleLogin();
+    }
+  });
+  
+  // 初始化表单提交
+  document.getElementById('escrowForm').addEventListener('submit', handleFormSubmit);
+  
+  // 初始化其他功能
+  updateFees();
+  startLiveUpdates();
 });
 
-// 加载交易数据
-function loadTransactionData() {
-  // 从sessionStorage获取数据
-  const storedData = sessionStorage.getItem('currentTransaction');
+// 登入功能 - 固定信誉分为80，KYC为L1
+function handleLogin() {
+  const addressInput = document.getElementById('walletAddress');
+  const address = addressInput.value.trim();
   
-  if (!storedData) {
-    // 如果没有数据，尝试从localStorage获取
-    const localData = localStorage.getItem('latestTransaction');
-    if (localData) {
-      transactionData = JSON.parse(localData);
+  if (!address) {
+    alert('请输入钱包地址');
+    return;
+  }
+  
+  if (address.length < 10) {
+    alert('请输入有效的钱包地址');
+    return;
+  }
+  
+  // 保存地址并设置登录状态
+  currentUserAddress = address;
+  isLoggedIn = true;
+  
+  // 锁定输入框
+  addressInput.disabled = true;
+  
+  // 显示登录状态
+  document.getElementById('loginStatusBadge').classList.add('show');
+  
+  // 更新用户地址显示
+  const shortAddress = address.substring(0, 6) + '...' + address.substring(address.length - 4);
+  document.getElementById('userAddressDisplay').textContent = shortAddress;
+  document.getElementById('userAddressDisplay').title = address;
+  
+  // ★★★ 核心：设置固定的信誉分80和KYC L1 ★★★
+  document.getElementById('userScore').textContent = '80';
+  document.getElementById('kycLevel').textContent = '1';
+  
+  // 显示成功提示
+  setTimeout(() => {
+    alert('登录成功！欢迎使用易趣SafePay担保交易平台');
+  }, 300);
+}
+
+// 重新登入功能
+function handleReset() {
+  // 重置登录状态
+  isLoggedIn = false;
+  currentUserAddress = '';
+  
+  // 解锁并清空输入框
+  const addressInput = document.getElementById('walletAddress');
+  addressInput.value = '';
+  addressInput.disabled = false;
+  
+  // 隐藏登录状态
+  document.getElementById('loginStatusBadge').classList.remove('show');
+  
+  // 重置显示
+  document.getElementById('userAddressDisplay').textContent = '未登录';
+  document.getElementById('userAddressDisplay').title = '';
+  document.getElementById('userScore').textContent = '--';
+  document.getElementById('kycLevel').textContent = '-';
+  
+  // 聚焦输入框
+  addressInput.focus();
+}
+
+// 角色选择
+function selectRole(role, element) {
+  currentRole = role;
+  document.querySelectorAll('.role-option').forEach(opt => opt.classList.remove('selected'));
+  element.classList.add('selected');
+  updateRiskAssessment();
+}
+
+// 地址检查
+function checkAddress(address) {
+  if (!address || address.length < 20) return;
+  
+  setTimeout(() => {
+    const riskyAddresses = ['TRX123', 'TRY456'];
+    const isRisky = riskyAddresses.some(risky => address.includes(risky));
+    
+    if (isRisky) {
+      document.getElementById('addressWarning').style.display = 'block';
+      document.getElementById('addressRisk').textContent = '⚠️ 高风险';
+      document.getElementById('addressRisk').style.color = 'var(--danger)';
     } else {
-      alert('交易数据丢失，请重新创建交易');
-      window.location.href = './index.html'; // 返回第一个页面
-      return;
-    }
-  } else {
-    transactionData = JSON.parse(storedData);
-  }
-  
-  // 更新页面显示
-  updatePageWithTransactionData();
-}
-
-// 更新页面显示
-function updatePageWithTransactionData() {
-  // 基本信息
-  document.getElementById('orderId').textContent = transactionData.id || 'ESC' + Date.now().toString(36).toUpperCase();
-  document.getElementById('createTime').textContent = formatDateTime(transactionData.createdAt);
-  document.getElementById('transactionId').textContent = (transactionData.id || 'ESC2025...').substring(0, 12) + '...';
-  
-  // 交易信息
-  document.getElementById('transactionType').textContent = transactionTypeMap[transactionData.transactionType] || '商品购买';
-  document.getElementById('userRole').textContent = roleMap[transactionData.role] || '买方';
-  
-  // 地址信息
-  const counterpartyAddress = transactionData.counterpartyAddress || 'TRY7...3aM5';
-  document.getElementById('counterpartyAddr').textContent = 
-    counterpartyAddress.length > 12 ? 
-    counterpartyAddress.substring(0, 6) + '...' + counterpartyAddress.substring(counterpartyAddress.length - 4) : 
-    counterpartyAddress;
-  
-  // 金额信息
-  const amount = parseFloat(transactionData.amount) || 0;
-  const riskScore = transactionData.riskScore || 25;
-  
-  // 计算费用
-  const serviceFeeRate = riskScore < 40 ? 0.005 : riskScore < 70 ? 0.007 : 0.01;
-  const serviceFee = amount * serviceFeeRate;
-  const deposit = riskScore > 70 ? amount * 0.05 : 0;
-  
-  // 选择网络
-  selectedNetwork = transactionData.network || 'TRC20';
-  const networkFee = networks[selectedNetwork].fee;
-  
-  // 更新显示
-  document.getElementById('transactionAmount').textContent = amount.toFixed(2) + ' USDT';
-  document.getElementById('serviceFee').textContent = serviceFee.toFixed(2) + ' USDT';
-  document.getElementById('networkFee').textContent = '~' + networkFee.toFixed(2) + ' USDT';
-  document.getElementById('depositAmount').textContent = deposit.toFixed(2) + ' USDT';
-  
-  const total = amount + serviceFee + networkFee + deposit;
-  document.getElementById('totalPayment').textContent = total.toFixed(2) + ' USDT';
-  document.getElementById('paymentAmount').textContent = total.toFixed(2) + ' USDT';
-  
-  // 选择对应的支付方式
-  selectPaymentMethod(selectedNetwork);
-  
-  // 自动选中对应的网络按钮
-  const methodElement = document.getElementById('method-' + selectedNetwork);
-  if (methodElement) {
-    selectPaymentMethod(selectedNetwork, methodElement);
-  }
-}
-
-// 格式化日期时间
-function formatDateTime(dateString) {
-  if (!dateString) {
-    return new Date().toLocaleString('zh-CN');
-  }
-  return new Date(dateString).toLocaleString('zh-CN');
-}
-
-// 选择支付方式
-function selectPaymentMethod(network, element) {
-  selectedNetwork = network;
-  
-  // 更新UI
-  document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
-  
-  if (element) {
-    element.classList.add('selected');
-  } else {
-    // 如果没有传入element，找到对应的元素
-    const methodElement = document.getElementById('method-' + network);
-    if (methodElement) {
-      methodElement.classList.add('selected');
-    }
-  }
-  
-  // 更新地址和网络显示
-  const networkInfo = networks[network];
-  document.getElementById('paymentAddress').textContent = networkInfo.address;
-  document.getElementById('paymentNetwork').textContent = networkInfo.name + ' Network';
-  
-  // 更新网络费用
-  document.getElementById('networkFee').textContent = '~' + networkInfo.fee.toFixed(2) + ' USDT';
-  
-  // 重新计算总额
-  const amount = parseFloat(transactionData.amount) || 0;
-  const riskScore = transactionData.riskScore || 25;
-  const serviceFeeRate = riskScore < 40 ? 0.005 : riskScore < 70 ? 0.007 : 0.01;
-  const serviceFee = amount * serviceFeeRate;
-  const deposit = riskScore > 70 ? amount * 0.05 : 0;
-  const total = amount + serviceFee + networkInfo.fee + deposit;
-  
-  document.getElementById('totalPayment').textContent = total.toFixed(2) + ' USDT';
-  document.getElementById('paymentAmount').textContent = total.toFixed(2) + ' USDT';
-}
-
-// 复制地址
-function copyAddress() {
-  const address = document.getElementById('paymentAddress').textContent;
-  navigator.clipboard.writeText(address).then(() => {
-    const btn = event.target;
-    btn.textContent = '已复制';
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = '复制地址';
-      btn.classList.remove('copied');
-    }, 2000);
-  });
-}
-
-// 倒计时
-function startCountdown() {
-  countdownTimer = setInterval(() => {
-    if (timeRemaining <= 0) {
-      clearInterval(countdownTimer);
-      handleTimeout();
-      return;
+      document.getElementById('addressWarning').style.display = 'none';
+      document.getElementById('addressRisk').textContent = '✓ 安全';
+      document.getElementById('addressRisk').style.color = 'var(--success)';
     }
     
-    timeRemaining--;
-    const minutes = Math.floor(timeRemaining / 60);
-    const seconds = timeRemaining % 60;
-    document.getElementById('countdown').textContent = 
-      `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    // 对方信誉也固定为80分
+    document.getElementById('counterpartyRep').textContent = '80 分';
     
-    // 最后5分钟警告
-    if (timeRemaining === 300) {
-      alert('⚠️ 支付时间仅剩5分钟，请尽快完成支付！');
-    }
+    updateRiskAssessment();
   }, 1000);
 }
 
-// 超时处理
-function handleTimeout() {
-  alert('支付超时，订单已自动取消');
-  updateTransactionStatus('EXPIRED');
-  window.location.href = './index.html';
+// 更新风险评估
+function updateRiskAssessment() {
+  const amount = parseFloat(document.getElementById('amount').value) || 0;
+  const transactionType = document.getElementById('transactionType').value;
+  
+  let score = 25;
+  
+  if (amount > 10000) {
+    score += 30;
+    document.getElementById('amountRisk').textContent = '⚠️ 大额';
+  } else if (amount > 5000) {
+    score += 15;
+    document.getElementById('amountRisk').textContent = '中等';
+  } else {
+    document.getElementById('amountRisk').textContent = '正常';
+  }
+  
+  if (transactionType === 'digital') {
+    score += 10;
+  }
+  
+  riskScore = Math.min(100, score);
+  document.getElementById('riskScore').textContent = riskScore;
+  
+  const riskLevel = document.getElementById('riskLevel');
+  if (riskScore < 40) {
+    riskLevel.textContent = '低风险';
+    riskLevel.className = 'risk-level risk-low';
+  } else if (riskScore < 70) {
+    riskLevel.textContent = '中风险';
+    riskLevel.className = 'risk-level risk-medium';
+  } else {
+    riskLevel.textContent = '高风险';
+    riskLevel.className = 'risk-level risk-high';
+  }
+  
+  updateFees();
 }
 
-// 验证交易
-async function verifyTransaction() {
-  const txHash = document.getElementById('txHash').value.trim();
+// 更新费用
+function updateFees() {
+  const amount = parseFloat(document.getElementById('amount').value) || 0;
+  const network = document.getElementById('network').value;
   
-  if (!txHash) {
-    alert('请输入交易哈希');
+  let serviceFeeRate = riskScore < 40 ? 0.005 : riskScore < 70 ? 0.007 : 0.01;
+  const serviceFee = amount * serviceFeeRate;
+  
+  const networkFees = {
+    'TRC20': 1,
+    'ERC20': 5,
+    'BEP20': 0.5
+  };
+  const networkFee = networkFees[network] || 1;
+  
+  const deposit = riskScore > 70 ? amount * 0.05 : 0;
+  
+  document.getElementById('feeAmount').textContent = amount.toFixed(2) + ' USDT';
+  document.getElementById('feeService').textContent = serviceFee.toFixed(2) + ' USDT';
+  document.getElementById('feeNetwork').textContent = networkFee.toFixed(2) + ' USDT';
+  document.getElementById('feeDeposit').textContent = deposit.toFixed(2) + ' USDT';
+  document.getElementById('feeTotal').textContent = (amount + serviceFee + networkFee + deposit).toFixed(2) + ' USDT';
+}
+
+// 保存草稿
+function saveDraft() {
+  if (!isLoggedIn) {
+    alert('请先登录钱包地址');
+    document.getElementById('walletAddress').focus();
     return;
   }
   
-  if (txHash.length < 64) {
-    alert('交易哈希格式不正确');
+  const formData = {
+    role: currentRole,
+    counterpartyAddress: document.getElementById('counterpartyAddress').value,
+    amount: document.getElementById('amount').value,
+    network: document.getElementById('network').value,
+    escrowPeriod: document.getElementById('escrowPeriod').value,
+    transactionType: document.getElementById('transactionType').value,
+    description: document.getElementById('description').value,
+    userAddress: currentUserAddress
+  };
+  
+  localStorage.setItem('escrowDraft', JSON.stringify(formData));
+  alert('草稿已保存');
+}
+
+// 提交表单 - 删除了限额检查
+function handleFormSubmit(e) {
+  e.preventDefault();
+  
+  if (!isLoggedIn) {
+    alert('请先登录钱包地址');
+    document.getElementById('walletAddress').focus();
     return;
   }
   
-  const statusEl = document.getElementById('verificationStatus');
-  statusEl.className = 'verification-status pending';
-  statusEl.innerHTML = '<div class="spinner"></div> 正在查询区块链...';
+  const amount = parseFloat(document.getElementById('amount').value);
   
-  // 模拟区块链查询
-  setTimeout(() => {
-    verificationAttempts++;
-    
-    const isValid = txHash.startsWith('0x') || txHash.startsWith('TX');
-    const confirmations = Math.floor(Math.random() * 20);
-    const requiredConfirmations = networks[selectedNetwork].confirmations;
-    
-    if (isValid && confirmations >= requiredConfirmations) {
-      statusEl.className = 'verification-status success';
-      statusEl.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span>✅</span>
-          <div>
-            <div>交易验证成功！</div>
-            <div style="font-size:11px;margin-top:4px;">
-              确认数：${confirmations}/${requiredConfirmations} | 
-              金额：${document.getElementById('totalPayment').textContent} | 
-              状态：已确认
-            </div>
-          </div>
-        </div>
-      `;
-      
-      setTimeout(() => {
-        proceedToEscrow();
-      }, 2000);
-      
-    } else if (confirmations < requiredConfirmations) {
-      statusEl.className = 'verification-status pending';
-      statusEl.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span>⏳</span>
-          <div>
-            <div>交易已提交，等待确认</div>
-            <div style="font-size:11px;margin-top:4px;">
-              当前确认数：${confirmations}/${requiredConfirmations} | 
-              预计${networks[selectedNetwork].blockTime}分钟后完成
-            </div>
-          </div>
-        </div>
-      `;
-      
-      setTimeout(() => verifyTransaction(), 10000);
-      
-    } else {
-      statusEl.className = 'verification-status error';
-      statusEl.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span>❌</span>
-          <div>
-            <div>交易验证失败</div>
-            <div style="font-size:11px;margin-top:4px;">
-              未找到交易或金额不匹配，请检查后重试
-            </div>
-          </div>
-        </div>
-      `;
-    }
-  }, 2000);
-}
-
-// 进入托管阶段
-function proceedToEscrow() {
-  document.getElementById('progressLine').style.width = '60%';
-  document.querySelectorAll('.step')[1].classList.remove('active');
-  document.querySelectorAll('.step')[1].classList.add('completed');
-  document.querySelectorAll('.step')[2].classList.add('active');
-  
-  updateTransactionStatus('ESCROWED');
-  
-  alert('支付验证成功！\n资金已进入智能合约托管。\n\n即将跳转到交易页面...');
-  
-  // 这里可以跳转到下一个页面
-  // window.location.href = './transaction.html';
-}
-
-// 确认支付
-function confirmPayment() {
-  if (confirm('请确认您已完成支付\n\n点击确定后，系统将验证您的支付')) {
-    const statusEl = document.getElementById('verificationStatus');
-    statusEl.className = 'verification-status pending';
-    statusEl.innerHTML = '<div class="spinner"></div> 系统正在自动验证支付...';
-    
-    setTimeout(() => {
-      alert('请输入交易哈希进行验证，或等待系统自动确认（约3-5分钟）');
-      statusEl.className = 'verification-status';
-      statusEl.style.display = 'none';
-    }, 3000);
+  // 只检查最小金额
+  if (amount < 10) {
+    alert('最小交易金额为 10 USDT');
+    return;
   }
-}
-
-// 取消支付
-function cancelPayment() {
-  if (confirm('确定要取消交易吗？\n\n取消后需要重新创建订单')) {
-    clearInterval(countdownTimer);
-    updateTransactionStatus('CANCELLED');
-    alert('交易已取消');
-    window.location.href = './index.html';
-  }
-}
-
-// 更新交易状态
-function updateTransactionStatus(status) {
-  transactionData.status = status;
-  transactionData.updatedAt = new Date().toISOString();
-  sessionStorage.setItem('currentTransaction', JSON.stringify(transactionData));
-  localStorage.setItem('latestTransaction', JSON.stringify(transactionData));
-}
-
-// 文件上传处理
-document.getElementById('proofFile').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (file) {
-    if (file.size > 5 * 1024 * 1024) {
-      alert('文件大小不能超过5MB');
+  
+  // ★★★ 已删除限额检查代码 ★★★
+  
+  // 高风险警告
+  if (riskScore > 70) {
+    if (!confirm(`⚠️ 风险提示\n\n当前交易风险评分：${riskScore}\n建议谨慎交易。是否继续？`)) {
       return;
     }
+  }
+  
+  // 生成交易ID
+  const txId = 'ESC' + Date.now().toString(36).toUpperCase();
+  
+  const transaction = {
+    id: txId,
+    role: currentRole,
+    userAddress: currentUserAddress,
+    counterpartyAddress: document.getElementById('counterpartyAddress').value,
+    amount: amount,
+    network: document.getElementById('network').value,
+    escrowPeriod: document.getElementById('escrowPeriod').value,
+    transactionType: document.getElementById('transactionType').value,
+    description: document.getElementById('description').value,
+    riskScore: riskScore,
+    status: 'CREATED',
+    createdAt: new Date().toISOString()
+  };
+  
+  // 保存到sessionStorage用于页面间传递数据
+  sessionStorage.setItem('currentTransaction', JSON.stringify(transaction));
+  
+  // 同时保存到localStorage以便持久化
+  localStorage.setItem('latestTransaction', JSON.stringify(transaction));
+  
+  // 显示成功提示
+  alert(`交易创建成功！\n交易ID: ${txId}\n\n即将跳转到支付页面...`);
+  
+  // 跳转到第二个页面
+  setTimeout(() => {
+    window.location.href = './dbjy1.html';
+  }, 500); // 延迟500毫秒让用户看到提示
+}
+
+// 实时交易更新
+function startLiveUpdates() {
+  setInterval(() => {
+    const amounts = [50, 100, 200, 500, 1000, 2500, 5000];
+    const amount = amounts[Math.floor(Math.random() * amounts.length)];
+    const txId = Math.random().toString(36).substr(2, 4).toUpperCase();
     
-    document.querySelector('.proof-upload').innerHTML = `
-      <div style="color:var(--success);">
-        <div style="font-size:32px;">✅</div>
-        <div style="margin-top:8px;">支付截图已上传</div>
-        <div style="font-size:12px;margin-top:4px;color:var(--text-muted);">${file.name}</div>
+    const newTransaction = `
+      <div class="transaction-item" style="animation: fadeIn 0.5s">
+        <span class="transaction-status status-active"></span>
+        <div class="transaction-info">
+          <div class="transaction-id">TX#${txId}...${Math.random().toString(36).substr(2, 4).toUpperCase()}</div>
+          <div><span class="transaction-amount">${amount} USDT</span> • 刚刚</div>
+        </div>
       </div>
     `;
-  }
-});
+    
+    const container = document.getElementById('liveTransactions');
+    if (container) {
+      container.insertAdjacentHTML('afterbegin', newTransaction);
+      
+      while (container.children.length > 5) {
+        container.removeChild(container.lastChild);
+      }
+    }
+  }, 8000);
+}
 </script>
+
 </body>
 </html>
