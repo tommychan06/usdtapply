@@ -1192,7 +1192,7 @@ function handleTimeout() {
   window.location.href = './index.html';
 }
 
-// 进入托管阶段
+// 进入托管阶段 - 跳转到dnjy3.html
 function proceedToEscrow() {
   // 更新进度条
   document.getElementById('progressLine').style.width = '60%';
@@ -1204,78 +1204,41 @@ function proceedToEscrow() {
   
   alert('✅ 支付验证成功！\n\n资金已进入智能合约托管。\n即将跳转到交易页面...');
   
-  // 实际项目中这里会跳转
-  // window.location.href = './transaction.html';
+  // 跳转到dnjy3.html
+  setTimeout(() => {
+    window.location.href = './dnjy3.html';
+  }, 2000);
 }
 
 // 确认支付
 function confirmPayment() {
-  if (confirm('请确认您已完成支付\n\n点击确定后，系统将验证您的支付')) {
-    const statusEl = document.getElementById('verificationStatus');
-    statusEl.style.display = 'block';
-    statusEl.className = 'verification-status pending';
-    statusEl.innerHTML = '<div class="spinner"></div> 系统正在自动验证支付...';
+  // 检查是否已输入哈希
+  const txHash = document.getElementById('txHash').value.trim();
+  
+  if (!txHash) {
+    // 如果没有输入哈希，提示用户输入
+    alert('✋ 请先输入交易哈希\n\n完成转账后，请将交易哈希粘贴到上方输入框中，然后点击"提交验证"按钮。');
     
-    setTimeout(() => {
-      const format = hashFormats[selectedNetwork];
-      alert(`⚠️ 请输入交易哈希进行验证\n\n格式要求：${format.example}\n长度：${format.length}位\n\n或等待系统自动确认（约3-5分钟）`);
-      statusEl.style.display = 'none';
-      
-      // 聚焦到哈希输入框
-      document.getElementById('txHash').focus();
-    }, 3000);
-  }
-}
-
-// 取消支付
-function cancelPayment() {
-  if (confirm('❓ 确定要取消交易吗？\n\n取消后需要重新创建订单')) {
-    clearInterval(countdownTimer);
-    updateTransactionStatus('CANCELLED');
-    alert('❌ 交易已取消');
-    window.location.href = './index.html';
-  }
-}
-
-// 更新交易状态
-function updateTransactionStatus(status) {
-  transactionData.status = status;
-  transactionData.updatedAt = new Date().toISOString();
-  sessionStorage.setItem('currentTransaction', JSON.stringify(transactionData));
-  localStorage.setItem('latestTransaction', JSON.stringify(transactionData));
-}
-
-// 文件上传处理
-document.getElementById('proofFile').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (file) {
-    if (file.size > 5 * 1024 * 1024) {
-      alert('❌ 文件大小不能超过5MB');
-      return;
+    // 聚焦到哈希输入框
+    document.getElementById('txHash').focus();
+    
+    // 添加输入框闪烁效果
+    const txHashInput = document.getElementById('txHash');
+    txHashInput.style.animation = 'glow 1s ease-in-out 3';
+    
+    // 添加动画样式
+    if (!document.getElementById('glowStyle')) {
+      const style = document.createElement('style');
+      style.id = 'glowStyle';
+      style.innerHTML = `
+        @keyframes glow {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+          50% { box-shadow: 0 0 20px 5px rgba(59,130,246,0.5); }
+        }
+      `;
+      document.head.appendChild(style);
     }
     
-    // 更新上传区域显示
-    const proofUpload = document.getElementById('proofUpload');
-    proofUpload.innerHTML = `
-      <div style="color:var(--success);text-align:center;">
-        <div style="font-size:32px;">✅</div>
-        <div style="margin-top:8px;font-weight:600;">支付截图已上传</div>
-        <div style="font-size:12px;margin-top:4px;color:var(--text-muted);">${file.name}</div>
-        <div style="font-size:11px;margin-top:4px;color:var(--text-secondary);">点击可重新上传</div>
-      </div>
-      <input type="file" id="proofFileNew" style="display:none" accept="image/*">
-    `;
-    
-    // 重新绑定点击事件
-    proofUpload.onclick = () => {
-      const newInput = document.getElementById('proofFileNew') || document.getElementById('proofFile');
-      if (newInput) newInput.click();
-    };
-    
-    // 更新状态
-    hasPaymentProof = true;
-  }
-});
-</script>
-</body>
-</html>
+  } else if (!hasValidHash) {
+    // 如果输入了哈希但格式不正确
+    alert('❌
