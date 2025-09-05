@@ -614,22 +614,6 @@
     border-bottom:none;
   }
   
-  /* 数据加载提示 */
-  .data-alert{
-    background:rgba(59,130,246,0.1);
-    border:1px solid rgba(59,130,246,0.3);
-    border-radius:12px;
-    padding:12px;
-    margin-bottom:16px;
-    font-size:13px;
-    color:var(--primary);
-    display:none;
-  }
-  
-  .data-alert.show{
-    display:block;
-  }
-  
   /* 响应式 */
   @media (max-width:1200px){
     .main-layout{
@@ -653,11 +637,6 @@
 </head>
 <body>
 <div class="container">
-  <!-- 数据接收提示 -->
-  <div class="data-alert" id="dataAlert">
-    ✅ 已成功接收支付验证数据，交易已进入托管阶段
-  </div>
-
   <!-- 头部 -->
   <div class="header">
     <div class="breadcrumb">
@@ -665,7 +644,7 @@
       <span>/</span>
       <a href="/transactions">我的交易</a>
       <span>/</span>
-      <span id="transactionIdBreadcrumb">ESC2025012014305678</span>
+      <span id="breadcrumbTxId">--</span>
     </div>
     <div class="header-actions">
       <button class="header-btn">📊 查看报告</button>
@@ -682,7 +661,7 @@
       <div class="card status-card">
         <div class="status-header">
           <h3 style="font-size:16px;">交易状态</h3>
-          <span class="status-badge status-escrowed">
+          <span class="status-badge status-escrowed" id="statusBadge">
             🔒 托管中
           </span>
         </div>
@@ -693,23 +672,23 @@
           
           <div class="timeline-item completed">
             <div class="timeline-dot"></div>
-            <div class="timeline-time" id="createTime">2025-01-20 14:30:56</div>
+            <div class="timeline-time" id="createTimeTimeline">--</div>
             <div class="timeline-title">创建交易</div>
-            <div class="timeline-desc">买方发起担保交易</div>
+            <div class="timeline-desc" id="createDesc">--</div>
           </div>
           
           <div class="timeline-item completed">
             <div class="timeline-dot"></div>
-            <div class="timeline-time" id="paymentTimeDisplay">2025-01-20 14:35:23</div>
+            <div class="timeline-time" id="paymentTimeTimeline">--</div>
             <div class="timeline-title">支付完成</div>
-            <div class="timeline-desc" id="paymentAmountDisplay">1,234.56 USDT</div>
+            <div class="timeline-desc" id="paymentDesc">-- USDT</div>
           </div>
           
           <div class="timeline-item completed">
             <div class="timeline-dot"></div>
-            <div class="timeline-time" id="verifyTime">2025-01-20 14:36:45</div>
-            <div class="timeline-title" id="verificationTitle">链上验证</div>
-            <div class="timeline-desc" id="verificationDesc">19个区块确认</div>
+            <div class="timeline-time" id="verifyTimeTimeline">--</div>
+            <div class="timeline-title">链上验证</div>
+            <div class="timeline-desc">19个区块确认</div>
           </div>
           
           <div class="timeline-item active">
@@ -723,14 +702,14 @@
             <div class="timeline-dot"></div>
             <div class="timeline-time">-</div>
             <div class="timeline-title">确认收货</div>
-            <div class="timeline-desc">买方确认</div>
+            <div class="timeline-desc" id="roleConfirmDesc">--</div>
           </div>
           
           <div class="timeline-item">
             <div class="timeline-dot"></div>
             <div class="timeline-time">-</div>
             <div class="timeline-title">资金释放</div>
-            <div class="timeline-desc">支付给卖方</div>
+            <div class="timeline-desc" id="roleReleaseDesc">--</div>
           </div>
         </div>
       </div>
@@ -739,8 +718,8 @@
       <div class="card">
         <div class="auto-process">
           <div class="auto-process-title">⏱️ 自动处理倒计时</div>
-          <div class="auto-process-time" id="autoReleaseTime">71:45:30</div>
-          <div class="auto-process-action">超时后将自动释放给卖方</div>
+          <div class="auto-process-time" id="autoProcessTime">--:--:--</div>
+          <div class="auto-process-action" id="autoProcessAction">--</div>
         </div>
       </div>
       
@@ -748,9 +727,9 @@
       <div class="protection-notice">
         <div class="protection-header">
           <span>🛡️</span>
-          <span class="protection-title">买家保护计划</span>
+          <span class="protection-title" id="protectionTitle">买家保护计划</span>
         </div>
-        <ul class="protection-list">
+        <ul class="protection-list" id="protectionList">
           <li>72小时无条件退款保障</li>
           <li>卖方需提供发货证明</li>
           <li>争议优先保护买方权益</li>
@@ -848,17 +827,13 @@
         
         <div class="chat-messages" id="chatMessages">
           <div class="system-message">
-            <span class="system-text">交易已创建，双方可开始沟通</span>
-          </div>
-          
-          <div class="system-message" id="verificationMessage" style="display:none;">
-            <span class="system-text" id="verificationMessageText">支付已验证，资金已进入托管</span>
+            <span class="system-text" id="chatInitMessage">交易已创建，双方可开始沟通</span>
           </div>
           
           <div class="message">
-            <div class="message-avatar">卖</div>
+            <div class="message-avatar" id="otherAvatar">卖</div>
             <div class="message-content">
-              <div class="message-name">卖方</div>
+              <div class="message-name" id="otherName">卖方</div>
               <div class="message-text">您好，感谢购买！商品已经准备好了。</div>
               <div class="message-time">14:40</div>
             </div>
@@ -874,9 +849,9 @@
           </div>
           
           <div class="message">
-            <div class="message-avatar">卖</div>
+            <div class="message-avatar" id="otherAvatar2">卖</div>
             <div class="message-content">
-              <div class="message-name">卖方</div>
+              <div class="message-name" id="otherName2">卖方</div>
               <div class="message-text">
                 链接：https://example.com/download<br>
                 密码：ABC123<br>
@@ -911,19 +886,19 @@
           <div class="detail-grid">
             <div class="detail-row">
               <span style="color:var(--text-muted);">交易编号</span>
-              <span style="font-family:monospace;" id="transactionIdDetail">ESC20250120...</span>
+              <span style="font-family:monospace;" id="txIdShort">--</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">创建时间</span>
-              <span id="createTimeDetail">2025-01-20 14:30</span>
+              <span id="createTimeDetail">--</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">交易类型</span>
-              <span id="transactionTypeDetail">数字商品</span>
+              <span id="txTypeDetail">--</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">托管期限</span>
-              <span>72小时</span>
+              <span id="escrowPeriodDetail">--</span>
             </div>
           </div>
         </div>
@@ -935,19 +910,19 @@
           <div class="detail-grid">
             <div class="detail-row">
               <span style="color:var(--text-muted);">买方</span>
-              <span style="font-family:monospace;">0x7f9...3d2</span>
+              <span style="font-family:monospace;" id="buyerAddress">--</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">买方信誉</span>
-              <span style="color:var(--success);">⭐ 98分</span>
+              <span style="color:var(--success);" id="buyerRep">⭐ --</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">卖方</span>
-              <span style="font-family:monospace;">TRY7...3aM5</span>
+              <span style="font-family:monospace;" id="sellerAddress">--</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">卖方信誉</span>
-              <span style="color:var(--warning);">⭐ 85分</span>
+              <span style="color:var(--success);" id="sellerRep">⭐ --</span>
             </div>
           </div>
         </div>
@@ -959,19 +934,19 @@
           <div class="detail-grid">
             <div class="detail-row">
               <span style="color:var(--text-muted);">交易金额</span>
-              <span id="amountDetail">1,200.00 USDT</span>
+              <span id="txAmount">-- USDT</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">服务费</span>
-              <span id="serviceFeeDetail">12.00 USDT</span>
+              <span id="serviceFee">-- USDT</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">保证金</span>
-              <span id="depositDetail">21.56 USDT</span>
+              <span id="depositAmount">-- USDT</span>
             </div>
             <div class="detail-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px;">
               <span style="color:var(--text-muted);font-weight:600;">托管总额</span>
-              <span style="color:var(--primary);font-weight:700;" id="totalAmountDetail">1,234.56 USDT</span>
+              <span style="color:var(--primary);font-weight:700;" id="totalAmount">-- USDT</span>
             </div>
           </div>
         </div>
@@ -983,11 +958,11 @@
           <div class="detail-grid">
             <div class="detail-row">
               <span style="color:var(--text-muted);">网络</span>
-              <span id="networkDetail">TRC-20</span>
+              <span id="networkType">--</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">支付哈希</span>
-              <span style="font-family:monospace;font-size:10px;" id="txHashDetail">0x7f9a...3d2e</span>
+              <span style="font-family:monospace;font-size:10px;" id="txHashShort" title="">--</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">托管合约</span>
@@ -995,11 +970,7 @@
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">确认数</span>
-              <span style="color:var(--success);" id="confirmationsDetail">19 确认</span>
-            </div>
-            <div class="detail-row" id="verificationStatusRow" style="display:none;">
-              <span style="color:var(--text-muted);">验证状态</span>
-              <span style="color:var(--success);" id="verificationStatusDetail">✅ 已验证</span>
+              <span style="color:var(--success);">19 确认</span>
             </div>
           </div>
         </div>
@@ -1012,184 +983,225 @@
 // 全局变量
 let disputeOpen = false;
 let autoReleaseTimer;
-let timeRemaining = 259530; // 默认72小时（秒）
-let transactionData = {}; // 存储接收的交易数据
+let timeRemaining = 259200; // 默认72小时（秒）
+let transactionData = {}; // 存储交易数据
 
-// 初始化
+// 交易类型映射
+const transactionTypeMap = {
+  'goods': '实物商品',
+  'digital': '数字商品',
+  'service': '服务类',
+  'other': '其他'
+};
+
+// 托管期限映射
+const escrowPeriodMap = {
+  '24': '24小时',
+  '72': '72小时',
+  '168': '7天',
+  '360': '15天'
+};
+
+// 网络类型映射
+const networkTypeMap = {
+  'TRC20': 'TRC-20',
+  'ERC20': 'ERC-20',
+  'BEP20': 'BEP-20'
+};
+
+// ★★★ 核心修改：初始化时加载传输的数据 ★★★
 document.addEventListener('DOMContentLoaded', function() {
-  // 读取并处理传递的数据
-  loadTransactionData();
+  // 读取传输的数据
+  let savedData = sessionStorage.getItem('currentTransaction');
   
-  // 初始化其他功能
+  if (!savedData) {
+    savedData = localStorage.getItem('latestTransaction');
+  }
+  
+  if (savedData) {
+    try {
+      transactionData = JSON.parse(savedData);
+      
+      // ★★★ 动态更新页面 ★★★
+      updatePageWithTransactionData(transactionData);
+      
+      // 计算托管剩余时间
+      calculateRemainingTime(transactionData);
+      
+    } catch (e) {
+      console.error('解析交易数据失败:', e);
+      alert('⚠️ 交易数据加载失败，请重试');
+      window.location.href = './dnjy.html';
+      return;
+    }
+  } else {
+    alert('⚠️ 未找到交易信息，请重新创建订单');
+    window.location.href = './dnjy.html';
+    return;
+  }
+  
+  // 启动倒计时和其他功能
   startAutoReleaseTimer();
   setupWebSocket();
 });
 
-// 读取交易数据
-function loadTransactionData() {
-  try {
-    // 从sessionStorage读取数据
-    const storedData = sessionStorage.getItem('currentTransaction');
-    if (storedData) {
-      transactionData = JSON.parse(storedData);
-      console.log('接收到的交易数据：', transactionData);
-      
-      // 显示数据接收提示
-      const dataAlert = document.getElementById('dataAlert');
-      dataAlert.classList.add('show');
-      setTimeout(() => {
-        dataAlert.classList.remove('show');
-      }, 5000);
-      
-      // 更新页面显示
-      updatePageWithData();
-    } else {
-      console.log('未找到交易数据，使用默认值');
-    }
-  } catch (error) {
-    console.error('读取交易数据失败：', error);
+// ★★★ 新增：更新页面数据函数 ★★★
+function updatePageWithTransactionData(data) {
+  // 更新面包屑导航
+  document.getElementById('breadcrumbTxId').textContent = data.id || 'ESC--';
+  
+  // 更新时间线
+  if (data.createdAt) {
+    const createDate = new Date(data.createdAt);
+    document.getElementById('createTimeTimeline').textContent = formatDateTime(createDate);
+    document.getElementById('createTimeDetail').textContent = formatDateTimeShort(createDate);
+  }
+  
+  // 更新创建描述
+  const roleText = data.role === 'buyer' ? '买方' : '卖方';
+  document.getElementById('createDesc').textContent = `${roleText}发起担保交易`;
+  
+  // 更新支付信息
+  if (data.paymentTime) {
+    const payDate = new Date(data.paymentTime);
+    document.getElementById('paymentTimeTimeline').textContent = formatDateTime(payDate);
+  }
+  document.getElementById('paymentDesc').textContent = (data.totalAmount || 0).toFixed(2) + ' USDT';
+  
+  // 更新验证时间（支付时间后1分钟）
+  if (data.verificationTime) {
+    const verifyDate = new Date(data.verificationTime);
+    verifyDate.setSeconds(verifyDate.getSeconds() + 60);
+    document.getElementById('verifyTimeTimeline').textContent = formatDateTime(verifyDate);
+  }
+  
+  // 更新角色相关描述
+  if (data.role === 'buyer') {
+    document.getElementById('roleConfirmDesc').textContent = '买方确认';
+    document.getElementById('roleReleaseDesc').textContent = '支付给卖方';
+    document.getElementById('protectionTitle').textContent = '买家保护计划';
+    document.getElementById('autoProcessAction').textContent = '超时后将自动释放给卖方';
+  } else {
+    document.getElementById('roleConfirmDesc').textContent = '卖方确认';
+    document.getElementById('roleReleaseDesc').textContent = '支付给买方';
+    document.getElementById('protectionTitle').textContent = '卖家保护计划';
+    document.getElementById('autoProcessAction').textContent = '超时后将自动退款给买方';
+  }
+  
+  // 更新交易详情
+  document.getElementById('txIdShort').textContent = 
+    data.id ? (data.id.length > 12 ? data.id.substring(0, 10) + '...' : data.id) : '--';
+  
+  // 交易类型
+  document.getElementById('txTypeDetail').textContent = 
+    transactionTypeMap[data.transactionType] || data.transactionType || '--';
+  
+  // 托管期限
+  document.getElementById('escrowPeriodDetail').textContent = 
+    escrowPeriodMap[data.escrowPeriod] || data.escrowPeriod + '小时' || '--';
+  
+  // 更新交易双方地址
+  if (data.role === 'buyer') {
+    // 买方是用户自己
+    const buyerAddr = data.userAddress || '--';
+    document.getElementById('buyerAddress').textContent = 
+      buyerAddr.length > 10 ? buyerAddr.substring(0, 4) + '...' + buyerAddr.substring(buyerAddr.length - 4) : buyerAddr;
+    document.getElementById('buyerRep').textContent = '⭐ 80分'; // 用户固定80分
+    
+    // 卖方是对方
+    const sellerAddr = data.counterpartyAddress || '--';
+    document.getElementById('sellerAddress').textContent = 
+      sellerAddr.length > 10 ? sellerAddr.substring(0, 4) + '...' + sellerAddr.substring(sellerAddr.length - 4) : sellerAddr;
+    document.getElementById('sellerRep').textContent = '⭐ 80分'; // 对方也是80分
+    
+    // 更新聊天头像和名称
+    document.getElementById('otherAvatar').textContent = '卖';
+    document.getElementById('otherAvatar2').textContent = '卖';
+    document.getElementById('otherName').textContent = '卖方';
+    document.getElementById('otherName2').textContent = '卖方';
+  } else {
+    // 卖方是用户自己
+    const sellerAddr = data.userAddress || '--';
+    document.getElementById('sellerAddress').textContent = 
+      sellerAddr.length > 10 ? sellerAddr.substring(0, 4) + '...' + sellerAddr.substring(sellerAddr.length - 4) : sellerAddr;
+    document.getElementById('sellerRep').textContent = '⭐ 80分';
+    
+    // 买方是对方
+    const buyerAddr = data.counterpartyAddress || '--';
+    document.getElementById('buyerAddress').textContent = 
+      buyerAddr.length > 10 ? buyerAddr.substring(0, 4) + '...' + buyerAddr.substring(buyerAddr.length - 4) : buyerAddr;
+    document.getElementById('buyerRep').textContent = '⭐ 80分';
+    
+    // 更新聊天头像和名称
+    document.getElementById('otherAvatar').textContent = '买';
+    document.getElementById('otherAvatar2').textContent = '买';
+    document.getElementById('otherName').textContent = '买方';
+    document.getElementById('otherName2').textContent = '买方';
+  }
+  
+  // 更新资金信息
+  document.getElementById('txAmount').textContent = 
+    (data.amount || 0).toFixed(2) + ' USDT';
+  document.getElementById('serviceFee').textContent = 
+    (data.serviceFee || 0).toFixed(2) + ' USDT';
+  document.getElementById('depositAmount').textContent = 
+    (data.deposit || 0).toFixed(2) + ' USDT';
+  document.getElementById('totalAmount').textContent = 
+    (data.totalAmount || 0).toFixed(2) + ' USDT';
+  
+  // 更新区块链信息
+  document.getElementById('networkType').textContent = 
+    networkTypeMap[data.network] || data.network || '--';
+  
+  // 更新交易哈希
+  if (data.txHash) {
+    const hash = data.txHash;
+    const shortHash = hash.length > 16 ? 
+      hash.substring(0, 8) + '...' + hash.substring(hash.length - 6) : hash;
+    document.getElementById('txHashShort').textContent = shortHash;
+    document.getElementById('txHashShort').title = hash; // 鼠标悬停显示完整哈希
   }
 }
 
-// 使用接收的数据更新页面
-function updatePageWithData() {
-  // 更新交易ID
-  if (transactionData.id) {
-    document.getElementById('transactionIdBreadcrumb').textContent = transactionData.id;
-    document.getElementById('transactionIdDetail').textContent = transactionData.id.substring(0, 11) + '...';
-  }
+// ★★★ 新增：计算托管剩余时间 ★★★
+function calculateRemainingTime(data) {
+  const escrowHours = parseInt(data.escrowPeriod) || 72;
+  const totalSeconds = escrowHours * 3600;
   
-  // 更新网络信息
-  if (transactionData.network) {
-    const networkMap = {
-      'TRC20': 'TRC-20',
-      'ERC20': 'ERC-20',
-      'BEP20': 'BEP-20'
-    };
-    document.getElementById('networkDetail').textContent = networkMap[transactionData.network] || transactionData.network;
+  // 如果有剩余时间，使用它；否则使用总时长
+  if (data.remainingTime) {
+    timeRemaining = data.remainingTime;
+  } else if (data.paymentTime) {
+    // 计算从支付时间到现在经过的时间
+    const payTime = new Date(data.paymentTime).getTime();
+    const now = Date.now();
+    const elapsed = Math.floor((now - payTime) / 1000);
+    timeRemaining = Math.max(0, totalSeconds - elapsed);
+  } else {
+    timeRemaining = totalSeconds;
   }
-  
-  // 更新金额信息
-  if (transactionData.amount) {
-    document.getElementById('amountDetail').textContent = transactionData.amount.toFixed(2) + ' USDT';
-  }
-  
-  if (transactionData.serviceFee) {
-    document.getElementById('serviceFeeDetail').textContent = transactionData.serviceFee.toFixed(2) + ' USDT';
-  }
-  
-  if (transactionData.deposit) {
-    document.getElementById('depositDetail').textContent = transactionData.deposit.toFixed(2) + ' USDT';
-  }
-  
-  if (transactionData.totalAmount) {
-    document.getElementById('totalAmountDetail').textContent = transactionData.totalAmount.toFixed(2) + ' USDT';
-    document.getElementById('paymentAmountDisplay').textContent = transactionData.totalAmount.toFixed(2) + ' USDT';
-  }
-  
-  // 更新交易哈希
-  if (transactionData.txHash) {
-    const hash = transactionData.txHash;
-    const shortHash = hash.substring(0, 6) + '...' + hash.substring(hash.length - 4);
-    document.getElementById('txHashDetail').textContent = shortHash;
-  }
-  
-  // 更新支付时间
-  if (transactionData.paymentTime) {
-    const paymentTime = new Date(transactionData.paymentTime);
-    const formattedTime = paymentTime.toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-    document.getElementById('paymentTimeDisplay').textContent = formattedTime;
-  }
-  
-  // 更新验证状态
-  if (transactionData.verificationStatus) {
-    const statusRow = document.getElementById('verificationStatusRow');
-    statusRow.style.display = 'flex';
-    
-    let statusText = '待验证';
-    let statusColor = 'var(--text-muted)';
-    
-    switch(transactionData.verificationStatus) {
-      case 'SUCCESS':
-      case 'VERIFIED':
-        statusText = '✅ 已验证';
-        statusColor = 'var(--success)';
-        // 显示验证成功消息
-        const verMsg = document.getElementById('verificationMessage');
-        verMsg.style.display = 'block';
-        document.getElementById('verificationMessageText').textContent = 
-          '支付验证成功，资金已进入智能合约托管';
-        break;
-      case 'PENDING':
-      case 'VERIFYING':
-        statusText = '⏳ 验证中';
-        statusColor = 'var(--warning)';
-        break;
-      case 'NOT_SUBMITTED':
-        statusText = '⚠️ 未提交';
-        statusColor = 'var(--text-muted)';
-        break;
-    }
-    
-    const statusEl = document.getElementById('verificationStatusDetail');
-    statusEl.textContent = statusText;
-    statusEl.style.color = statusColor;
-    
-    // 更新验证时间线信息
-    if (transactionData.verificationStatus === 'SUCCESS' || transactionData.verificationStatus === 'VERIFIED') {
-      document.getElementById('verificationTitle').textContent = '支付验证';
-      document.getElementById('verificationDesc').textContent = '验证成功，资金已托管';
-      
-      // 更新确认数
-      const confirmations = transactionData.network === 'TRC20' ? 19 : 
-                           transactionData.network === 'ERC20' ? 12 : 15;
-      document.getElementById('confirmationsDetail').textContent = confirmations + ' 确认';
-    }
-  }
-  
-  // 更新自动释放倒计时（如果有剩余时间数据）
-  if (transactionData.remainingTime) {
-    // 从支付页面带来的倒计时转换为托管倒计时（72小时减去已用时间）
-    const usedTime = 1785 - transactionData.remainingTime; // 原始倒计时30分钟（1800秒）
-    timeRemaining = 259200 - usedTime; // 72小时减去已用时间
-  }
-  
-  // 更新交易类型
-  if (transactionData.transactionType) {
-    const typeMap = {
-      'goods': '实物商品',
-      'digital': '数字商品',
-      'service': '服务'
-    };
-    document.getElementById('transactionTypeDetail').textContent = 
-      typeMap[transactionData.transactionType] || transactionData.transactionType;
-  }
-  
-  // 添加支付证明标记（如果有）
-  if (transactionData.hasProof) {
-    const verDesc = document.getElementById('verificationDesc');
-    verDesc.textContent += ' (含支付凭证)';
-  }
-  
-  // 更新创建时间
-  const createTime = new Date();
-  createTime.setMinutes(createTime.getMinutes() - 10); // 假设10分钟前创建
-  document.getElementById('createTime').textContent = 
-    createTime.toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
+}
+
+// ★★★ 新增：格式化日期时间函数 ★★★
+function formatDateTime(date) {
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  }).replace(/\//g, '-');
+}
+
+function formatDateTimeShort(date) {
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).replace(/\//g, '-');
 }
 
 // 自动释放倒计时
@@ -1206,7 +1218,7 @@ function startAutoReleaseTimer() {
     const minutes = Math.floor((timeRemaining % 3600) / 60);
     const seconds = timeRemaining % 60;
     
-    document.querySelector('.auto-process-time').textContent = 
+    document.getElementById('autoProcessTime').textContent = 
       `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     
     // 提醒通知
@@ -1220,27 +1232,25 @@ function startAutoReleaseTimer() {
 
 // 自动释放处理
 function handleAutoRelease() {
-  if (confirm('托管期限已到，系统将自动释放资金给卖方。\n\n如有问题请立即发起争议！')) {
-    // 更新状态
+  const roleText = transactionData.role === 'buyer' ? '卖方' : '买方';
+  if (confirm(`托管期限已到，系统将自动释放资金给${roleText}。\n\n如有问题请立即发起争议！`)) {
     updateTransactionStatus('AUTO_RELEASED');
   }
 }
 
 // WebSocket连接（模拟实时通信）
 function setupWebSocket() {
-  // 模拟WebSocket连接
   console.log('WebSocket connected');
   
-  // 根据验证状态发送不同的系统消息
-  if (transactionData.verificationStatus === 'SUCCESS' || transactionData.verificationStatus === 'VERIFIED') {
-    setTimeout(() => {
-      receiveMessage({
-        type: 'system',
-        text: '卖方已收到支付确认通知，请等待发货',
-        time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
-      });
-    }, 5000);
-  }
+  // 模拟接收消息
+  setTimeout(() => {
+    const roleText = transactionData.role === 'buyer' ? '卖方' : '买方';
+    receiveMessage({
+      type: 'system',
+      text: `${roleText}已确认${transactionData.role === 'buyer' ? '发货' : '订单'}`,
+      time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
+    });
+  }, 5000);
 }
 
 // 发送消息
@@ -1271,8 +1281,9 @@ function sendMessage() {
   // 模拟自动回复
   if (message.includes('收到') || message.includes('确认')) {
     setTimeout(() => {
+      const roleText = transactionData.role === 'buyer' ? '卖方' : '买方';
       receiveMessage({
-        type: 'seller',
+        type: roleText,
         text: '好的，请确认后尽快点击确认收货按钮',
         time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
       });
@@ -1292,11 +1303,14 @@ function receiveMessage(data) {
     `;
     messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
   } else {
+    const avatarText = transactionData.role === 'buyer' ? '卖' : '买';
+    const nameText = transactionData.role === 'buyer' ? '卖方' : '买方';
+    
     const messageHTML = `
       <div class="message">
-        <div class="message-avatar">卖</div>
+        <div class="message-avatar">${avatarText}</div>
         <div class="message-content">
-          <div class="message-name">卖方</div>
+          <div class="message-name">${nameText}</div>
           <div class="message-text">${data.text}</div>
           <div class="message-time">${data.time}</div>
         </div>
@@ -1310,8 +1324,10 @@ function receiveMessage(data) {
 
 // 确认收货
 function confirmReceived() {
-  if (confirm('确认已收到商品/服务？\n\n确认后资金将立即释放给卖方，此操作不可撤销。')) {
-    // 显示评价窗口
+  const actionText = transactionData.role === 'buyer' ? '商品/服务' : '付款';
+  const releaseText = transactionData.role === 'buyer' ? '卖方' : '买方';
+  
+  if (confirm(`确认已收到${actionText}？\n\n确认后资金将立即释放给${releaseText}，此操作不可撤销。`)) {
     showRatingDialog();
   }
 }
@@ -1365,14 +1381,13 @@ function closeRating() {
 function submitRating() {
   closeRating();
   
-  // 更新状态
   updateTransactionStatus('COMPLETED');
   
-  // 更新UI
-  document.querySelector('.status-badge').innerHTML = '✅ 已完成';
-  document.querySelector('.status-badge').className = 'status-badge status-completed';
+  document.getElementById('statusBadge').innerHTML = '✅ 已完成';
+  document.getElementById('statusBadge').className = 'status-badge status-completed';
   
-  alert('交易完成！\n\n资金已释放给卖方。\n感谢您的评价！');
+  const releaseText = transactionData.role === 'buyer' ? '卖方' : '买方';
+  alert(`交易完成！\n\n资金已释放给${releaseText}。\n感谢您的评价！`);
 }
 
 // 打开争议
@@ -1390,14 +1405,11 @@ function closeDispute() {
 // 提交争议
 function submitDispute() {
   if (confirm('确定要提交争议申请吗？\n\n提交后，资金将继续冻结，平台将在24小时内介入处理。')) {
-    // 更新状态
     updateTransactionStatus('DISPUTED');
     
-    // 更新UI
-    document.querySelector('.status-badge').innerHTML = '⚖️ 争议中';
-    document.querySelector('.status-badge').className = 'status-badge status-disputed';
+    document.getElementById('statusBadge').innerHTML = '⚖️ 争议中';
+    document.getElementById('statusBadge').className = 'status-badge status-disputed';
     
-    // 发送系统消息
     receiveMessage({
       type: 'system',
       text: '争议已提交，客服将在24小时内介入处理',
@@ -1414,10 +1426,12 @@ function submitDispute() {
 function extendPeriod() {
   const days = prompt('请输入要延长的天数（1-7）：');
   if (days && !isNaN(days) && days >= 1 && days <= 7) {
-    // 发送延长申请
+    const roleText = transactionData.role === 'buyer' ? '买方' : '卖方';
+    const otherRole = transactionData.role === 'buyer' ? '卖方' : '买方';
+    
     receiveMessage({
       type: 'system',
-      text: `买方申请延长托管期限 ${days} 天，等待卖方确认`,
+      text: `${roleText}申请延长托管期限 ${days} 天，等待${otherRole}确认`,
       time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
     });
     
@@ -1428,10 +1442,12 @@ function extendPeriod() {
 // 申请取消
 function requestCancel() {
   if (confirm('确定要申请取消交易吗？\n\n需要对方同意才能取消。')) {
-    // 发送取消申请
+    const roleText = transactionData.role === 'buyer' ? '买方' : '卖方';
+    const otherRole = transactionData.role === 'buyer' ? '卖方' : '买方';
+    
     receiveMessage({
       type: 'system',
-      text: '买方申请取消交易，等待卖方确认',
+      text: `${roleText}申请取消交易，等待${otherRole}确认`,
       time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
     });
     
@@ -1444,7 +1460,6 @@ function updateTransactionStatus(status) {
   transactionData.status = status;
   transactionData.updatedAt = new Date().toISOString();
   
-  // 记录状态变更日志
   if (!transactionData.statusHistory) {
     transactionData.statusHistory = [];
   }
@@ -1455,14 +1470,13 @@ function updateTransactionStatus(status) {
   });
   
   sessionStorage.setItem('currentTransaction', JSON.stringify(transactionData));
+  localStorage.setItem('latestTransaction', JSON.stringify(transactionData));
 }
 
 // 显示通知
 function showNotification(message) {
-  // 在实际应用中，这里可以使用浏览器通知API或Toast组件
   console.log('Notification:', message);
   
-  // 添加到聊天窗口
   receiveMessage({
     type: 'system',
     text: message,
