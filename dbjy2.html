@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SafePay - 智能交易管理中心</title>
+<style>
+  :root{
+    --bg-dark:#0a0e1a;
+    --bg-card:#131825;
+    --bg-hover:#1a2235;
+    --border:#2a3245;
+    --text-primary:#ffffff;
+    --text-secondary:#94a3b8;
+    --text-muted:#64748b;
+    --primary:#3b82f6;
+    --primary-dark:#2563eb;
+    --success:#10b981;
+    --warning:#f59e0b;
+    --danger:#ef4444;
+    --info:#06b6d4;
+  }
+  
+  *{margin:0;padding:0;box-sizing:border-box}
+  
+  body{
+    background:var(--bg-dark);
+    background-image:radial-gradient(circle at 20% 80%, #1e40af15 0%, transparent 50%),
+                     radial-gradient(circle at 80% 20%, #7c3aed15 0%, transparent 50%);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    color:var(--text-primary);
+    min-height:100vh;
+  }
+  
+  .container{
+    max-width:1400px;
+    margin:0 auto;
+    padding:24px;
+  }
+  
+  /* 头部 */
+  .header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:32px;
+  }
+  
+  .breadcrumb{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    color:var(--text-muted);
+  }
+  
+  .breadcrumb a{
+    color:var(--text-muted);
+    text-decoration:none;
+    transition:color 0.3s;
+  }
+  
+  .breadcrumb a:hover{
+    color:var(--primary);
+  }
+  
+  .header-actions{
+    display:flex;
+    gap:12px;
+  }
+  
+  .header-btn{
+    padding:8px 16px;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--text-primary);
+    font-size:13px;
+    cursor:pointer;
+    transition:all 0.3s;
+  }
+  
+  .header-btn:hover{
+    background:var(--bg-hover);
+    border-color:var(--primary);
+  }
+  
+  /* 主布局 */
+  .main-layout{
+    display:grid;
+    grid-template-columns:300px 1fr 380px;
+    gap:24px;
+  }
+  
+  .card{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:24px;
+  }
+  
+  /* 交易状态卡片 */
+  .status-card{
+    margin-bottom:24px;
+  }
+  
+  .status-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+  }
+  
+  .status-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 16px;
+    border-radius:24px;
+    font-size:13px;
+    font-weight:600;
+  }
+  
+  .status-escrowed{
+    background:rgba(59,130,246,0.1);
+    color:var(--primary);
+    border:1px solid rgba(59,130,246,0.3);
+  }
+  
+  .status-delivering{
+    background:rgba(6,182,212,0.1);
+    color:var(--info);
+    border:1px solid rgba(6,182,212,0.3);
+  }
+  
+  .status-disputed{
+    background:rgba(245,158,11,0.1);
+    color:var(--warning);
+    border:1px solid rgba(245,158,11,0.3);
+  }
+  
+  .status-completed{
+    background:rgba(16,185,129,0.1);
+    color:var(--success);
+    border:1px solid rgba(16,185,129,0.3);
+  }
+  
+  /* 时间线 */
+  .timeline{
+    position:relative;
+    padding-left:32px;
+  }
+  
+  .timeline-line{
+    position:absolute;
+    left:12px;
+    top:20px;
+    bottom:0;
+    width:2px;
+    background:var(--border);
+  }
+  
+  .timeline-item{
+    position:relative;
+    padding-bottom:24px;
+  }
+  
+  .timeline-dot{
+    position:absolute;
+    left:-20px;
+    top:4px;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:var(--bg-card);
+    border:2px solid var(--border);
+  }
+  
+  .timeline-item.completed .timeline-dot{
+    background:var(--success);
+    border-color:var(--success);
+  }
+  
+  .timeline-item.active .timeline-dot{
+    background:var(--primary);
+    border-color:var(--primary);
+    box-shadow:0 0 0 6px rgba(59,130,246,0.1);
+  }
+  
+  .timeline-time{
+    font-size:11px;
+    color:var(--text-muted);
+    margin-bottom:4px;
+  }
+  
+  .timeline-title{
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:4px;
+  }
+  
+  .timeline-desc{
+    font-size:12px;
+    color:var(--text-secondary);
+  }
+  
+  /* 交易信息 */
+  .info-section{
+    margin-bottom:24px;
+  }
+  
+  .info-title{
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:12px;
+    color:var(--text-secondary);
+  }
+  
+  .info-grid{
+    display:grid;
+    gap:12px;
+  }
+  
+  .info-item{
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    background:var(--bg-hover);
+    border-radius:8px;
+    font-size:13px;
+  }
+  
+  .info-label{
+    color:var(--text-muted);
+  }
+  
+  .info-value{
+    color:var(--text-primary);
+    font-weight:500;
+  }
+  
+  /* 操作面板 */
+  .action-panel{
+    background:linear-gradient(135deg, rgba(59,130,246,0.05), rgba(16,185,129,0.05));
+    border:1px solid rgba(59,130,246,0.2);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:24px;
+  }
+  
+  .action-title{
+    font-size:16px;
+    font-weight:600;
+    margin-bottom:16px;
+  }
+  
+  .action-buttons{
+    display:grid;
+    gap:12px;
+  }
+  
+  .action-btn{
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.3s;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  
+  .action-btn:hover{
+    transform:translateX(4px);
+    box-shadow:0 4px 12px rgba(0,0,0,0.2);
+  }
+  
+  .btn-confirm{
+    background:var(--success);
+    color:white;
+  }
+  
+  .btn-dispute{
+    background:var(--warning);
+    color:white;
+  }
+  
+  .btn-cancel{
+    background:var(--danger);
+    color:white;
+  }
+  
+  .btn-extend{
+    background:var(--info);
+    color:white;
+  }
+  
+  /* 聊天窗口 */
+  .chat-container{
+    display:flex;
+    flex-direction:column;
+    height:600px;
+  }
+  
+  .chat-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-bottom:16px;
+    margin-bottom:16px;
+    border-bottom:1px solid var(--border);
+  }
+  
+  .chat-status{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+  }
+  
+  .online-dot{
+    width:8px;
+    height:8px;
+    background:var(--success);
+    border-radius:50%;
+    animation:pulse 2s infinite;
+  }
+  
+  .chat-messages{
+    flex:1;
+    overflow-y:auto;
+    padding:16px;
+    background:var(--bg-hover);
+    border-radius:12px;
+    margin-bottom:16px;
+  }
+  
+  .message{
+    margin-bottom:16px;
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+  }
+  
+  .message-avatar{
+    width:32px;
+    height:32px;
+    background:var(--primary);
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:bold;
+    flex-shrink:0;
+  }
+  
+  .message-content{
+    flex:1;
+    max-width:70%;
+  }
+  
+  .message-name{
+    font-size:11px;
+    color:var(--text-muted);
+    margin-bottom:4px;
+  }
+  
+  .message-text{
+    background:var(--bg-card);
+    padding:10px 14px;
+    border-radius:12px;
+    font-size:13px;
+    line-height:1.5;
+  }
+  
+  .message.self{
+    flex-direction:row-reverse;
+  }
+  
+  .message.self .message-content{
+    align-items:flex-end;
+  }
+  
+  .message.self .message-text{
+    background:rgba(59,130,246,0.2);
+  }
+  
+  .message-time{
+    font-size:10px;
+    color:var(--text-muted);
+    margin-top:4px;
+  }
+  
+  .system-message{
+    text-align:center;
+    margin:16px 0;
+  }
+  
+  .system-text{
+    display:inline-block;
+    padding:6px 12px;
+    background:rgba(245,158,11,0.1);
+    border-radius:20px;
+    font-size:11px;
+    color:var(--warning);
+  }
+  
+  .chat-input-area{
+    display:flex;
+    gap:12px;
+  }
+  
+  .chat-input{
+    flex:1;
+    padding:12px;
+    background:var(--bg-hover);
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--text-primary);
+    font-size:13px;
+  }
+  
+  .send-btn{
+    padding:12px 24px;
+    background:var(--primary);
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+    transition:all 0.3s;
+  }
+  
+  .send-btn:hover{
+    background:var(--primary-dark);
+  }
+  
+  /* 争议面板 */
+  .dispute-panel{
+    background:rgba(245,158,11,0.05);
+    border:1px solid rgba(245,158,11,0.2);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:24px;
+  }
+  
+  .dispute-header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:16px;
+  }
+  
+  .dispute-icon{
+    font-size:24px;
+  }
+  
+  .dispute-title{
+    font-size:16px;
+    font-weight:600;
+    color:var(--warning);
+  }
+  
+  .dispute-info{
+    font-size:13px;
+    color:var(--text-secondary);
+    line-height:1.6;
+    margin-bottom:16px;
+  }
+  
+  /* 证据上传 */
+  .evidence-upload{
+    background:var(--bg-hover);
+    border:2px dashed var(--border);
+    border-radius:12px;
+    padding:20px;
+    text-align:center;
+    cursor:pointer;
+    transition:all 0.3s;
+    margin-bottom:16px;
+  }
+  
+  .evidence-upload:hover{
+    border-color:var(--primary);
+    background:rgba(59,130,246,0.05);
+  }
+  
+  .evidence-list{
+    display:grid;
+    gap:8px;
+  }
+  
+  .evidence-item{
+    display:flex;
+    align-items:center;
+    padding:12px;
+    background:var(--bg-hover);
+    border-radius:8px;
+    font-size:13px;
+  }
+  
+  .evidence-icon{
+    margin-right:12px;
+    font-size:20px;
+  }
+  
+  .evidence-info{
+    flex:1;
+  }
+  
+  .evidence-name{
+    font-weight:500;
+    margin-bottom:2px;
+  }
+  
+  .evidence-size{
+    font-size:11px;
+    color:var(--text-muted);
+  }
+  
+  /* 保护机制提示 */
+  .protection-notice{
+    background:rgba(16,185,129,0.05);
+    border:1px solid rgba(16,185,129,0.2);
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:24px;
+  }
+  
+  .protection-header{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  
+  .protection-title{
+    font-size:14px;
+    font-weight:600;
+    color:var(--success);
+  }
+  
+  .protection-list{
+    font-size:12px;
+    color:var(--text-secondary);
+    line-height:1.8;
+    padding-left:24px;
+  }
+  
+  /* 自动处理倒计时 */
+  .auto-process{
+    background:var(--bg-hover);
+    border-radius:12px;
+    padding:16px;
+    text-align:center;
+  }
+  
+  .auto-process-title{
+    font-size:13px;
+    color:var(--text-secondary);
+    margin-bottom:8px;
+  }
+  
+  .auto-process-time{
+    font-size:24px;
+    font-weight:700;
+    color:var(--primary);
+    margin-bottom:8px;
+  }
+  
+  .auto-process-action{
+    font-size:12px;
+    color:var(--text-muted);
+  }
+  
+  /* 交易详情卡片 */
+  .detail-card{
+    background:var(--bg-hover);
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:16px;
+  }
+  
+  .detail-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px;
+  }
+  
+  .detail-title{
+    font-size:14px;
+    font-weight:600;
+  }
+  
+  .detail-grid{
+    display:grid;
+    gap:8px;
+  }
+  
+  .detail-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    padding:6px 0;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+  }
+  
+  .detail-row:last-child{
+    border-bottom:none;
+  }
+  
+  /* 响应式 */
+  @media (max-width:1200px){
+    .main-layout{
+      grid-template-columns:1fr;
+    }
+    .chat-container{
+      height:400px;
+    }
+  }
+  
+  @media (max-width:640px){
+    .header{
+      flex-direction:column;
+      gap:16px;
+    }
+    .action-buttons{
+      grid-template-columns:1fr;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- 头部 -->
+  <div class="header">
+    <div class="breadcrumb">
+      <a href="/">首页</a>
+      <span>/</span>
+      <a href="/transactions">我的交易</a>
+      <span>/</span>
+      <span>ESC2025012014305678</span>
+    </div>
+    <div class="header-actions">
+      <button class="header-btn">📊 查看报告</button>
+      <button class="header-btn">📥 下载凭证</button>
+      <button class="header-btn">🔗 分享交易</button>
+      <button class="header-btn">❓ 获取帮助</button>
+    </div>
+  </div>
+  
+  <div class="main-layout">
+    <!-- 左侧状态栏 -->
+    <div>
+      <!-- 交易状态 -->
+      <div class="card status-card">
+        <div class="status-header">
+          <h3 style="font-size:16px;">交易状态</h3>
+          <span class="status-badge status-escrowed">
+            🔒 托管中
+          </span>
+        </div>
+        
+        <!-- 时间线 -->
+        <div class="timeline">
+          <div class="timeline-line"></div>
+          
+          <div class="timeline-item completed">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">2025-01-20 14:30:56</div>
+            <div class="timeline-title">创建交易</div>
+            <div class="timeline-desc">买方发起担保交易</div>
+          </div>
+          
+          <div class="timeline-item completed">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">2025-01-20 14:35:23</div>
+            <div class="timeline-title">支付完成</div>
+            <div class="timeline-desc">1,234.56 USDT</div>
+          </div>
+          
+          <div class="timeline-item completed">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">2025-01-20 14:36:45</div>
+            <div class="timeline-title">链上验证</div>
+            <div class="timeline-desc">19个区块确认</div>
+          </div>
+          
+          <div class="timeline-item active">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">进行中...</div>
+            <div class="timeline-title">资金托管</div>
+            <div class="timeline-desc">等待交易完成</div>
+          </div>
+          
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">-</div>
+            <div class="timeline-title">确认收货</div>
+            <div class="timeline-desc">买方确认</div>
+          </div>
+          
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">-</div>
+            <div class="timeline-title">资金释放</div>
+            <div class="timeline-desc">支付给卖方</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 自动处理倒计时 -->
+      <div class="card">
+        <div class="auto-process">
+          <div class="auto-process-title">⏱️ 自动处理倒计时</div>
+          <div class="auto-process-time">71:45:30</div>
+          <div class="auto-process-action">超时后将自动释放给卖方</div>
+        </div>
+      </div>
+      
+      <!-- 保护机制 -->
+      <div class="protection-notice">
+        <div class="protection-header">
+          <span>🛡️</span>
+          <span class="protection-title">买家保护计划</span>
+        </div>
+        <ul class="protection-list">
+          <li>72小时无条件退款保障</li>
+          <li>卖方需提供发货证明</li>
+          <li>争议优先保护买方权益</li>
+          <li>平台承担仲裁责任</li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- 中间主要内容 -->
+    <div>
+      <!-- 操作面板 -->
+      <div class="action-panel">
+        <h3 class="action-title">⚡ 交易操作</h3>
+        <div class="action-buttons">
+          <button class="action-btn btn-confirm" onclick="confirmReceived()">
+            ✅ 确认收货并释放资金
+          </button>
+          <button class="action-btn btn-dispute" onclick="openDispute()">
+            ⚖️ 发起争议申请
+          </button>
+          <button class="action-btn btn-extend" onclick="extendPeriod()">
+            ⏰ 延长托管期限
+          </button>
+          <button class="action-btn btn-cancel" onclick="requestCancel()">
+            ❌ 申请取消交易
+          </button>
+        </div>
+      </div>
+      
+      <!-- 争议面板（初始隐藏） -->
+      <div class="dispute-panel" id="disputePanel" style="display:none;">
+        <div class="dispute-header">
+          <span class="dispute-icon">⚖️</span>
+          <span class="dispute-title">争议处理中心</span>
+        </div>
+        <div class="dispute-info">
+          请选择争议原因并提供相关证据，平台将在24小时内介入处理
+        </div>
+        
+        <div style="margin-bottom:16px;">
+          <label style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;display:block;">
+            争议原因
+          </label>
+          <select style="width:100%;padding:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);">
+            <option>未收到商品</option>
+            <option>商品与描述不符</option>
+            <option>商品质量问题</option>
+            <option>卖方失联</option>
+            <option>其他原因</option>
+          </select>
+        </div>
+        
+        <div style="margin-bottom:16px;">
+          <label style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;display:block;">
+            详细说明
+          </label>
+          <textarea style="width:100%;min-height:80px;padding:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);resize:vertical;" 
+                    placeholder="请详细描述问题..."></textarea>
+        </div>
+        
+        <div class="evidence-upload" onclick="document.getElementById('evidenceFile').click()">
+          <div style="font-size:24px;">📎</div>
+          <div style="margin-top:8px;font-size:13px;">点击上传证据材料</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+            支持图片、视频、文档等格式
+          </div>
+          <input type="file" id="evidenceFile" style="display:none;" multiple>
+        </div>
+        
+        <div class="evidence-list" id="evidenceList">
+          <!-- 证据列表动态插入 -->
+        </div>
+        
+        <div style="display:flex;gap:12px;margin-top:16px;">
+          <button style="flex:1;padding:12px;background:var(--bg-hover);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);cursor:pointer;" 
+                  onclick="closeDispute()">
+            取消
+          </button>
+          <button style="flex:1;padding:12px;background:var(--warning);border:none;border-radius:8px;color:white;font-weight:600;cursor:pointer;" 
+                  onclick="submitDispute()">
+            提交争议
+          </button>
+        </div>
+      </div>
+      
+      <!-- 聊天窗口 -->
+      <div class="card chat-container">
+        <div class="chat-header">
+          <h3 style="font-size:16px;">💬 交易沟通</h3>
+          <div class="chat-status">
+            <span class="online-dot"></span>
+            <span>对方在线</span>
+          </div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+          <div class="system-message">
+            <span class="system-text">交易已创建，双方可开始沟通</span>
+          </div>
+          
+          <div class="message">
+            <div class="message-avatar">卖</div>
+            <div class="message-content">
+              <div class="message-name">卖方</div>
+              <div class="message-text">您好，感谢购买！商品已经准备好了。</div>
+              <div class="message-time">14:40</div>
+            </div>
+          </div>
+          
+          <div class="message self">
+            <div class="message-avatar">我</div>
+            <div class="message-content">
+              <div class="message-name">我</div>
+              <div class="message-text">好的，请提供下载链接和密码</div>
+              <div class="message-time">14:42</div>
+            </div>
+          </div>
+          
+          <div class="message">
+            <div class="message-avatar">卖</div>
+            <div class="message-content">
+              <div class="message-name">卖方</div>
+              <div class="message-text">
+                链接：https://example.com/download<br>
+                密码：ABC123<br>
+                请及时下载，链接24小时有效
+              </div>
+              <div class="message-time">14:43</div>
+            </div>
+          </div>
+          
+          <div class="system-message">
+            <span class="system-text">系统提示：请在平台内完成交易，注意保护个人信息</span>
+          </div>
+        </div>
+        
+        <div class="chat-input-area">
+          <input type="text" class="chat-input" id="messageInput" placeholder="输入消息...">
+          <button class="send-btn" onclick="sendMessage()">发送</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 右侧详情栏 -->
+    <div>
+      <!-- 交易详情 -->
+      <div class="card">
+        <h3 style="font-size:16px;margin-bottom:20px;">📋 交易详情</h3>
+        
+        <div class="detail-card">
+          <div class="detail-header">
+            <span class="detail-title">基本信息</span>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">交易编号</span>
+              <span style="font-family:monospace;">ESC20250120...</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">创建时间</span>
+              <span>2025-01-20 14:30</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">交易类型</span>
+              <span>数字商品</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">托管期限</span>
+              <span>72小时</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-header">
+            <span class="detail-title">交易双方</span>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">买方</span>
+              <span style="font-family:monospace;">0x7f9...3d2</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">买方信誉</span>
+              <span style="color:var(--success);">⭐ 98分</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">卖方</span>
+              <span style="font-family:monospace;">TRY7...3aM5</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">卖方信誉</span>
+              <span style="color:var(--warning);">⭐ 85分</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-header">
+            <span class="detail-title">资金信息</span>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">交易金额</span>
+              <span>1,200.00 USDT</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">服务费</span>
+              <span>12.00 USDT</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">保证金</span>
+              <span>21.56 USDT</span>
+            </div>
+            <div class="detail-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px;">
+              <span style="color:var(--text-muted);font-weight:600;">托管总额</span>
+              <span style="color:var(--primary);font-weight:700;">1,234.56 USDT</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-header">
+            <span class="detail-title">区块链信息</span>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">网络</span>
+              <span>TRC-20</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">支付哈希</span>
+              <span style="font-family:monospace;font-size:10px;">0x7f9a...3d2e</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">托管合约</span>
+              <span style="font-family:monospace;font-size:10px;">TRX8d...29dK2</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">确认数</span>
+              <span style="color:var(--success);">19 确认</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// 全局变量
+let disputeOpen = false;
+let autoReleaseTimer;
+let timeRemaining = 259530; // 72小时（秒）
+
+// 初始化
+document.addEventListener('DOMContentLoaded', function() {
+  startAutoReleaseTimer();
+  setupWebSocket();
+});
+
+// 自动释放倒计时
+function startAutoReleaseTimer() {
+  autoReleaseTimer = setInterval(() => {
+    if (timeRemaining <= 0) {
+      clearInterval(autoReleaseTimer);
+      handleAutoRelease();
+      return;
+    }
+    
+    timeRemaining--;
+    const hours = Math.floor(timeRemaining / 3600);
+    const minutes = Math.floor((timeRemaining % 3600) / 60);
+    const seconds = timeRemaining % 60;
+    
+    document.querySelector('.auto-process-time').textContent = 
+      `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    // 提醒通知
+    if (timeRemaining === 86400) { // 24小时
+      showNotification('⏰ 提醒：托管期限剩余24小时');
+    } else if (timeRemaining === 3600) { // 1小时
+      showNotification('⚠️ 警告：托管期限剩余1小时，请尽快确认');
+    }
+  }, 1000);
+}
+
+// 自动释放处理
+function handleAutoRelease() {
+  if (confirm('托管期限已到，系统将自动释放资金给卖方。\n\n如有问题请立即发起争议！')) {
+    // 更新状态
+    updateTransactionStatus('AUTO_RELEASED');
+  }
+}
+
+// WebSocket连接（模拟实时通信）
+function setupWebSocket() {
+  // 模拟WebSocket连接
+  console.log('WebSocket connected');
+  
+  // 模拟接收消息
+  setTimeout(() => {
+    receiveMessage({
+      type: 'system',
+      text: '卖方已确认发货',
+      time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
+    });
+  }, 5000);
+}
+
+// 发送消息
+function sendMessage() {
+  const input = document.getElementById('messageInput');
+  const message = input.value.trim();
+  
+  if (!message) return;
+  
+  // 添加消息到聊天窗口
+  const messagesContainer = document.getElementById('chatMessages');
+  const messageHTML = `
+    <div class="message self">
+      <div class="message-avatar">我</div>
+      <div class="message-content">
+        <div class="message-name">我</div>
+        <div class="message-text">${message}</div>
+        <div class="message-time">${new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}</div>
+      </div>
+    </div>
+  `;
+  
+  messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  
+  input.value = '';
+  
+  // 模拟自动回复
+  if (message.includes('收到') || message.includes('确认')) {
+    setTimeout(() => {
+      receiveMessage({
+        type: 'seller',
+        text: '好的，请确认后尽快点击确认收货按钮',
+        time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
+      });
+    }, 2000);
+  }
+}
+
+// 接收消息
+function receiveMessage(data) {
+  const messagesContainer = document.getElementById('chatMessages');
+  
+  if (data.type === 'system') {
+    const messageHTML = `
+      <div class="system-message">
+        <span class="system-text">${data.text}</span>
+      </div>
+    `;
+    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+  } else {
+    const messageHTML = `
+      <div class="message">
+        <div class="message-avatar">卖</div>
+        <div class="message-content">
+          <div class="message-name">卖方</div>
+          <div class="message-text">${data.text}</div>
+          <div class="message-time">${data.time}</div>
+        </div>
+      </div>
+    `;
+    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+  }
+  
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// 确认收货
+function confirmReceived() {
+  if (confirm('确认已收到商品/服务？\n\n确认后资金将立即释放给卖方，此操作不可撤销。')) {
+    // 显示评价窗口
+    showRatingDialog();
+  }
+}
+
+// 显示评价对话框
+function showRatingDialog() {
+  const dialog = `
+    <div id="ratingDialog" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:1000;">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:400px;width:90%;">
+        <h3 style="text-align:center;margin-bottom:24px;">为本次交易评价</h3>
+        
+        <div style="display:flex;justify-content:center;gap:8px;margin-bottom:20px;">
+          ${[1,2,3,4,5].map(i => `<span onclick="setRating(${i})" style="font-size:32px;cursor:pointer;opacity:0.3;" id="star-${i}">⭐</span>`).join('')}
+        </div>
+        
+        <textarea style="width:100%;min-height:80px;padding:12px;background:var(--bg-hover);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);margin-bottom:20px;" 
+                  placeholder="分享您的交易体验..."></textarea>
+        
+        <div style="display:flex;gap:12px;">
+          <button style="flex:1;padding:12px;background:var(--bg-hover);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);cursor:pointer;" 
+                  onclick="closeRating()">
+            取消
+          </button>
+          <button style="flex:1;padding:12px;background:var(--success);border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;" 
+                  onclick="submitRating()">
+            提交评价
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', dialog);
+}
+
+// 设置评分
+function setRating(rating) {
+  for (let i = 1; i <= 5; i++) {
+    const star = document.getElementById(`star-${i}`);
+    star.style.opacity = i <= rating ? '1' : '0.3';
+  }
+}
+
+// 关闭评价
+function closeRating() {
+  const dialog = document.getElementById('ratingDialog');
+  if (dialog) dialog.remove();
+}
+
+// 提交评价
+function submitRating() {
+  closeRating();
+  
+  // 更新状态
+  updateTransactionStatus('COMPLETED');
+  
+  // 更新UI
+  document.querySelector('.status-badge').innerHTML = '✅ 已完成';
+  document.querySelector('.status-badge').className = 'status-badge status-completed';
+  
+  alert('交易完成！\n\n资金已释放给卖方。\n感谢您的评价！');
+}
+
+// 打开争议
+function openDispute() {
+  document.getElementById('disputePanel').style.display = 'block';
+  disputeOpen = true;
+}
+
+// 关闭争议
+function closeDispute() {
+  document.getElementById('disputePanel').style.display = 'none';
+  disputeOpen = false;
+}
+
+// 提交争议
+function submitDispute() {
+  if (confirm('确定要提交争议申请吗？\n\n提交后，资金将继续冻结，平台将在24小时内介入处理。')) {
+    // 更新状态
+    updateTransactionStatus('DISPUTED');
+    
+    // 更新UI
+    document.querySelector('.status-badge').innerHTML = '⚖️ 争议中';
+    document.querySelector('.status-badge').className = 'status-badge status-disputed';
+    
+    // 发送系统消息
+    receiveMessage({
+      type: 'system',
+      text: '争议已提交，客服将在24小时内介入处理',
+      time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
+    });
+    
+    closeDispute();
+    
+    alert('争议申请已提交！\n\n客服将在24小时内联系双方进行处理。');
+  }
+}
+
+// 延长期限
+function extendPeriod() {
+  const days = prompt('请输入要延长的天数（1-7）：');
+  if (days && !isNaN(days) && days >= 1 && days <= 7) {
+    // 发送延长申请
+    receiveMessage({
+      type: 'system',
+      text: `买方申请延长托管期限 ${days} 天，等待卖方确认`,
+      time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
+    });
+    
+    alert('延长申请已发送给对方，需要对方同意后生效。');
+  }
+}
+
+// 申请取消
+function requestCancel() {
+  if (confirm('确定要申请取消交易吗？\n\n需要对方同意才能取消。')) {
+    // 发送取消申请
+    receiveMessage({
+      type: 'system',
+      text: '买方申请取消交易，等待卖方确认',
+      time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
+    });
+    
+    alert('取消申请已发送，需要对方同意后交易才会取消。');
+  }
+}
+
+// 更新交易状态
+function updateTransactionStatus(status) {
+  const transaction = JSON.parse(sessionStorage.getItem('currentTransaction') || '{}');
+  transaction.status = status;
+  transaction.updatedAt = new Date().toISOString();
+  
+  // 记录状态变更日志
+  if (!transaction.statusHistory) {
+    transaction.statusHistory = [];
+  }
+  transaction.statusHistory.push({
+    status: status,
+    timestamp: new Date().toISOString(),
+    reason: 'User action'
+  });
+  
+  sessionStorage.setItem('currentTransaction', JSON.stringify(transaction));
+}
+
+// 显示通知
+function showNotification(message) {
+  // 在实际应用中，这里可以使用浏览器通知API或Toast组件
+  console.log('Notification:', message);
+  
+  // 添加到聊天窗口
+  receiveMessage({
+    type: 'system',
+    text: message,
+    time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
+  });
+}
+
+// 证据上传
+document.getElementById('evidenceFile').addEventListener('change', function(e) {
+  const files = e.target.files;
+  const evidenceList = document.getElementById('evidenceList');
+  
+  for (let file of files) {
+    const evidenceHTML = `
+      <div class="evidence-item">
+        <span class="evidence-icon">📄</span>
+        <div class="evidence-info">
+          <div class="evidence-name">${file.name}</div>
+          <div class="evidence-size">${(file.size / 1024).toFixed(2)} KB</div>
+        </div>
+      </div>
+    `;
+    evidenceList.insertAdjacentHTML('beforeend', evidenceHTML);
+  }
+});
+
+// 回车发送消息
+document.getElementById('messageInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    sendMessage();
+  }
+});
+</script>
+</body>
+</html>
