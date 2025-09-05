@@ -1100,19 +1100,25 @@ function updatePageWithTransactionData(data) {
   document.getElementById('escrowPeriodDetail').textContent = 
     escrowPeriodMap[data.escrowPeriod] || data.escrowPeriod + '小时' || '--';
   
-  // 更新交易双方地址
+  // 更新交易双方地址和信誉分
   if (data.role === 'buyer') {
     // 买方是用户自己
     const buyerAddr = data.userAddress || '--';
     document.getElementById('buyerAddress').textContent = 
       buyerAddr.length > 10 ? buyerAddr.substring(0, 4) + '...' + buyerAddr.substring(buyerAddr.length - 4) : buyerAddr;
-    document.getElementById('buyerRep').textContent = '⭐ 80分'; // 用户固定80分
+    
+    // 用户信誉分（固定80分或从数据读取）
+    const buyerScore = data.userScore || 80;
+    document.getElementById('buyerRep').textContent = '⭐ ' + buyerScore + '分';
     
     // 卖方是对方
     const sellerAddr = data.counterpartyAddress || '--';
     document.getElementById('sellerAddress').textContent = 
       sellerAddr.length > 10 ? sellerAddr.substring(0, 4) + '...' + sellerAddr.substring(sellerAddr.length - 4) : sellerAddr;
-    document.getElementById('sellerRep').textContent = '⭐ 80分'; // 对方也是80分
+    
+    // 对方信誉分（固定80分或从数据读取）
+    const sellerScore = data.counterpartyScore || 80;
+    document.getElementById('sellerRep').textContent = '⭐ ' + sellerScore + '分';
     
     // 更新聊天头像和名称
     document.getElementById('otherAvatar').textContent = '卖';
@@ -1124,13 +1130,19 @@ function updatePageWithTransactionData(data) {
     const sellerAddr = data.userAddress || '--';
     document.getElementById('sellerAddress').textContent = 
       sellerAddr.length > 10 ? sellerAddr.substring(0, 4) + '...' + sellerAddr.substring(sellerAddr.length - 4) : sellerAddr;
-    document.getElementById('sellerRep').textContent = '⭐ 80分';
+    
+    // 用户信誉分
+    const sellerScore = data.userScore || 80;
+    document.getElementById('sellerRep').textContent = '⭐ ' + sellerScore + '分';
     
     // 买方是对方
     const buyerAddr = data.counterpartyAddress || '--';
     document.getElementById('buyerAddress').textContent = 
       buyerAddr.length > 10 ? buyerAddr.substring(0, 4) + '...' + buyerAddr.substring(buyerAddr.length - 4) : buyerAddr;
-    document.getElementById('buyerRep').textContent = '⭐ 80分';
+    
+    // 对方信誉分
+    const buyerScore = data.counterpartyScore || 80;
+    document.getElementById('buyerRep').textContent = '⭐ ' + buyerScore + '分';
     
     // 更新聊天头像和名称
     document.getElementById('otherAvatar').textContent = '买';
