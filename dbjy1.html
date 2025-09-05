@@ -582,14 +582,35 @@
     gap:8px;
   }
   
-  .btn:hover{
+  .btn:hover:not(:disabled){
     transform:translateY(-2px);
     box-shadow:0 8px 20px rgba(0,0,0,0.3);
+  }
+  
+  .btn:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+    background:var(--bg-hover) !important;
+    color:var(--text-muted) !important;
+    border:1px solid var(--border);
   }
   
   .btn-primary{
     background:linear-gradient(135deg, var(--primary), var(--primary-dark));
     color:white;
+  }
+  
+  .btn-primary.pulse{
+    animation:btnPulse 1s ease-in-out infinite;
+  }
+  
+  @keyframes btnPulse{
+    0%, 100%{
+      box-shadow:0 0 0 0 rgba(59,130,246,0.4);
+    }
+    50%{
+      box-shadow:0 0 0 10px rgba(59,130,246,0);
+    }
   }
   
   .btn-secondary{
@@ -764,8 +785,8 @@
           <button class="btn btn-secondary" onclick="cancelPayment()">
             ❌ 取消交易
           </button>
-          <button class="btn btn-primary" onclick="confirmPayment()">
-            ✅ 我已支付
+          <button class="btn btn-primary" id="confirmPaymentBtn" onclick="confirmPayment()" disabled title="请先提交验证">
+            🔒 我已支付
           </button>
         </div>
       </div>
@@ -865,7 +886,11 @@ let transactionData = {
   txHash: null,
   hasProof: false,
   verificationStatus: null,
-  verificationTime: null
+  verificationTime: null,
+  serviceFee: 0.75,
+  networkFee: 1,
+  deposit: 5,
+  totalAmount: 156.75
 };
 
 // 网络配置
@@ -920,6 +945,9 @@ document.addEventListener('DOMContentLoaded', function() {
   startCountdown();
   initHashValidation();
   updateHashFormat();
+  
+  // 初始化时禁用"我已支付"按钮
+  updateConfirmPaymentButton(false);
 });
 
 // 初始化哈希验证
@@ -1026,7 +1054,30 @@ function updateVerifyButton() {
   }
 }
 
-// 提交验证 - 修改：不自动跳转
+// 更新"我已支付"按钮状态
+function updateConfirmPaymentButton(enable) {
+  const confirmBtn = document.getElementById('confirmPaymentBtn');
+  
+  if (enable) {
+    confirmBtn.disabled = false;
+    confirmBtn.innerHTML = '✅ 我已支付';
+    confirmBtn.title = '点击确认支付';
+    // 添加脉冲动画提示用户可以点击
+    confirmBtn.classList.add('pulse');
+    
+    // 3秒后移除动画
+    setTimeout(() => {
+      confirmBtn.classList.remove('pulse');
+    }, 3000);
+  } else {
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '🔒 我已支付';
+    confirmBtn.title = '请先提交验证';
+    confirmBtn.classList.remove('pulse');
+  }
+}
+
+// 提交验证 - 不自动跳转
 function submitVerification() {
   const txHash = document.getElementById('txHash').value.trim();
   
@@ -1085,6 +1136,9 @@ function submitVerification() {
     document.getElementById('verifyBtn').innerHTML = '⏳ 验证中...';
     document.getElementById('verifyBtn').style.background = '#666';
     
+    // 立即启用"我已支付"按钮
+    updateConfirmPaymentButton(true);
+    
     // 更新交易状态
     transactionData.verificationStatus = 'PENDING';
     updateTransactionStatus('VERIFYING');
@@ -1141,6 +1195,7 @@ function selectPaymentMethod(network, element) {
   
   // 更新网络费用
   document.getElementById('networkFee').textContent = '~' + networkInfo.fee.toFixed(2) + ' USDT';
+  transactionData.networkFee = networkInfo.fee;
   
   // 更新哈希输入框
   updateHashFormat();
@@ -1161,11 +1216,12 @@ function selectPaymentMethod(network, element) {
   
   transactionData.totalAmount = total;
   transactionData.serviceFee = serviceFee;
-  transactionData.networkFee = networkInfo.fee;
   transactionData.deposit = deposit;
   
   document.getElementById('totalPayment').textContent = total.toFixed(2) + ' USDT';
   document.getElementById('paymentAmount').textContent = total.toFixed(2) + ' USDT';
+  document.getElementById('serviceFee').textContent = serviceFee.toFixed(2) + ' USDT';
+  document.getElementById('depositAmount').textContent = deposit.toFixed(2) + ' USDT';
 }
 
 // 复制地址
@@ -1227,46 +1283,27 @@ function handleTimeout() {
   window.location.href = './dnjy.html';
 }
 
-// 确认支付 - 修改：直接带数据跳转到dbjy2.html
+// 确认支付 - 必须先提交验证
 function confirmPayment() {
-  const txHash = document.getElementById('txHash').value.trim();
-  
-  // 如果没有输入哈希，提醒用户
-  if (!txHash) {
-    if (confirm('⚠️ 您还没有输入交易哈希\n\n建议您先输入交易哈希并提交验证，以确保交易顺利进行。\n\n是否仍要继续？')) {
-      // 用户确认继续，保存数据并跳转
-      saveAndRedirect();
+  // 再次检查是否已提交验证（以防万一）
+  if (!hasSubmittedVerification) {
+    alert('⚠️ 请先提交验证！\n\n请先点击"提交验证"按钮进行验证，然后才能确认支付。');
+    
+    // 让提交验证按钮闪烁提示
+    const verifyBtn = document.getElementById('verifyBtn');
+    if (!verifyBtn.disabled) {
+      verifyBtn.style.animation = 'pulse 0.5s ease-in-out 3';
+      setTimeout(() => {
+        verifyBtn.style.animation = '';
+      }, 1500);
     } else {
-      // 用户选择不继续，聚焦到输入框
+      // 如果验证按钮也是禁用的，说明还没输入哈希
       document.getElementById('txHash').focus();
     }
     return;
   }
   
-  // 如果有哈希但格式不正确
-  if (!hasValidHash) {
-    alert('❌ 交易哈希格式不正确\n\n请检查并输入正确的交易哈希');
-    document.getElementById('txHash').focus();
-    document.getElementById('txHash').select();
-    return;
-  }
-  
-  // 如果有正确的哈希但没有提交验证
-  if (!hasSubmittedVerification) {
-    if (confirm('⚠️ 您还没有提交验证\n\n建议您先点击"提交验证"按钮进行验证，以确保交易顺利进行。\n\n是否仍要继续？')) {
-      // 用户确认继续，保存数据并跳转
-      transactionData.txHash = txHash;
-      transactionData.verificationStatus = 'NOT_SUBMITTED';
-      saveAndRedirect();
-    } else {
-      // 让提交验证按钮闪烁提示
-      const verifyBtn = document.getElementById('verifyBtn');
-      verifyBtn.style.animation = 'pulse 0.5s ease-in-out 3';
-    }
-    return;
-  }
-  
-  // 已经提交验证，直接跳转
+  // 保存数据并跳转
   saveAndRedirect();
 }
 
