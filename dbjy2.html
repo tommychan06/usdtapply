@@ -614,6 +614,22 @@
     border-bottom:none;
   }
   
+  /* 数据加载提示 */
+  .data-alert{
+    background:rgba(59,130,246,0.1);
+    border:1px solid rgba(59,130,246,0.3);
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:16px;
+    font-size:13px;
+    color:var(--primary);
+    display:none;
+  }
+  
+  .data-alert.show{
+    display:block;
+  }
+  
   /* 响应式 */
   @media (max-width:1200px){
     .main-layout{
@@ -637,6 +653,11 @@
 </head>
 <body>
 <div class="container">
+  <!-- 数据接收提示 -->
+  <div class="data-alert" id="dataAlert">
+    ✅ 已成功接收支付验证数据，交易已进入托管阶段
+  </div>
+
   <!-- 头部 -->
   <div class="header">
     <div class="breadcrumb">
@@ -644,7 +665,7 @@
       <span>/</span>
       <a href="/transactions">我的交易</a>
       <span>/</span>
-      <span>ESC2025012014305678</span>
+      <span id="transactionIdBreadcrumb">ESC2025012014305678</span>
     </div>
     <div class="header-actions">
       <button class="header-btn">📊 查看报告</button>
@@ -672,23 +693,23 @@
           
           <div class="timeline-item completed">
             <div class="timeline-dot"></div>
-            <div class="timeline-time">2025-01-20 14:30:56</div>
+            <div class="timeline-time" id="createTime">2025-01-20 14:30:56</div>
             <div class="timeline-title">创建交易</div>
             <div class="timeline-desc">买方发起担保交易</div>
           </div>
           
           <div class="timeline-item completed">
             <div class="timeline-dot"></div>
-            <div class="timeline-time">2025-01-20 14:35:23</div>
+            <div class="timeline-time" id="paymentTimeDisplay">2025-01-20 14:35:23</div>
             <div class="timeline-title">支付完成</div>
-            <div class="timeline-desc">1,234.56 USDT</div>
+            <div class="timeline-desc" id="paymentAmountDisplay">1,234.56 USDT</div>
           </div>
           
           <div class="timeline-item completed">
             <div class="timeline-dot"></div>
-            <div class="timeline-time">2025-01-20 14:36:45</div>
-            <div class="timeline-title">链上验证</div>
-            <div class="timeline-desc">19个区块确认</div>
+            <div class="timeline-time" id="verifyTime">2025-01-20 14:36:45</div>
+            <div class="timeline-title" id="verificationTitle">链上验证</div>
+            <div class="timeline-desc" id="verificationDesc">19个区块确认</div>
           </div>
           
           <div class="timeline-item active">
@@ -718,7 +739,7 @@
       <div class="card">
         <div class="auto-process">
           <div class="auto-process-title">⏱️ 自动处理倒计时</div>
-          <div class="auto-process-time">71:45:30</div>
+          <div class="auto-process-time" id="autoReleaseTime">71:45:30</div>
           <div class="auto-process-action">超时后将自动释放给卖方</div>
         </div>
       </div>
@@ -830,6 +851,10 @@
             <span class="system-text">交易已创建，双方可开始沟通</span>
           </div>
           
+          <div class="system-message" id="verificationMessage" style="display:none;">
+            <span class="system-text" id="verificationMessageText">支付已验证，资金已进入托管</span>
+          </div>
+          
           <div class="message">
             <div class="message-avatar">卖</div>
             <div class="message-content">
@@ -886,15 +911,15 @@
           <div class="detail-grid">
             <div class="detail-row">
               <span style="color:var(--text-muted);">交易编号</span>
-              <span style="font-family:monospace;">ESC20250120...</span>
+              <span style="font-family:monospace;" id="transactionIdDetail">ESC20250120...</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">创建时间</span>
-              <span>2025-01-20 14:30</span>
+              <span id="createTimeDetail">2025-01-20 14:30</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">交易类型</span>
-              <span>数字商品</span>
+              <span id="transactionTypeDetail">数字商品</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">托管期限</span>
@@ -934,19 +959,19 @@
           <div class="detail-grid">
             <div class="detail-row">
               <span style="color:var(--text-muted);">交易金额</span>
-              <span>1,200.00 USDT</span>
+              <span id="amountDetail">1,200.00 USDT</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">服务费</span>
-              <span>12.00 USDT</span>
+              <span id="serviceFeeDetail">12.00 USDT</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">保证金</span>
-              <span>21.56 USDT</span>
+              <span id="depositDetail">21.56 USDT</span>
             </div>
             <div class="detail-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px;">
               <span style="color:var(--text-muted);font-weight:600;">托管总额</span>
-              <span style="color:var(--primary);font-weight:700;">1,234.56 USDT</span>
+              <span style="color:var(--primary);font-weight:700;" id="totalAmountDetail">1,234.56 USDT</span>
             </div>
           </div>
         </div>
@@ -958,11 +983,11 @@
           <div class="detail-grid">
             <div class="detail-row">
               <span style="color:var(--text-muted);">网络</span>
-              <span>TRC-20</span>
+              <span id="networkDetail">TRC-20</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">支付哈希</span>
-              <span style="font-family:monospace;font-size:10px;">0x7f9a...3d2e</span>
+              <span style="font-family:monospace;font-size:10px;" id="txHashDetail">0x7f9a...3d2e</span>
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">托管合约</span>
@@ -970,7 +995,11 @@
             </div>
             <div class="detail-row">
               <span style="color:var(--text-muted);">确认数</span>
-              <span style="color:var(--success);">19 确认</span>
+              <span style="color:var(--success);" id="confirmationsDetail">19 确认</span>
+            </div>
+            <div class="detail-row" id="verificationStatusRow" style="display:none;">
+              <span style="color:var(--text-muted);">验证状态</span>
+              <span style="color:var(--success);" id="verificationStatusDetail">✅ 已验证</span>
             </div>
           </div>
         </div>
@@ -983,13 +1012,185 @@
 // 全局变量
 let disputeOpen = false;
 let autoReleaseTimer;
-let timeRemaining = 259530; // 72小时（秒）
+let timeRemaining = 259530; // 默认72小时（秒）
+let transactionData = {}; // 存储接收的交易数据
 
 // 初始化
 document.addEventListener('DOMContentLoaded', function() {
+  // 读取并处理传递的数据
+  loadTransactionData();
+  
+  // 初始化其他功能
   startAutoReleaseTimer();
   setupWebSocket();
 });
+
+// 读取交易数据
+function loadTransactionData() {
+  try {
+    // 从sessionStorage读取数据
+    const storedData = sessionStorage.getItem('currentTransaction');
+    if (storedData) {
+      transactionData = JSON.parse(storedData);
+      console.log('接收到的交易数据：', transactionData);
+      
+      // 显示数据接收提示
+      const dataAlert = document.getElementById('dataAlert');
+      dataAlert.classList.add('show');
+      setTimeout(() => {
+        dataAlert.classList.remove('show');
+      }, 5000);
+      
+      // 更新页面显示
+      updatePageWithData();
+    } else {
+      console.log('未找到交易数据，使用默认值');
+    }
+  } catch (error) {
+    console.error('读取交易数据失败：', error);
+  }
+}
+
+// 使用接收的数据更新页面
+function updatePageWithData() {
+  // 更新交易ID
+  if (transactionData.id) {
+    document.getElementById('transactionIdBreadcrumb').textContent = transactionData.id;
+    document.getElementById('transactionIdDetail').textContent = transactionData.id.substring(0, 11) + '...';
+  }
+  
+  // 更新网络信息
+  if (transactionData.network) {
+    const networkMap = {
+      'TRC20': 'TRC-20',
+      'ERC20': 'ERC-20',
+      'BEP20': 'BEP-20'
+    };
+    document.getElementById('networkDetail').textContent = networkMap[transactionData.network] || transactionData.network;
+  }
+  
+  // 更新金额信息
+  if (transactionData.amount) {
+    document.getElementById('amountDetail').textContent = transactionData.amount.toFixed(2) + ' USDT';
+  }
+  
+  if (transactionData.serviceFee) {
+    document.getElementById('serviceFeeDetail').textContent = transactionData.serviceFee.toFixed(2) + ' USDT';
+  }
+  
+  if (transactionData.deposit) {
+    document.getElementById('depositDetail').textContent = transactionData.deposit.toFixed(2) + ' USDT';
+  }
+  
+  if (transactionData.totalAmount) {
+    document.getElementById('totalAmountDetail').textContent = transactionData.totalAmount.toFixed(2) + ' USDT';
+    document.getElementById('paymentAmountDisplay').textContent = transactionData.totalAmount.toFixed(2) + ' USDT';
+  }
+  
+  // 更新交易哈希
+  if (transactionData.txHash) {
+    const hash = transactionData.txHash;
+    const shortHash = hash.substring(0, 6) + '...' + hash.substring(hash.length - 4);
+    document.getElementById('txHashDetail').textContent = shortHash;
+  }
+  
+  // 更新支付时间
+  if (transactionData.paymentTime) {
+    const paymentTime = new Date(transactionData.paymentTime);
+    const formattedTime = paymentTime.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    document.getElementById('paymentTimeDisplay').textContent = formattedTime;
+  }
+  
+  // 更新验证状态
+  if (transactionData.verificationStatus) {
+    const statusRow = document.getElementById('verificationStatusRow');
+    statusRow.style.display = 'flex';
+    
+    let statusText = '待验证';
+    let statusColor = 'var(--text-muted)';
+    
+    switch(transactionData.verificationStatus) {
+      case 'SUCCESS':
+      case 'VERIFIED':
+        statusText = '✅ 已验证';
+        statusColor = 'var(--success)';
+        // 显示验证成功消息
+        const verMsg = document.getElementById('verificationMessage');
+        verMsg.style.display = 'block';
+        document.getElementById('verificationMessageText').textContent = 
+          '支付验证成功，资金已进入智能合约托管';
+        break;
+      case 'PENDING':
+      case 'VERIFYING':
+        statusText = '⏳ 验证中';
+        statusColor = 'var(--warning)';
+        break;
+      case 'NOT_SUBMITTED':
+        statusText = '⚠️ 未提交';
+        statusColor = 'var(--text-muted)';
+        break;
+    }
+    
+    const statusEl = document.getElementById('verificationStatusDetail');
+    statusEl.textContent = statusText;
+    statusEl.style.color = statusColor;
+    
+    // 更新验证时间线信息
+    if (transactionData.verificationStatus === 'SUCCESS' || transactionData.verificationStatus === 'VERIFIED') {
+      document.getElementById('verificationTitle').textContent = '支付验证';
+      document.getElementById('verificationDesc').textContent = '验证成功，资金已托管';
+      
+      // 更新确认数
+      const confirmations = transactionData.network === 'TRC20' ? 19 : 
+                           transactionData.network === 'ERC20' ? 12 : 15;
+      document.getElementById('confirmationsDetail').textContent = confirmations + ' 确认';
+    }
+  }
+  
+  // 更新自动释放倒计时（如果有剩余时间数据）
+  if (transactionData.remainingTime) {
+    // 从支付页面带来的倒计时转换为托管倒计时（72小时减去已用时间）
+    const usedTime = 1785 - transactionData.remainingTime; // 原始倒计时30分钟（1800秒）
+    timeRemaining = 259200 - usedTime; // 72小时减去已用时间
+  }
+  
+  // 更新交易类型
+  if (transactionData.transactionType) {
+    const typeMap = {
+      'goods': '实物商品',
+      'digital': '数字商品',
+      'service': '服务'
+    };
+    document.getElementById('transactionTypeDetail').textContent = 
+      typeMap[transactionData.transactionType] || transactionData.transactionType;
+  }
+  
+  // 添加支付证明标记（如果有）
+  if (transactionData.hasProof) {
+    const verDesc = document.getElementById('verificationDesc');
+    verDesc.textContent += ' (含支付凭证)';
+  }
+  
+  // 更新创建时间
+  const createTime = new Date();
+  createTime.setMinutes(createTime.getMinutes() - 10); // 假设10分钟前创建
+  document.getElementById('createTime').textContent = 
+    createTime.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+}
 
 // 自动释放倒计时
 function startAutoReleaseTimer() {
@@ -1030,14 +1231,16 @@ function setupWebSocket() {
   // 模拟WebSocket连接
   console.log('WebSocket connected');
   
-  // 模拟接收消息
-  setTimeout(() => {
-    receiveMessage({
-      type: 'system',
-      text: '卖方已确认发货',
-      time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
-    });
-  }, 5000);
+  // 根据验证状态发送不同的系统消息
+  if (transactionData.verificationStatus === 'SUCCESS' || transactionData.verificationStatus === 'VERIFIED') {
+    setTimeout(() => {
+      receiveMessage({
+        type: 'system',
+        text: '卖方已收到支付确认通知，请等待发货',
+        time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})
+      });
+    }, 5000);
+  }
 }
 
 // 发送消息
@@ -1238,21 +1441,20 @@ function requestCancel() {
 
 // 更新交易状态
 function updateTransactionStatus(status) {
-  const transaction = JSON.parse(sessionStorage.getItem('currentTransaction') || '{}');
-  transaction.status = status;
-  transaction.updatedAt = new Date().toISOString();
+  transactionData.status = status;
+  transactionData.updatedAt = new Date().toISOString();
   
   // 记录状态变更日志
-  if (!transaction.statusHistory) {
-    transaction.statusHistory = [];
+  if (!transactionData.statusHistory) {
+    transactionData.statusHistory = [];
   }
-  transaction.statusHistory.push({
+  transactionData.statusHistory.push({
     status: status,
     timestamp: new Date().toISOString(),
     reason: 'User action'
   });
   
-  sessionStorage.setItem('currentTransaction', JSON.stringify(transaction));
+  sessionStorage.setItem('currentTransaction', JSON.stringify(transactionData));
 }
 
 // 显示通知
