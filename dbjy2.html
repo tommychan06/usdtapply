@@ -246,6 +246,7 @@
     border-radius:16px;
     padding:20px;
     margin-bottom:24px;
+    margin-top:32px; /* 增加上边距，与聊天窗口拉开距离 */
   }
   
   .action-title{
@@ -303,6 +304,7 @@
     display:flex;
     flex-direction:column;
     height:600px;
+    margin-bottom:20px; /* 增加下边距，与操作面板拉开距离 */
   }
   
   .chat-header{
@@ -845,24 +847,7 @@
             <span class="system-text" id="chatInitMessage">交易已创建，双方可开始沟通</span>
           </div>
           
-          <div class="message">
-            <div class="message-avatar" style="background:var(--warning);">客服</div>
-            <div class="message-content">
-              <div class="message-name">客服KF0531</div>
-              <div class="message-text">现在开始交易</div>
-            </div>
-          </div>
-          
-          <div class="message">
-            <div class="message-avatar" style="background:var(--warning);">客服</div>
-            <div class="message-content">
-              <div class="message-name">客服KF0531</div>
-              <div class="message-text">
-                <strong>交易内容（备注）：</strong><br>
-                <span id="chatTransactionDesc">--</span>
-              </div>
-            </div>
-          </div>
+          <!-- 客服消息将通过JavaScript动态添加，每5秒一条 -->
           
           <div class="system-message">
             <span class="system-text">系统提示：请在平台内完成交易，注意保护个人信息</span>
@@ -1274,7 +1259,53 @@ document.addEventListener('DOMContentLoaded', function() {
   // 启动倒计时和其他功能
   startAutoReleaseTimer();
   setupWebSocket();
+  
+  // ★★★ 新增：启动客服消息发送定时器，每5秒一条 ★★★
+  startCustomerServiceMessages();
 });
+
+// ★★★ 新增：客服消息定时发送函数 ★★★
+function startCustomerServiceMessages() {
+  const customerServiceMessages = [
+    '现在开始交易',
+    {
+      isDescriptionMessage: true,
+      content: `<strong>交易内容（备注）：</strong><br><span id="chatTransactionDesc">${transactionData.description || '暂无交易描述'}</span>`
+    }
+  ];
+  
+  let messageIndex = 0;
+  
+  // 延迟5秒后开始发送第一条客服消息
+  setTimeout(() => {
+    const sendNextMessage = () => {
+      if (messageIndex < customerServiceMessages.length) {
+        const messageData = customerServiceMessages[messageIndex];
+        
+        let messageText;
+        if (typeof messageData === 'object' && messageData.isDescriptionMessage) {
+          messageText = messageData.content;
+        } else {
+          messageText = messageData;
+        }
+        
+        receiveMessage({
+          type: 'service',
+          text: messageText
+        });
+        
+        messageIndex++;
+        
+        // 如果还有更多消息，5秒后发送下一条
+        if (messageIndex < customerServiceMessages.length) {
+          setTimeout(sendNextMessage, 5000);
+        }
+      }
+    };
+    
+    sendNextMessage();
+  }, 5000); // 第一条消息延迟5秒
+}
 
 // ★★★ 新增：更新页面数据函数 ★★★
 function updatePageWithTransactionData(data) {
@@ -1324,13 +1355,6 @@ function updatePageWithTransactionData(data) {
     document.getElementById('roleReleaseDesc').textContent = '支付给买方';
     document.getElementById('protectionTitle').textContent = '卖家保护计划';
     document.getElementById('autoProcessAction').textContent = '超时后将自动退款给买方';
-  }
-  
-  // ★★★ 更新聊天中的交易描述 ★★★
-  if (data.description) {
-    document.getElementById('chatTransactionDesc').textContent = data.description;
-  } else {
-    document.getElementById('chatTransactionDesc').textContent = '暂无交易描述';
   }
   
   // 更新交易详情
@@ -1573,7 +1597,7 @@ function handleAutoRelease() {
 function setupWebSocket() {
   console.log('WebSocket connected');
   
-  // ★★★ 30秒后添加卖方消息 ★★★
+  // ★★★ 修改：30秒后添加卖方消息（如果需要的话） ★★★
   setTimeout(() => {
     const sellerMessage = {
       type: 'seller',
