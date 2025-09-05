@@ -852,6 +852,7 @@ let verificationAttempts = 0;
 let hasValidHash = false;
 let hasPaymentProof = false;
 let hasSubmittedVerification = false; // 记录是否已提交验证
+let verificationComplete = false; // 记录验证是否完成
 
 // 交易数据
 let transactionData = {
@@ -860,7 +861,11 @@ let transactionData = {
   role: 'buyer',
   transactionType: 'goods',
   riskScore: 25,
-  network: 'TRC20'
+  network: 'TRC20',
+  txHash: null,
+  hasProof: false,
+  verificationStatus: null,
+  verificationTime: null
 };
 
 // 网络配置
@@ -1005,6 +1010,11 @@ function validateHash(hash, network) {
 function updateVerifyButton() {
   const verifyBtn = document.getElementById('verifyBtn');
   
+  // 如果已经提交验证，保持当前状态
+  if (hasSubmittedVerification) {
+    return;
+  }
+  
   if (hasValidHash) {
     verifyBtn.disabled = false;
     verifyBtn.classList.add('active');
@@ -1016,7 +1026,7 @@ function updateVerifyButton() {
   }
 }
 
-// 提交验证 - 验证成功后跳转到dnjy2.html
+// 提交验证 - 修改：不自动跳转
 function submitVerification() {
   const txHash = document.getElementById('txHash').value.trim();
   
@@ -1037,6 +1047,11 @@ function submitVerification() {
   
   // 标记已提交验证
   hasSubmittedVerification = true;
+  
+  // 保存交易哈希
+  transactionData.txHash = txHash;
+  transactionData.verificationTime = new Date().toISOString();
+  transactionData.hasProof = hasPaymentProof;
   
   // 显示处理状态
   const statusEl = document.getElementById('verificationStatus');
@@ -1060,17 +1075,21 @@ function submitVerification() {
             正在验证哈希: ${txHash.substring(0, 10)}...${txHash.substring(txHash.length - 8)}
           </div>
           <div style="font-size:11px;margin-top:2px;color:var(--text-secondary);">
-            预计 3-5 分钟内完成人工审核，请耐心等待
+            预计 3-5 分钟内完成人工审核
           </div>
         </div>
       </div>
     `;
     
     // 更新按钮状态
-    document.getElementById('verifyBtn').innerHTML = '⏳ 已提交验证';
+    document.getElementById('verifyBtn').innerHTML = '⏳ 验证中...';
     document.getElementById('verifyBtn').style.background = '#666';
     
-    // 模拟验证成功
+    // 更新交易状态
+    transactionData.verificationStatus = 'PENDING';
+    updateTransactionStatus('VERIFYING');
+    
+    // 15秒后显示验证成功（不自动跳转）
     setTimeout(() => {
       statusEl.innerHTML = `
         <div style="display:flex;align-items:center;gap:12px;">
@@ -1078,15 +1097,21 @@ function submitVerification() {
           <div>
             <div style="font-weight:600;color:var(--success);">支付验证成功！</div>
             <div style="font-size:11px;margin-top:4px;color:var(--text-secondary);">
-              交易哈希已确认 | 金额核对无误 | 即将进入托管阶段
+              交易哈希已确认 | 金额核对无误 | 可点击"我已支付"进入下一步
             </div>
           </div>
         </div>
       `;
       
-      setTimeout(() => {
-        proceedToEscrow();
-      }, 2000);
+      // 更新按钮状态
+      document.getElementById('verifyBtn').innerHTML = '✅ 验证成功';
+      document.getElementById('verifyBtn').style.background = 'var(--success)';
+      
+      // 标记验证完成
+      verificationComplete = true;
+      transactionData.verificationStatus = 'SUCCESS';
+      updateTransactionStatus('VERIFIED');
+      
     }, 15000); // 15秒后验证成功
     
   }, 1500);
@@ -1095,6 +1120,7 @@ function submitVerification() {
 // 选择支付方式
 function selectPaymentMethod(network, element) {
   selectedNetwork = network;
+  transactionData.network = network;
   
   // 更新UI
   document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
@@ -1132,6 +1158,11 @@ function selectPaymentMethod(network, element) {
   const serviceFee = amount * serviceFeeRate;
   const deposit = riskScore > 70 ? amount * 0.05 : 5;
   const total = amount + serviceFee + networkInfo.fee + deposit;
+  
+  transactionData.totalAmount = total;
+  transactionData.serviceFee = serviceFee;
+  transactionData.networkFee = networkInfo.fee;
+  transactionData.deposit = deposit;
   
   document.getElementById('totalPayment').textContent = total.toFixed(2) + ' USDT';
   document.getElementById('paymentAmount').textContent = total.toFixed(2) + ' USDT';
@@ -1196,52 +1227,65 @@ function handleTimeout() {
   window.location.href = './dnjy.html';
 }
 
-// 进入托管阶段 - 跳转到dnjy2.html
-function proceedToEscrow() {
-  // 更新进度条
-  document.getElementById('progressLine').style.width = '60%';
-  document.querySelectorAll('.step')[1].classList.remove('active');
-  document.querySelectorAll('.step')[1].classList.add('completed');
-  document.querySelectorAll('.step')[2].classList.add('active');
-  
-  updateTransactionStatus('ESCROWED');
-  
-  alert('✅ 支付验证成功！\n\n资金已进入智能合约托管。\n即将跳转到交易页面...');
-  
-  // 跳转到dnjy2.html
-  setTimeout(() => {
-    window.location.href = './dnjy2.html';
-  }, 2000);
-}
-
-// 确认支付 - 需要先提交验证才能跳转到dbjy2.html
+// 确认支付 - 修改：直接带数据跳转到dbjy2.html
 function confirmPayment() {
-  // 检查是否已提交验证
-  if (!hasSubmittedVerification) {
-    // 如果还没提交验证，提示用户
-    const txHash = document.getElementById('txHash').value.trim();
-    
-    if (!txHash) {
-      // 如果没有输入哈希
-      alert('⚠️ 请先输入交易哈希\n\n请按以下步骤操作：\n1. 在上方输入框填写交易哈希\n2. 点击"提交验证"按钮\n3. 等待验证开始后再点击"我已支付"');
-      document.getElementById('txHash').focus();
-    } else if (!hasValidHash) {
-      // 如果哈希格式不正确
-      alert('❌ 交易哈希格式不正确\n\n请检查并输入正确的交易哈希，然后点击"提交验证"按钮');
-      document.getElementById('txHash').focus();
-      document.getElementById('txHash').select();
+  const txHash = document.getElementById('txHash').value.trim();
+  
+  // 如果没有输入哈希，提醒用户
+  if (!txHash) {
+    if (confirm('⚠️ 您还没有输入交易哈希\n\n建议您先输入交易哈希并提交验证，以确保交易顺利进行。\n\n是否仍要继续？')) {
+      // 用户确认继续，保存数据并跳转
+      saveAndRedirect();
     } else {
-      // 如果哈希格式正确但还没提交
-      alert('✋ 请先点击"提交验证"按钮\n\n您已输入交易哈希，请先点击"提交验证"按钮进行验证，验证开始后再点击"我已支付"');
-      
+      // 用户选择不继续，聚焦到输入框
+      document.getElementById('txHash').focus();
+    }
+    return;
+  }
+  
+  // 如果有哈希但格式不正确
+  if (!hasValidHash) {
+    alert('❌ 交易哈希格式不正确\n\n请检查并输入正确的交易哈希');
+    document.getElementById('txHash').focus();
+    document.getElementById('txHash').select();
+    return;
+  }
+  
+  // 如果有正确的哈希但没有提交验证
+  if (!hasSubmittedVerification) {
+    if (confirm('⚠️ 您还没有提交验证\n\n建议您先点击"提交验证"按钮进行验证，以确保交易顺利进行。\n\n是否仍要继续？')) {
+      // 用户确认继续，保存数据并跳转
+      transactionData.txHash = txHash;
+      transactionData.verificationStatus = 'NOT_SUBMITTED';
+      saveAndRedirect();
+    } else {
       // 让提交验证按钮闪烁提示
       const verifyBtn = document.getElementById('verifyBtn');
       verifyBtn.style.animation = 'pulse 0.5s ease-in-out 3';
     }
-  } else {
-    // 已经提交验证，可以跳转
-    window.location.href = './dbjy2.html';
+    return;
   }
+  
+  // 已经提交验证，直接跳转
+  saveAndRedirect();
+}
+
+// 保存数据并跳转
+function saveAndRedirect() {
+  // 更新交易状态
+  transactionData.status = 'PAID';
+  transactionData.paymentTime = new Date().toISOString();
+  transactionData.remainingTime = timeRemaining;
+  
+  // 保存到sessionStorage和localStorage
+  sessionStorage.setItem('currentTransaction', JSON.stringify(transactionData));
+  localStorage.setItem('latestTransaction', JSON.stringify(transactionData));
+  
+  // 停止倒计时
+  clearInterval(countdownTimer);
+  
+  // 跳转到dbjy2.html
+  window.location.href = './dbjy2.html';
 }
 
 // 取消支付 - 跳转到dnjy.html
@@ -1291,6 +1335,7 @@ document.getElementById('proofFile').addEventListener('change', function(e) {
     
     // 更新状态
     hasPaymentProof = true;
+    transactionData.hasProof = true;
   }
 });
 </script>
