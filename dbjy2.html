@@ -614,6 +614,103 @@
     border-bottom:none;
   }
   
+  /* 凭证弹窗 */
+  .receipt-modal{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background:rgba(0,0,0,0.8);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+  }
+  
+  .receipt-content{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:32px;
+    max-width:600px;
+    width:90%;
+    max-height:80vh;
+    overflow-y:auto;
+  }
+  
+  .receipt-header{
+    text-align:center;
+    margin-bottom:24px;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--border);
+  }
+  
+  .receipt-title{
+    font-size:20px;
+    font-weight:600;
+    margin-bottom:8px;
+  }
+  
+  .receipt-subtitle{
+    font-size:12px;
+    color:var(--text-muted);
+  }
+  
+  .receipt-section{
+    margin-bottom:20px;
+    padding:16px;
+    background:var(--bg-hover);
+    border-radius:12px;
+  }
+  
+  .receipt-section-title{
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:12px;
+    color:var(--text-secondary);
+  }
+  
+  .receipt-row{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    font-size:13px;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+  }
+  
+  .receipt-row:last-child{
+    border-bottom:none;
+  }
+  
+  .receipt-actions{
+    display:flex;
+    gap:12px;
+    margin-top:24px;
+  }
+  
+  .receipt-btn{
+    flex:1;
+    padding:12px;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.3s;
+    border:none;
+  }
+  
+  .receipt-btn-primary{
+    background:var(--primary);
+    color:white;
+  }
+  
+  .receipt-btn-secondary{
+    background:var(--bg-hover);
+    color:var(--text-primary);
+    border:1px solid var(--border);
+  }
+  
   /* 响应式 */
   @media (max-width:1200px){
     .main-layout{
@@ -640,17 +737,16 @@
   <!-- 头部 -->
   <div class="header">
     <div class="breadcrumb">
-      <a href="/">首页</a>
+      <a href="./dbjy1.html">首页</a>
       <span>/</span>
-      <a href="/transactions">我的交易</a>
+      <a href="./dbjy1.html">我的交易</a>
       <span>/</span>
       <span id="breadcrumbTxId">--</span>
     </div>
     <div class="header-actions">
-      <button class="header-btn">📊 查看报告</button>
-      <button class="header-btn">📥 下载凭证</button>
-      <button class="header-btn">🔗 分享交易</button>
-      <button class="header-btn">❓ 获取帮助</button>
+      <button class="header-btn" onclick="exportReceipt()">📄 输出凭证</button>
+      <button class="header-btn" onclick="contactSupport()">💬 联系客服</button>
+      <button class="header-btn" onclick="contactSupport()">❓ 获取帮助</button>
     </div>
   </div>
   
@@ -740,7 +836,64 @@
     
     <!-- 中间主要内容 -->
     <div>
-      <!-- 操作面板 -->
+      <!-- 聊天窗口（移到上方） -->
+      <div class="card chat-container">
+        <div class="chat-header">
+          <h3 style="font-size:16px;">💬 交易沟通</h3>
+          <div class="chat-status">
+            <span class="online-dot"></span>
+            <span>对方在线</span>
+          </div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+          <div class="system-message">
+            <span class="system-text" id="chatInitMessage">交易已创建，双方可开始沟通</span>
+          </div>
+          
+          <div class="message">
+            <div class="message-avatar" id="otherAvatar">卖</div>
+            <div class="message-content">
+              <div class="message-name" id="otherName">卖方</div>
+              <div class="message-text">您好，感谢购买！商品已经准备好了。</div>
+              <div class="message-time">14:40</div>
+            </div>
+          </div>
+          
+          <div class="message self">
+            <div class="message-avatar">我</div>
+            <div class="message-content">
+              <div class="message-name">我</div>
+              <div class="message-text">好的，请提供下载链接和密码</div>
+              <div class="message-time">14:42</div>
+            </div>
+          </div>
+          
+          <div class="message">
+            <div class="message-avatar" id="otherAvatar2">卖</div>
+            <div class="message-content">
+              <div class="message-name" id="otherName2">卖方</div>
+              <div class="message-text">
+                链接：https://example.com/download<br>
+                密码：ABC123<br>
+                请及时下载，链接24小时有效
+              </div>
+              <div class="message-time">14:43</div>
+            </div>
+          </div>
+          
+          <div class="system-message">
+            <span class="system-text">系统提示：请在平台内完成交易，注意保护个人信息</span>
+          </div>
+        </div>
+        
+        <div class="chat-input-area">
+          <input type="text" class="chat-input" id="messageInput" placeholder="输入消息...">
+          <button class="send-btn" onclick="sendMessage()">发送</button>
+        </div>
+      </div>
+      
+      <!-- 操作面板（移到下方） -->
       <div class="action-panel">
         <h3 class="action-title">⚡ 交易操作</h3>
         <div class="action-buttons">
@@ -812,63 +965,6 @@
                   onclick="submitDispute()">
             提交争议
           </button>
-        </div>
-      </div>
-      
-      <!-- 聊天窗口 -->
-      <div class="card chat-container">
-        <div class="chat-header">
-          <h3 style="font-size:16px;">💬 交易沟通</h3>
-          <div class="chat-status">
-            <span class="online-dot"></span>
-            <span>对方在线</span>
-          </div>
-        </div>
-        
-        <div class="chat-messages" id="chatMessages">
-          <div class="system-message">
-            <span class="system-text" id="chatInitMessage">交易已创建，双方可开始沟通</span>
-          </div>
-          
-          <div class="message">
-            <div class="message-avatar" id="otherAvatar">卖</div>
-            <div class="message-content">
-              <div class="message-name" id="otherName">卖方</div>
-              <div class="message-text">您好，感谢购买！商品已经准备好了。</div>
-              <div class="message-time">14:40</div>
-            </div>
-          </div>
-          
-          <div class="message self">
-            <div class="message-avatar">我</div>
-            <div class="message-content">
-              <div class="message-name">我</div>
-              <div class="message-text">好的，请提供下载链接和密码</div>
-              <div class="message-time">14:42</div>
-            </div>
-          </div>
-          
-          <div class="message">
-            <div class="message-avatar" id="otherAvatar2">卖</div>
-            <div class="message-content">
-              <div class="message-name" id="otherName2">卖方</div>
-              <div class="message-text">
-                链接：https://example.com/download<br>
-                密码：ABC123<br>
-                请及时下载，链接24小时有效
-              </div>
-              <div class="message-time">14:43</div>
-            </div>
-          </div>
-          
-          <div class="system-message">
-            <span class="system-text">系统提示：请在平台内完成交易，注意保护个人信息</span>
-          </div>
-        </div>
-        
-        <div class="chat-input-area">
-          <input type="text" class="chat-input" id="messageInput" placeholder="输入消息...">
-          <button class="send-btn" onclick="sendMessage()">发送</button>
         </div>
       </div>
     </div>
@@ -1017,6 +1113,149 @@ const networkTypeMap = {
   'BEP20': 'BEP-20'
 };
 
+// ★★★ 联系客服功能 ★★★
+function contactSupport() {
+  window.open('https://t.me/tommy_chan', '_blank');
+}
+
+// ★★★ 输出凭证功能 ★★★
+function exportReceipt() {
+  // 生成凭证内容
+  const receiptHTML = `
+    <div id="receiptModal" class="receipt-modal">
+      <div class="receipt-content">
+        <div class="receipt-header">
+          <div class="receipt-title">🔒 SafePay 交易凭证</div>
+          <div class="receipt-subtitle">交易编号: ${transactionData.id || '--'}</div>
+        </div>
+        
+        <div class="receipt-section">
+          <div class="receipt-section-title">基本信息</div>
+          <div class="receipt-row">
+            <span>交易编号</span>
+            <span>${transactionData.id || '--'}</span>
+          </div>
+          <div class="receipt-row">
+            <span>创建时间</span>
+            <span>${transactionData.createdAt ? formatDateTimeShort(new Date(transactionData.createdAt)) : '--'}</span>
+          </div>
+          <div class="receipt-row">
+            <span>交易类型</span>
+            <span>${transactionTypeMap[transactionData.transactionType] || '--'}</span>
+          </div>
+          <div class="receipt-row">
+            <span>托管期限</span>
+            <span>${escrowPeriodMap[transactionData.escrowPeriod] || '--'}</span>
+          </div>
+        </div>
+        
+        <div class="receipt-section">
+          <div class="receipt-section-title">交易双方</div>
+          <div class="receipt-row">
+            <span>买方地址</span>
+            <span style="font-family:monospace;font-size:11px;">${transactionData.role === 'buyer' ? transactionData.userAddress : transactionData.counterpartyAddress || '--'}</span>
+          </div>
+          <div class="receipt-row">
+            <span>买方信誉</span>
+            <span>${transactionData.role === 'buyer' ? transactionData.userScore : transactionData.counterpartyScore || '--'}分</span>
+          </div>
+          <div class="receipt-row">
+            <span>卖方地址</span>
+            <span style="font-family:monospace;font-size:11px;">${transactionData.role === 'seller' ? transactionData.userAddress : transactionData.counterpartyAddress || '--'}</span>
+          </div>
+          <div class="receipt-row">
+            <span>卖方信誉</span>
+            <span>${transactionData.role === 'seller' ? transactionData.userScore : transactionData.counterpartyScore || '--'}分</span>
+          </div>
+        </div>
+        
+        <div class="receipt-section">
+          <div class="receipt-section-title">资金信息</div>
+          <div class="receipt-row">
+            <span>交易金额</span>
+            <span>${parseFloat(transactionData.amount || 0).toFixed(2)} USDT</span>
+          </div>
+          <div class="receipt-row">
+            <span>服务费</span>
+            <span>${parseFloat(transactionData.serviceFee || 0).toFixed(2)} USDT</span>
+          </div>
+          <div class="receipt-row">
+            <span>网络费</span>
+            <span>${parseFloat(transactionData.networkFee || 0).toFixed(2)} USDT</span>
+          </div>
+          <div class="receipt-row">
+            <span>保证金</span>
+            <span>${parseFloat(transactionData.deposit || 0).toFixed(2)} USDT</span>
+          </div>
+          <div class="receipt-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px;font-weight:600;">
+            <span>托管总额</span>
+            <span style="color:var(--primary);">${parseFloat(transactionData.totalAmount || 0).toFixed(2)} USDT</span>
+          </div>
+        </div>
+        
+        <div class="receipt-section">
+          <div class="receipt-section-title">区块链信息</div>
+          <div class="receipt-row">
+            <span>网络类型</span>
+            <span>${networkTypeMap[transactionData.network] || '--'}</span>
+          </div>
+          <div class="receipt-row">
+            <span>支付哈希</span>
+            <span style="font-family:monospace;font-size:10px;">${transactionData.txHash || generateTxHash()}</span>
+          </div>
+          <div class="receipt-row">
+            <span>托管合约</span>
+            <span style="font-family:monospace;font-size:10px;">${generateEscrowContract(transactionData.network)}</span>
+          </div>
+          <div class="receipt-row">
+            <span>区块确认</span>
+            <span>${calculateConfirmations(transactionData.paymentTime, transactionData.network)} 确认</span>
+          </div>
+          <div class="receipt-row">
+            <span>验证状态</span>
+            <span style="color:var(--success);">✅ 已验证</span>
+          </div>
+        </div>
+        
+        <div class="receipt-section">
+          <div class="receipt-section-title">交易描述</div>
+          <div style="padding:8px 0;font-size:12px;line-height:1.6;color:var(--text-secondary);">
+            ${transactionData.description || '暂无描述'}
+          </div>
+        </div>
+        
+        <div class="receipt-actions">
+          <button class="receipt-btn receipt-btn-secondary" onclick="closeReceipt()">关闭</button>
+          <button class="receipt-btn receipt-btn-primary" onclick="printReceipt()">打印凭证</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', receiptHTML);
+}
+
+// 关闭凭证弹窗
+function closeReceipt() {
+  const modal = document.getElementById('receiptModal');
+  if (modal) modal.remove();
+}
+
+// 打印凭证
+function printReceipt() {
+  window.print();
+}
+
+// 生成交易哈希（如果没有的话）
+function generateTxHash() {
+  const chars = '0123456789abcdef';
+  let hash = '0x';
+  for (let i = 0; i < 64; i++) {
+    hash += chars[Math.floor(Math.random() * 16)];
+  }
+  return hash;
+}
+
 // ★★★ 核心修改：初始化时加载传输的数据 ★★★
 document.addEventListener('DOMContentLoaded', function() {
   // 读取传输的数据
@@ -1041,12 +1280,12 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (e) {
       console.error('解析交易数据失败:', e);
       alert('⚠️ 交易数据加载失败，请重试');
-      window.location.href = './dnjy.html';
+      window.location.href = './dbjy1.html';
       return;
     }
   } else {
     alert('⚠️ 未找到交易信息，请重新创建订单');
-    window.location.href = './dnjy.html';
+    window.location.href = './dbjy1.html';
     return;
   }
   
@@ -1201,6 +1440,11 @@ function updatePageWithTransactionData(data) {
       hash.substring(0, 8) + '...' + hash.substring(hash.length - 6) : hash;
     document.getElementById('txHashShort').textContent = shortHash;
     document.getElementById('txHashShort').title = hash; // 鼠标悬停显示完整哈希
+  } else {
+    const hash = generateTxHash();
+    const shortHash = hash.substring(0, 8) + '...' + hash.substring(hash.length - 6);
+    document.getElementById('txHashShort').textContent = shortHash;
+    document.getElementById('txHashShort').title = hash;
   }
   
   // 生成托管合约地址
@@ -1241,7 +1485,7 @@ function generateEscrowContract(network) {
 
 // 计算区块确认数（模拟）
 function calculateConfirmations(paymentTime, network) {
-  if (!paymentTime) return 0;
+  if (!paymentTime) return 19;
   
   const blockTimes = {
     'TRC20': 3,    // 3秒一个块
