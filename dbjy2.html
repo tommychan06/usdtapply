@@ -246,7 +246,7 @@
     border-radius:16px;
     padding:20px;
     margin-bottom:24px;
-    margin-top:32px; /* 增加上边距，与聊天窗口拉开距离 */
+    margin-top:32px;
   }
   
   .action-title{
@@ -304,7 +304,7 @@
     display:flex;
     flex-direction:column;
     height:600px;
-    margin-bottom:20px; /* 增加下边距，与操作面板拉开距离 */
+    margin-bottom:20px;
   }
   
   .chat-header{
@@ -610,101 +610,347 @@
     border-bottom:none;
   }
   
-  /* 凭证弹窗 */
-  .receipt-modal{
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    background:rgba(0,0,0,0.8);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:1000;
+  /* ========== 统一的弹窗样式 ========== */
+  
+  /* 弹窗遮罩层 */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
   }
   
-  .receipt-content{
-    background:var(--bg-card);
-    border:1px solid var(--border);
-    border-radius:20px;
-    padding:32px;
-    max-width:600px;
-    width:90%;
-    max-height:80vh;
-    overflow-y:auto;
+  /* 弹窗容器 */
+  .modal-container {
+    background: var(--bg-card);
+    background-image: radial-gradient(circle at top left, rgba(59,130,246,0.05), transparent),
+                      radial-gradient(circle at bottom right, rgba(16,185,129,0.05), transparent);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 90%;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 100px rgba(59, 130, 246, 0.1);
+    animation: slideUp 0.3s ease;
   }
   
-  .receipt-header{
-    text-align:center;
-    margin-bottom:24px;
-    padding-bottom:16px;
-    border-bottom:1px solid var(--border);
+  /* 弹窗大小变体 */
+  .modal-container.small {
+    max-width: 400px;
   }
   
-  .receipt-title{
-    font-size:20px;
-    font-weight:600;
-    margin-bottom:8px;
+  .modal-container.medium {
+    max-width: 600px;
   }
   
-  .receipt-subtitle{
-    font-size:12px;
-    color:var(--text-muted);
+  .modal-container.large {
+    max-width: 800px;
   }
   
-  .receipt-section{
-    margin-bottom:20px;
-    padding:16px;
-    background:var(--bg-hover);
-    border-radius:12px;
+  /* 弹窗头部 */
+  .modal-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
   }
   
-  .receipt-section-title{
-    font-size:14px;
-    font-weight:600;
-    margin-bottom:12px;
-    color:var(--text-secondary);
+  .modal-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
   }
   
-  .receipt-row{
-    display:flex;
-    justify-content:space-between;
-    padding:8px 0;
-    font-size:13px;
-    border-bottom:1px solid rgba(255,255,255,0.05);
+  .modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
   }
   
-  .receipt-row:last-child{
-    border-bottom:none;
+  .modal-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
   }
   
-  .receipt-actions{
-    display:flex;
-    gap:12px;
-    margin-top:24px;
+  /* 弹窗内容 */
+  .modal-body {
+    margin-bottom: 24px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
   }
   
-  .receipt-btn{
-    flex:1;
-    padding:12px;
-    border-radius:10px;
-    font-size:14px;
-    font-weight:600;
-    cursor:pointer;
-    transition:all 0.3s;
-    border:none;
+  /* 弹窗信息块 */
+  .modal-info-section {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--bg-hover);
+    border-radius: 12px;
   }
   
-  .receipt-btn-primary{
-    background:var(--primary);
-    color:white;
+  .modal-info-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-secondary);
   }
   
-  .receipt-btn-secondary{
-    background:var(--bg-hover);
-    color:var(--text-primary);
-    border:1px solid var(--border);
+  .modal-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  
+  .modal-info-row:last-child {
+    border-bottom: none;
+  }
+  
+  .modal-info-label {
+    color: var(--text-muted);
+  }
+  
+  .modal-info-value {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+  
+  /* 弹窗动作按钮 */
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  
+  .modal-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    outline: none;
+  }
+  
+  .modal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .modal-btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+  
+  .modal-btn-primary:hover {
+    background: var(--primary-dark);
+  }
+  
+  .modal-btn-secondary {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+  
+  .modal-btn-secondary:hover {
+    border-color: var(--primary);
+    background: rgba(59, 130, 246, 0.1);
+  }
+  
+  .modal-btn-success {
+    background: var(--success);
+    color: white;
+  }
+  
+  .modal-btn-warning {
+    background: var(--warning);
+    color: white;
+  }
+  
+  .modal-btn-danger {
+    background: var(--danger);
+    color: white;
+  }
+  
+  /* 输入框和文本域 */
+  .modal-input,
+  .modal-textarea,
+  .modal-select {
+    width: 100%;
+    padding: 12px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 13px;
+    margin-bottom: 16px;
+    transition: all 0.3s;
+  }
+  
+  .modal-input:focus,
+  .modal-textarea:focus,
+  .modal-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(59, 130, 246, 0.05);
+  }
+  
+  .modal-textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+  
+  .modal-label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+  
+  /* 评分星星 */
+  .modal-rating {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 20px 0;
+  }
+  
+  .modal-star {
+    font-size: 32px;
+    cursor: pointer;
+    transition: all 0.3s;
+    opacity: 0.3;
+  }
+  
+  .modal-star:hover {
+    transform: scale(1.2);
+  }
+  
+  .modal-star.active {
+    opacity: 1;
+    animation: starPulse 0.5s ease;
+  }
+  
+  /* Toast 通知样式 */
+  .toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    z-index: 2000;
+    animation: slideInRight 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+  
+  .toast-icon {
+    font-size: 20px;
+  }
+  
+  .toast-message {
+    flex: 1;
+    color: var(--text-primary);
+  }
+  
+  .toast-close {
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+  }
+  
+  .toast-close:hover {
+    opacity: 1;
+  }
+  
+  .toast.success {
+    border-color: var(--success);
+    background: linear-gradient(to right, rgba(16, 185, 129, 0.1), var(--bg-card));
+  }
+  
+  .toast.warning {
+    border-color: var(--warning);
+    background: linear-gradient(to right, rgba(245, 158, 11, 0.1), var(--bg-card));
+  }
+  
+  .toast.error {
+    border-color: var(--danger);
+    background: linear-gradient(to right, rgba(239, 68, 68, 0.1), var(--bg-card));
+  }
+  
+  .toast.info {
+    border-color: var(--info);
+    background: linear-gradient(to right, rgba(6, 182, 212, 0.1), var(--bg-card));
+  }
+  
+  /* 动画 */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes starPulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.3);
+    }
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
   
   /* 响应式 */
@@ -724,6 +970,10 @@
     }
     .action-buttons{
       grid-template-columns:1fr;
+    }
+    .modal-container {
+      max-width: 95%;
+      padding: 24px;
     }
   }
 </style>
@@ -832,7 +1082,7 @@
     
     <!-- 中间主要内容 -->
     <div>
-      <!-- 聊天窗口（移到上方） -->
+      <!-- 聊天窗口 -->
       <div class="card chat-container">
         <div class="chat-header">
           <h3 style="font-size:16px;">💬 交易沟通</h3>
@@ -847,8 +1097,6 @@
             <span class="system-text" id="chatInitMessage">交易已创建，双方可开始沟通</span>
           </div>
           
-          <!-- 客服消息将通过JavaScript动态添加，每5秒一条 -->
-          
           <div class="system-message">
             <span class="system-text">系统提示：请在平台内完成交易，注意保护个人信息</span>
           </div>
@@ -860,7 +1108,7 @@
         </div>
       </div>
       
-      <!-- 操作面板（移到下方） -->
+      <!-- 操作面板 -->
       <div class="action-panel">
         <h3 class="action-title">⚡ 交易操作</h3>
         <div class="action-buttons">
@@ -893,7 +1141,7 @@
           <label style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;display:block;">
             争议原因
           </label>
-          <select style="width:100%;padding:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);">
+          <select class="modal-select" id="disputeReason">
             <option>未收到商品</option>
             <option>商品与描述不符</option>
             <option>商品质量问题</option>
@@ -906,8 +1154,7 @@
           <label style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;display:block;">
             详细说明
           </label>
-          <textarea style="width:100%;min-height:80px;padding:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);resize:vertical;" 
-                    placeholder="请详细描述问题..."></textarea>
+          <textarea class="modal-textarea" id="disputeDetail" placeholder="请详细描述问题..."></textarea>
         </div>
         
         <div class="evidence-upload" onclick="document.getElementById('evidenceFile').click()">
@@ -924,12 +1171,10 @@
         </div>
         
         <div style="display:flex;gap:12px;margin-top:16px;">
-          <button style="flex:1;padding:12px;background:var(--bg-hover);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);cursor:pointer;" 
-                  onclick="closeDispute()">
+          <button class="modal-btn modal-btn-secondary" onclick="closeDispute()">
             取消
           </button>
-          <button style="flex:1;padding:12px;background:var(--warning);border:none;border-radius:8px;color:white;font-weight:600;cursor:pointer;" 
-                  onclick="submitDispute()">
+          <button class="modal-btn modal-btn-warning" onclick="submitDispute()">
             提交争议
           </button>
         </div>
@@ -1080,140 +1325,320 @@ const networkTypeMap = {
   'BEP20': 'BEP-20'
 };
 
-// ★★★ 联系客服功能 ★★★
-function contactSupport() {
-  window.open('https://t.me/tommy_chan', '_blank');
-}
+// ========== 统一的弹窗系统 ==========
 
-// ★★★ 输出凭证功能 ★★★
-function exportReceipt() {
-  // 生成凭证内容
-  const receiptHTML = `
-    <div id="receiptModal" class="receipt-modal">
-      <div class="receipt-content">
-        <div class="receipt-header">
-          <div class="receipt-title">🔒 SafePay 交易凭证</div>
-          <div class="receipt-subtitle">交易编号: ${transactionData.id || '--'}</div>
-        </div>
+// 显示自定义弹窗
+function showModal(options) {
+  const {
+    icon = '',
+    title = '提示',
+    subtitle = '',
+    content = '',
+    type = 'info',
+    size = 'medium',
+    buttons = [
+      { text: '确定', type: 'primary', action: () => closeModal() }
+    ],
+    onClose = null
+  } = options;
+  
+  const iconMap = {
+    success: '✅',
+    warning: '⚠️',
+    error: '❌',
+    info: 'ℹ️',
+    question: '❓'
+  };
+  
+  const modalHTML = `
+    <div id="customModal" class="modal-overlay">
+      <div class="modal-container ${size}">
+        ${icon || iconMap[type] ? `
+          <div class="modal-header">
+            <span class="modal-icon">${icon || iconMap[type]}</span>
+            <div class="modal-title">${title}</div>
+            ${subtitle ? `<div class="modal-subtitle">${subtitle}</div>` : ''}
+          </div>
+        ` : `
+          <div class="modal-header">
+            <div class="modal-title">${title}</div>
+            ${subtitle ? `<div class="modal-subtitle">${subtitle}</div>` : ''}
+          </div>
+        `}
         
-        <div class="receipt-section">
-          <div class="receipt-section-title">基本信息</div>
-          <div class="receipt-row">
-            <span>交易编号</span>
-            <span>${transactionData.id || '--'}</span>
-          </div>
-          <div class="receipt-row">
-            <span>创建时间</span>
-            <span>${transactionData.createdAt ? formatDateTimeShort(new Date(transactionData.createdAt)) : '--'}</span>
-          </div>
-          <div class="receipt-row">
-            <span>交易类型</span>
-            <span>${transactionTypeMap[transactionData.transactionType] || '--'}</span>
-          </div>
-          <div class="receipt-row">
-            <span>托管期限</span>
-            <span>${escrowPeriodMap[transactionData.escrowPeriod] || '--'}</span>
-          </div>
-        </div>
+        ${content ? `<div class="modal-body">${content}</div>` : ''}
         
-        <div class="receipt-section">
-          <div class="receipt-section-title">交易双方</div>
-          <div class="receipt-row">
-            <span>买方地址</span>
-            <span style="font-family:monospace;font-size:11px;">${transactionData.role === 'buyer' ? transactionData.userAddress : transactionData.counterpartyAddress || '--'}</span>
-          </div>
-          <div class="receipt-row">
-            <span>买方信誉</span>
-            <span>${transactionData.role === 'buyer' ? transactionData.userScore : transactionData.counterpartyScore || '--'}分</span>
-          </div>
-          <div class="receipt-row">
-            <span>卖方地址</span>
-            <span style="font-family:monospace;font-size:11px;">${transactionData.role === 'seller' ? transactionData.userAddress : transactionData.counterpartyAddress || '--'}</span>
-          </div>
-          <div class="receipt-row">
-            <span>卖方信誉</span>
-            <span>${transactionData.role === 'seller' ? transactionData.userScore : transactionData.counterpartyScore || '--'}分</span>
-          </div>
-        </div>
-        
-        <div class="receipt-section">
-          <div class="receipt-section-title">资金信息</div>
-          <div class="receipt-row">
-            <span>交易金额</span>
-            <span>${parseFloat(transactionData.amount || 0).toFixed(2)} USDT</span>
-          </div>
-          <div class="receipt-row">
-            <span>服务费</span>
-            <span>${parseFloat(transactionData.serviceFee || 0).toFixed(2)} USDT</span>
-          </div>
-          <div class="receipt-row">
-            <span>网络费</span>
-            <span>${parseFloat(transactionData.networkFee || 0).toFixed(2)} USDT</span>
-          </div>
-          <div class="receipt-row">
-            <span>保证金</span>
-            <span>${parseFloat(transactionData.deposit || 0).toFixed(2)} USDT</span>
-          </div>
-          <div class="receipt-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px;font-weight:600;">
-            <span>托管总额</span>
-            <span style="color:var(--primary);">${parseFloat(transactionData.totalAmount || 0).toFixed(2)} USDT</span>
-          </div>
-        </div>
-        
-        <div class="receipt-section">
-          <div class="receipt-section-title">区块链信息</div>
-          <div class="receipt-row">
-            <span>网络类型</span>
-            <span>${networkTypeMap[transactionData.network] || '--'}</span>
-          </div>
-          <div class="receipt-row">
-            <span>支付哈希</span>
-            <span style="font-family:monospace;font-size:10px;">${transactionData.txHash || generateTxHash()}</span>
-          </div>
-          <div class="receipt-row">
-            <span>托管合约</span>
-            <span style="font-family:monospace;font-size:10px;">${generateEscrowContract(transactionData.network, transactionData.id)}</span>
-          </div>
-          <div class="receipt-row">
-            <span>区块确认</span>
-            <span>${calculateConfirmations(transactionData.paymentTime, transactionData.network)} 确认</span>
-          </div>
-          <div class="receipt-row">
-            <span>验证状态</span>
-            <span style="color:var(--success);">✅ 已验证</span>
-          </div>
-        </div>
-        
-        <div class="receipt-section">
-          <div class="receipt-section-title">交易描述</div>
-          <div style="padding:8px 0;font-size:12px;line-height:1.6;color:var(--text-secondary);">
-            ${transactionData.description || '暂无描述'}
-          </div>
-        </div>
-        
-        <div class="receipt-actions">
-          <button class="receipt-btn receipt-btn-secondary" onclick="closeReceipt()">关闭</button>
-          <button class="receipt-btn receipt-btn-primary" onclick="printReceipt()">打印凭证</button>
+        <div class="modal-actions">
+          ${buttons.map((btn, index) => `
+            <button class="modal-btn modal-btn-${btn.type || 'secondary'}" 
+                    onclick="handleModalAction(${index})">
+              ${btn.text}
+            </button>
+          `).join('')}
         </div>
       </div>
     </div>
   `;
   
-  document.body.insertAdjacentHTML('beforeend', receiptHTML);
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  
+  // 保存按钮动作
+  window.modalButtons = buttons;
+  window.modalOnClose = onClose;
 }
 
-// 关闭凭证弹窗
-function closeReceipt() {
-  const modal = document.getElementById('receiptModal');
-  if (modal) modal.remove();
+// 处理弹窗按钮动作
+function handleModalAction(index) {
+  const button = window.modalButtons[index];
+  if (button.action) {
+    button.action();
+  }
+  if (!button.preventClose) {
+    closeModal();
+  }
 }
 
-// 打印凭证
-function printReceipt() {
-  window.print();
+// 关闭弹窗
+function closeModal() {
+  const modal = document.getElementById('customModal');
+  if (modal) {
+    modal.remove();
+    if (window.modalOnClose) {
+      window.modalOnClose();
+    }
+  }
 }
 
-// 生成交易哈希（如果没有的话）
+// 显示 Toast 通知
+function showToast(message, type = 'info', duration = 3000) {
+  const iconMap = {
+    success: '✅',
+    warning: '⚠️',
+    error: '❌',
+    info: 'ℹ️'
+  };
+  
+  const toastHTML = `
+    <div class="toast ${type}" id="toast-${Date.now()}">
+      <span class="toast-icon">${iconMap[type]}</span>
+      <span class="toast-message">${message}</span>
+      <span class="toast-close" onclick="this.parentElement.remove()">✕</span>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', toastHTML);
+  
+  const toast = document.body.lastElementChild;
+  setTimeout(() => {
+    if (toast && toast.parentElement) {
+      toast.remove();
+    }
+  }, duration);
+}
+
+// 替换原生 alert
+window.customAlert = function(message, type = 'info') {
+  showModal({
+    type: type,
+    title: type === 'success' ? '成功' : type === 'error' ? '错误' : type === 'warning' ? '警告' : '提示',
+    content: message,
+    size: 'small',
+    buttons: [
+      { text: '确定', type: 'primary' }
+    ]
+  });
+};
+
+// 替换原生 confirm
+window.customConfirm = function(message, onConfirm, onCancel) {
+  showModal({
+    type: 'question',
+    title: '确认',
+    content: message,
+    size: 'small',
+    buttons: [
+      { text: '取消', type: 'secondary', action: onCancel },
+      { text: '确定', type: 'primary', action: onConfirm }
+    ]
+  });
+};
+
+// 替换原生 prompt
+window.customPrompt = function(message, defaultValue = '', onSubmit) {
+  const inputId = 'prompt-input-' + Date.now();
+  
+  showModal({
+    type: 'question',
+    title: '输入',
+    content: `
+      <div>${message}</div>
+      <input type="text" class="modal-input" id="${inputId}" value="${defaultValue}" style="margin-top:16px;">
+    `,
+    size: 'small',
+    buttons: [
+      { text: '取消', type: 'secondary' },
+      { 
+        text: '确定', 
+        type: 'primary',
+        action: () => {
+          const value = document.getElementById(inputId).value;
+          if (onSubmit) onSubmit(value);
+        }
+      }
+    ]
+  });
+  
+  // 聚焦输入框
+  setTimeout(() => {
+    const input = document.getElementById(inputId);
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  }, 100);
+};
+
+// ========== 业务逻辑 ==========
+
+// 联系客服功能
+function contactSupport() {
+  showModal({
+    icon: '💬',
+    title: '联系客服',
+    content: '即将跳转到 Telegram 客服...',
+    type: 'info',
+    size: 'small',
+    buttons: [
+      { text: '取消', type: 'secondary' },
+      { 
+        text: '确定', 
+        type: 'primary',
+        action: () => window.open('https://t.me/tommy_chan', '_blank')
+      }
+    ]
+  });
+}
+
+// 输出凭证功能
+function exportReceipt() {
+  const receiptContent = `
+    <div class="modal-info-section">
+      <div class="modal-info-title">基本信息</div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">交易编号</span>
+        <span class="modal-info-value">${transactionData.id || '--'}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">创建时间</span>
+        <span class="modal-info-value">${transactionData.createdAt ? formatDateTimeShort(new Date(transactionData.createdAt)) : '--'}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">交易类型</span>
+        <span class="modal-info-value">${transactionTypeMap[transactionData.transactionType] || '--'}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">托管期限</span>
+        <span class="modal-info-value">${escrowPeriodMap[transactionData.escrowPeriod] || '--'}</span>
+      </div>
+    </div>
+    
+    <div class="modal-info-section">
+      <div class="modal-info-title">交易双方</div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">买方地址</span>
+        <span class="modal-info-value" style="font-family:monospace;font-size:11px;">${transactionData.role === 'buyer' ? transactionData.userAddress : transactionData.counterpartyAddress || '--'}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">买方信誉</span>
+        <span class="modal-info-value">${transactionData.role === 'buyer' ? transactionData.userScore : transactionData.counterpartyScore || '--'}分</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">卖方地址</span>
+        <span class="modal-info-value" style="font-family:monospace;font-size:11px;">${transactionData.role === 'seller' ? transactionData.userAddress : transactionData.counterpartyAddress || '--'}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">卖方信誉</span>
+        <span class="modal-info-value">${transactionData.role === 'seller' ? transactionData.userScore : transactionData.counterpartyScore || '--'}分</span>
+      </div>
+    </div>
+    
+    <div class="modal-info-section">
+      <div class="modal-info-title">资金信息</div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">交易金额</span>
+        <span class="modal-info-value">${parseFloat(transactionData.amount || 0).toFixed(2)} USDT</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">服务费</span>
+        <span class="modal-info-value">${parseFloat(transactionData.serviceFee || 0).toFixed(2)} USDT</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">网络费</span>
+        <span class="modal-info-value">${parseFloat(transactionData.networkFee || 0).toFixed(2)} USDT</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">保证金</span>
+        <span class="modal-info-value">${parseFloat(transactionData.deposit || 0).toFixed(2)} USDT</span>
+      </div>
+      <div class="modal-info-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px;font-weight:600;">
+        <span class="modal-info-label">托管总额</span>
+        <span class="modal-info-value" style="color:var(--primary);">${parseFloat(transactionData.totalAmount || 0).toFixed(2)} USDT</span>
+      </div>
+    </div>
+    
+    <div class="modal-info-section">
+      <div class="modal-info-title">区块链信息</div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">网络类型</span>
+        <span class="modal-info-value">${networkTypeMap[transactionData.network] || '--'}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">支付哈希</span>
+        <span class="modal-info-value" style="font-family:monospace;font-size:10px;">${transactionData.txHash || generateTxHash()}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">托管合约</span>
+        <span class="modal-info-value" style="font-family:monospace;font-size:10px;">${generateEscrowContract(transactionData.network, transactionData.id)}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">区块确认</span>
+        <span class="modal-info-value">${calculateConfirmations(transactionData.paymentTime, transactionData.network)} 确认</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">验证状态</span>
+        <span class="modal-info-value" style="color:var(--success);">✅ 已验证</span>
+      </div>
+    </div>
+    
+    <div class="modal-info-section">
+      <div class="modal-info-title">交易描述</div>
+      <div style="padding:8px 0;font-size:12px;line-height:1.6;color:var(--text-secondary);">
+        ${transactionData.description || '暂无描述'}
+      </div>
+    </div>
+  `;
+  
+  showModal({
+    icon: '🔒',
+    title: 'SafePay 交易凭证',
+    subtitle: `交易编号: ${transactionData.id || '--'}`,
+    content: receiptContent,
+    size: 'large',
+    buttons: [
+      { text: '关闭', type: 'secondary' },
+      { 
+        text: '打印凭证', 
+        type: 'primary',
+        action: () => {
+          window.print();
+        },
+        preventClose: true
+      }
+    ]
+  });
+}
+
+// 生成交易哈希
 function generateTxHash() {
   const chars = '0123456789abcdef';
   let hash = '0x';
@@ -1223,7 +1648,7 @@ function generateTxHash() {
   return hash;
 }
 
-// ★★★ 核心修改：初始化时加载传输的数据 ★★★
+// 初始化
 document.addEventListener('DOMContentLoaded', function() {
   // 读取传输的数据
   let savedData = sessionStorage.getItem('currentTransaction');
@@ -1236,9 +1661,9 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       transactionData = JSON.parse(savedData);
       
-      console.log('加载的交易数据:', transactionData); // 调试用
+      console.log('加载的交易数据:', transactionData);
       
-      // ★★★ 动态更新页面 ★★★
+      // 动态更新页面
       updatePageWithTransactionData(transactionData);
       
       // 计算托管剩余时间
@@ -1246,13 +1671,17 @@ document.addEventListener('DOMContentLoaded', function() {
       
     } catch (e) {
       console.error('解析交易数据失败:', e);
-      alert('⚠️ 交易数据加载失败，请重试');
-      window.location.href = './dbjy1.html';
+      customAlert('交易数据加载失败，请重试', 'error');
+      setTimeout(() => {
+        window.location.href = './dbjy1.html';
+      }, 2000);
       return;
     }
   } else {
-    alert('⚠️ 未找到交易信息，请重新创建订单');
-    window.location.href = './dbjy1.html';
+    customAlert('未找到交易信息，请重新创建订单', 'warning');
+    setTimeout(() => {
+      window.location.href = './dbjy1.html';
+    }, 2000);
     return;
   }
   
@@ -1260,11 +1689,11 @@ document.addEventListener('DOMContentLoaded', function() {
   startAutoReleaseTimer();
   setupWebSocket();
   
-  // ★★★ 新增：启动客服消息发送定时器，每5秒一条 ★★★
+  // 启动客服消息发送定时器
   startCustomerServiceMessages();
 });
 
-// ★★★ 新增：客服消息定时发送函数 ★★★
+// 客服消息定时发送
 function startCustomerServiceMessages() {
   const customerServiceMessages = [
     '现在开始交易',
@@ -1276,7 +1705,6 @@ function startCustomerServiceMessages() {
   
   let messageIndex = 0;
   
-  // 延迟5秒后开始发送第一条客服消息
   setTimeout(() => {
     const sendNextMessage = () => {
       if (messageIndex < customerServiceMessages.length) {
@@ -1296,7 +1724,6 @@ function startCustomerServiceMessages() {
         
         messageIndex++;
         
-        // 如果还有更多消息，5秒后发送下一条
         if (messageIndex < customerServiceMessages.length) {
           setTimeout(sendNextMessage, 5000);
         }
@@ -1304,12 +1731,12 @@ function startCustomerServiceMessages() {
     };
     
     sendNextMessage();
-  }, 5000); // 第一条消息延迟5秒
+  }, 5000);
 }
 
-// ★★★ 新增：更新页面数据函数 ★★★
+// 更新页面数据
 function updatePageWithTransactionData(data) {
-  console.log('更新页面数据:', data); // 调试用
+  console.log('更新页面数据:', data);
   
   // 更新面包屑导航
   document.getElementById('breadcrumbTxId').textContent = data.id || 'ESC--';
@@ -1325,19 +1752,19 @@ function updatePageWithTransactionData(data) {
   const roleText = data.role === 'buyer' ? '买方' : '卖方';
   document.getElementById('createDesc').textContent = `${roleText}发起担保交易`;
   
-  // 更新支付信息 - 使用实际总额
+  // 更新支付信息
   if (data.paymentTime) {
     const payDate = new Date(data.paymentTime);
     document.getElementById('paymentTimeTimeline').textContent = formatDateTime(payDate);
   }
   
-  // ★★★ 修复：正确计算并显示支付金额 ★★★
+  // 修复：正确计算并显示支付金额
   const totalForDisplay = parseFloat(data.totalAmount) || 
     (parseFloat(data.amount || 0) + parseFloat(data.serviceFee || 0) + 
      parseFloat(data.networkFee || 0) + parseFloat(data.deposit || 0));
   document.getElementById('paymentDesc').textContent = totalForDisplay.toFixed(2) + ' USDT';
   
-  // 更新验证时间（支付时间后1分钟）
+  // 更新验证时间
   if (data.verificationTime) {
     const verifyDate = new Date(data.verificationTime);
     verifyDate.setSeconds(verifyDate.getSeconds() + 60);
@@ -1369,14 +1796,13 @@ function updatePageWithTransactionData(data) {
   document.getElementById('escrowPeriodDetail').textContent = 
     escrowPeriodMap[data.escrowPeriod] || data.escrowPeriod + '小时' || '--';
   
-  // ★★★ 修复：更新交易双方地址和信誉分 ★★★
+  // 更新交易双方地址和信誉分
   if (data.role === 'buyer') {
     // 买方是用户自己
     const buyerAddr = data.userAddress || '--';
     document.getElementById('buyerAddress').textContent = 
       buyerAddr.length > 10 ? buyerAddr.substring(0, 4) + '...' + buyerAddr.substring(buyerAddr.length - 4) : buyerAddr;
     
-    // 用户信誉分（从第一个页面传递的是80分）
     const buyerScore = data.userScore || 80;
     document.getElementById('buyerRep').textContent = '⭐ ' + buyerScore + '分';
     
@@ -1385,7 +1811,6 @@ function updatePageWithTransactionData(data) {
     document.getElementById('sellerAddress').textContent = 
       sellerAddr.length > 10 ? sellerAddr.substring(0, 4) + '...' + sellerAddr.substring(sellerAddr.length - 4) : sellerAddr;
     
-    // 对方信誉分（也是80分）
     const sellerScore = data.counterpartyScore || 80;
     document.getElementById('sellerRep').textContent = '⭐ ' + sellerScore + '分';
   } else {
@@ -1406,13 +1831,13 @@ function updatePageWithTransactionData(data) {
     document.getElementById('buyerRep').textContent = '⭐ ' + buyerScore + '分';
   }
   
-  // ★★★ 修复：更新资金信息 - 确保所有金额正确显示 ★★★
+  // 更新资金信息
   const amount = parseFloat(data.amount) || 0;
   const serviceFee = parseFloat(data.serviceFee) || 0;
   const networkFee = parseFloat(data.networkFee) || 0;
   const deposit = parseFloat(data.deposit) || 0;
   
-  console.log('金额详情:', {amount, serviceFee, networkFee, deposit}); // 调试用
+  console.log('金额详情:', {amount, serviceFee, networkFee, deposit});
   
   // 显示各项费用
   document.getElementById('txAmount').textContent = amount.toFixed(2) + ' USDT';
@@ -1422,15 +1847,13 @@ function updatePageWithTransactionData(data) {
   
   // 计算并显示托管总额
   const calculatedTotal = amount + serviceFee + networkFee + deposit;
-  
-  // 如果传输的总额与计算的总额不一致，使用传输的值
   const finalTotal = data.totalAmount ? parseFloat(data.totalAmount) : calculatedTotal;
   
-  console.log('总额计算:', {calculatedTotal, dataTotal: data.totalAmount, finalTotal}); // 调试用
+  console.log('总额计算:', {calculatedTotal, dataTotal: data.totalAmount, finalTotal});
   
   document.getElementById('totalAmount').textContent = finalTotal.toFixed(2) + ' USDT';
   
-  // ★★★ 更新区块链信息 ★★★
+  // 更新区块链信息
   document.getElementById('networkType').textContent = 
     networkTypeMap[data.network] || data.network || '--';
   
@@ -1440,7 +1863,7 @@ function updatePageWithTransactionData(data) {
     const shortHash = hash.length > 16 ? 
       hash.substring(0, 8) + '...' + hash.substring(hash.length - 6) : hash;
     document.getElementById('txHashShort').textContent = shortHash;
-    document.getElementById('txHashShort').title = hash; // 鼠标悬停显示完整哈希
+    document.getElementById('txHashShort').title = hash;
   } else {
     const hash = generateTxHash();
     const shortHash = hash.substring(0, 8) + '...' + hash.substring(hash.length - 6);
@@ -1470,14 +1893,11 @@ function updatePageWithTransactionData(data) {
   }
 }
 
-// ★★★ 新增：辅助函数 ★★★
-// 生成托管合约地址（基于交易ID生成唯一地址）
+// 辅助函数
 function generateEscrowContract(network, txId) {
-  // 使用交易ID生成唯一的合约地址
   const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
   let hash = '';
   
-  // 基于txId生成伪随机字符
   const seed = txId ? txId.replace(/[^0-9A-Z]/gi, '') : Date.now().toString();
   
   for (let i = 0; i < 8; i++) {
@@ -1485,49 +1905,40 @@ function generateEscrowContract(network, txId) {
     hash += chars[index];
   }
   
-  // 根据不同网络生成不同格式的地址
   if (network === 'TRC20') {
-    // TRC20地址格式：T开头
     return `T${hash.substring(0, 4)}...${hash.substring(4, 8)}`;
   } else if (network === 'ERC20' || network === 'BEP20') {
-    // ERC20/BEP20地址格式：0x开头
     return `0x${hash.substring(0, 4).toLowerCase()}...${hash.substring(4, 8).toLowerCase()}`;
   } else {
-    // 默认TRC20格式
     return `T${hash.substring(0, 4)}...${hash.substring(4, 8)}`;
   }
 }
 
-// 计算区块确认数（模拟）
 function calculateConfirmations(paymentTime, network) {
   if (!paymentTime) return 19;
   
   const blockTimes = {
-    'TRC20': 3,    // 3秒一个块
-    'ERC20': 15,   // 15秒一个块
-    'BEP20': 3     // 3秒一个块
+    'TRC20': 3,
+    'ERC20': 15,
+    'BEP20': 3
   };
   
   const blockTime = blockTimes[network] || 3;
   const payTime = new Date(paymentTime).getTime();
   const now = Date.now();
-  const elapsed = Math.floor((now - payTime) / 1000); // 秒
+  const elapsed = Math.floor((now - payTime) / 1000);
   const confirmations = Math.floor(elapsed / blockTime);
   
-  // 最少返回19个确认
   return Math.max(19, confirmations);
 }
 
-// ★★★ 新增：计算托管剩余时间 ★★★
 function calculateRemainingTime(data) {
   const escrowHours = parseInt(data.escrowPeriod) || 72;
   const totalSeconds = escrowHours * 3600;
   
-  // 如果有剩余时间，使用它；否则使用总时长
   if (data.remainingTime) {
     timeRemaining = data.remainingTime;
   } else if (data.paymentTime) {
-    // 计算从支付时间到现在经过的时间
     const payTime = new Date(data.paymentTime).getTime();
     const now = Date.now();
     const elapsed = Math.floor((now - payTime) / 1000);
@@ -1537,7 +1948,6 @@ function calculateRemainingTime(data) {
   }
 }
 
-// ★★★ 新增：格式化日期时间函数 ★★★
 function formatDateTime(date) {
   return date.toLocaleString('zh-CN', {
     year: 'numeric',
@@ -1577,10 +1987,10 @@ function startAutoReleaseTimer() {
       `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     
     // 提醒通知
-    if (timeRemaining === 86400) { // 24小时
-      showNotification('⏰ 提醒：托管期限剩余24小时');
-    } else if (timeRemaining === 3600) { // 1小时
-      showNotification('⚠️ 警告：托管期限剩余1小时，请尽快确认');
+    if (timeRemaining === 86400) {
+      showToast('托管期限剩余24小时', 'warning');
+    } else if (timeRemaining === 3600) {
+      showToast('托管期限剩余1小时，请尽快确认', 'warning');
     }
   }, 1000);
 }
@@ -1588,16 +1998,19 @@ function startAutoReleaseTimer() {
 // 自动释放处理
 function handleAutoRelease() {
   const roleText = transactionData.role === 'buyer' ? '卖方' : '买方';
-  if (confirm(`托管期限已到，系统将自动释放资金给${roleText}。\n\n如有问题请立即发起争议！`)) {
-    updateTransactionStatus('AUTO_RELEASED');
-  }
+  customConfirm(
+    `托管期限已到，系统将自动释放资金给${roleText}。\n\n如有问题请立即发起争议！`,
+    () => {
+      updateTransactionStatus('AUTO_RELEASED');
+      showToast('资金已自动释放', 'success');
+    }
+  );
 }
 
-// WebSocket连接（模拟实时通信）
+// WebSocket连接
 function setupWebSocket() {
   console.log('WebSocket connected');
   
-  // ★★★ 修改：30秒后添加卖方消息（如果需要的话） ★★★
   setTimeout(() => {
     const sellerMessage = {
       type: 'seller',
@@ -1605,7 +2018,7 @@ function setupWebSocket() {
     };
     
     receiveMessage(sellerMessage);
-  }, 30000); // 30秒
+  }, 30000);
 }
 
 // 发送消息
@@ -1615,7 +2028,6 @@ function sendMessage() {
   
   if (!message) return;
   
-  // 添加消息到聊天窗口（不显示时间）
   const messagesContainer = document.getElementById('chatMessages');
   const messageHTML = `
     <div class="message self">
@@ -1632,7 +2044,6 @@ function sendMessage() {
   
   input.value = '';
   
-  // 模拟客服自动回复
   if (message.includes('客服') || message.includes('帮助')) {
     setTimeout(() => {
       receiveMessage({
@@ -1643,7 +2054,7 @@ function sendMessage() {
   }
 }
 
-// 接收消息（不显示时间）
+// 接收消息
 function receiveMessage(data) {
   const messagesContainer = document.getElementById('chatMessages');
   
@@ -1655,7 +2066,6 @@ function receiveMessage(data) {
     `;
     messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
   } else if (data.type === 'service') {
-    // 客服消息
     const messageHTML = `
       <div class="message">
         <div class="message-avatar" style="background:var(--warning);">客服</div>
@@ -1667,7 +2077,6 @@ function receiveMessage(data) {
     `;
     messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
   } else if (data.type === 'seller') {
-    // 卖方消息
     const messageHTML = `
       <div class="message">
         <div class="message-avatar">卖</div>
@@ -1679,7 +2088,6 @@ function receiveMessage(data) {
     `;
     messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
   } else {
-    // 其他消息类型（保留用于扩展）
     const messageHTML = `
       <div class="message">
         <div class="message-avatar">${data.type === 'buyer' ? '买' : '卖'}</div>
@@ -1700,59 +2108,56 @@ function confirmReceived() {
   const actionText = transactionData.role === 'buyer' ? '商品/服务' : '付款';
   const releaseText = transactionData.role === 'buyer' ? '卖方' : '买方';
   
-  if (confirm(`确认已收到${actionText}？\n\n确认后资金将立即释放给${releaseText}，此操作不可撤销。`)) {
-    showRatingDialog();
-  }
+  customConfirm(
+    `确认已收到${actionText}？\n\n确认后资金将立即释放给${releaseText}，此操作不可撤销。`,
+    () => {
+      showRatingDialog();
+    }
+  );
 }
 
 // 显示评价对话框
 function showRatingDialog() {
-  const dialog = `
-    <div id="ratingDialog" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:1000;">
-      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:400px;width:90%;">
-        <h3 style="text-align:center;margin-bottom:24px;">为本次交易评价</h3>
-        
-        <div style="display:flex;justify-content:center;gap:8px;margin-bottom:20px;">
-          ${[1,2,3,4,5].map(i => `<span onclick="setRating(${i})" style="font-size:32px;cursor:pointer;opacity:0.3;" id="star-${i}">⭐</span>`).join('')}
-        </div>
-        
-        <textarea style="width:100%;min-height:80px;padding:12px;background:var(--bg-hover);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);margin-bottom:20px;" 
-                  placeholder="分享您的交易体验..."></textarea>
-        
-        <div style="display:flex;gap:12px;">
-          <button style="flex:1;padding:12px;background:var(--bg-hover);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);cursor:pointer;" 
-                  onclick="closeRating()">
-            取消
-          </button>
-          <button style="flex:1;padding:12px;background:var(--success);border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;" 
-                  onclick="submitRating()">
-            提交评价
-          </button>
-        </div>
-      </div>
+  const ratingHTML = `
+    <div class="modal-rating">
+      ${[1,2,3,4,5].map(i => `
+        <span class="modal-star" id="star-${i}" onclick="setRating(${i})">⭐</span>
+      `).join('')}
     </div>
+    <textarea class="modal-textarea" id="ratingComment" placeholder="分享您的交易体验..."></textarea>
   `;
   
-  document.body.insertAdjacentHTML('beforeend', dialog);
+  showModal({
+    icon: '⭐',
+    title: '为本次交易评价',
+    content: ratingHTML,
+    size: 'small',
+    buttons: [
+      { text: '取消', type: 'secondary' },
+      { 
+        text: '提交评价', 
+        type: 'success',
+        action: () => {
+          submitRating();
+        }
+      }
+    ]
+  });
 }
 
 // 设置评分
 function setRating(rating) {
   for (let i = 1; i <= 5; i++) {
     const star = document.getElementById(`star-${i}`);
-    star.style.opacity = i <= rating ? '1' : '0.3';
+    if (star) {
+      star.className = i <= rating ? 'modal-star active' : 'modal-star';
+    }
   }
-}
-
-// 关闭评价
-function closeRating() {
-  const dialog = document.getElementById('ratingDialog');
-  if (dialog) dialog.remove();
 }
 
 // 提交评价
 function submitRating() {
-  closeRating();
+  closeModal();
   
   updateTransactionStatus('COMPLETED');
   
@@ -1760,7 +2165,12 @@ function submitRating() {
   document.getElementById('statusBadge').className = 'status-badge status-completed';
   
   const releaseText = transactionData.role === 'buyer' ? '卖方' : '买方';
-  alert(`交易完成！\n\n资金已释放给${releaseText}。\n感谢您的评价！`);
+  
+  showToast('交易完成！感谢您的评价！', 'success');
+  
+  setTimeout(() => {
+    customAlert(`资金已释放给${releaseText}。\n交易圆满完成！`, 'success');
+  }, 500);
 }
 
 // 打开争议
@@ -1777,52 +2187,61 @@ function closeDispute() {
 
 // 提交争议
 function submitDispute() {
-  if (confirm('确定要提交争议申请吗？\n\n提交后，资金将继续冻结，平台将在24小时内介入处理。')) {
-    updateTransactionStatus('DISPUTED');
-    
-    document.getElementById('statusBadge').innerHTML = '⚖️ 争议中';
-    document.getElementById('statusBadge').className = 'status-badge status-disputed';
-    
-    receiveMessage({
-      type: 'system',
-      text: '争议已提交，客服将在24小时内介入处理'
-    });
-    
-    closeDispute();
-    
-    alert('争议申请已提交！\n\n客服将在24小时内联系双方进行处理。');
-  }
+  customConfirm(
+    '确定要提交争议申请吗？\n\n提交后，资金将继续冻结，平台将在24小时内介入处理。',
+    () => {
+      updateTransactionStatus('DISPUTED');
+      
+      document.getElementById('statusBadge').innerHTML = '⚖️ 争议中';
+      document.getElementById('statusBadge').className = 'status-badge status-disputed';
+      
+      receiveMessage({
+        type: 'system',
+        text: '争议已提交，客服将在24小时内介入处理'
+      });
+      
+      closeDispute();
+      
+      showToast('争议申请已提交！客服将在24小时内联系双方进行处理。', 'warning');
+    }
+  );
 }
 
 // 延长期限
 function extendPeriod() {
-  const days = prompt('请输入要延长的天数（1-7）：');
-  if (days && !isNaN(days) && days >= 1 && days <= 7) {
-    const roleText = transactionData.role === 'buyer' ? '买方' : '卖方';
-    const otherRole = transactionData.role === 'buyer' ? '卖方' : '买方';
-    
-    receiveMessage({
-      type: 'system',
-      text: `${roleText}申请延长托管期限 ${days} 天，等待${otherRole}确认`
-    });
-    
-    alert('延长申请已发送给对方，需要对方同意后生效。');
-  }
+  customPrompt('请输入要延长的天数（1-7）：', '3', (days) => {
+    if (days && !isNaN(days) && days >= 1 && days <= 7) {
+      const roleText = transactionData.role === 'buyer' ? '买方' : '卖方';
+      const otherRole = transactionData.role === 'buyer' ? '卖方' : '买方';
+      
+      receiveMessage({
+        type: 'system',
+        text: `${roleText}申请延长托管期限 ${days} 天，等待${otherRole}确认`
+      });
+      
+      showToast('延长申请已发送给对方，需要对方同意后生效。', 'info');
+    } else {
+      showToast('请输入有效的天数（1-7）', 'error');
+    }
+  });
 }
 
 // 申请取消
 function requestCancel() {
-  if (confirm('确定要申请取消交易吗？\n\n需要对方同意才能取消。')) {
-    const roleText = transactionData.role === 'buyer' ? '买方' : '卖方';
-    const otherRole = transactionData.role === 'buyer' ? '卖方' : '买方';
-    
-    receiveMessage({
-      type: 'system',
-      text: `${roleText}申请取消交易，等待${otherRole}确认`
-    });
-    
-    alert('取消申请已发送，需要对方同意后交易才会取消。');
-  }
+  customConfirm(
+    '确定要申请取消交易吗？\n\n需要对方同意才能取消。',
+    () => {
+      const roleText = transactionData.role === 'buyer' ? '买方' : '卖方';
+      const otherRole = transactionData.role === 'buyer' ? '卖方' : '买方';
+      
+      receiveMessage({
+        type: 'system',
+        text: `${roleText}申请取消交易，等待${otherRole}确认`
+      });
+      
+      showToast('取消申请已发送，需要对方同意后交易才会取消。', 'info');
+    }
+  );
 }
 
 // 更新交易状态
@@ -1870,6 +2289,8 @@ document.getElementById('evidenceFile').addEventListener('change', function(e) {
     `;
     evidenceList.insertAdjacentHTML('beforeend', evidenceHTML);
   }
+  
+  showToast('证据文件已添加', 'success');
 });
 
 // 回车发送消息
