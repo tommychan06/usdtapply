@@ -872,7 +872,7 @@
 // 全局变量
 let selectedNetwork = 'TRC20';
 let countdownTimer;
-let timeRemaining = 1785; // 29:45
+let paymentTimeRemaining = 1785; // 29:45 - 这是支付倒计时，不要混淆
 let verificationAttempts = 0;
 let hasValidHash = false;
 let hasPaymentProof = false;
@@ -896,9 +896,11 @@ let transactionData = {
   deposit: 0,
   totalAmount: 0,
   counterpartyAddress: '',
-  escrowPeriod: '72',
+  escrowPeriod: '72',  // ★★★ 重要：这个值会从第一个页面传递过来
   description: '',
   userAddress: '',
+  userScore: 80,
+  counterpartyScore: 80,
   createdAt: new Date().toISOString()
 };
 
@@ -984,6 +986,10 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // ★★★ 动态更新页面显示 ★★★
       updatePageWithTransactionData(transaction);
+      
+      // 添加调试日志
+      console.log('加载的交易数据:', transactionData);
+      console.log('托管期限:', transactionData.escrowPeriod, '小时');
       
     } catch (e) {
       console.error('解析交易数据失败:', e);
@@ -1397,23 +1403,23 @@ function copyAddress() {
   });
 }
 
-// 倒计时
+// 倒计时 - 这是支付倒计时，不是托管倒计时
 function startCountdown() {
   countdownTimer = setInterval(() => {
-    if (timeRemaining <= 0) {
+    if (paymentTimeRemaining <= 0) {
       clearInterval(countdownTimer);
       handleTimeout();
       return;
     }
     
-    timeRemaining--;
-    const minutes = Math.floor(timeRemaining / 60);
-    const seconds = timeRemaining % 60;
+    paymentTimeRemaining--;
+    const minutes = Math.floor(paymentTimeRemaining / 60);
+    const seconds = paymentTimeRemaining % 60;
     document.getElementById('countdown').textContent = 
       `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     
     // 最后5分钟警告
-    if (timeRemaining === 300) {
+    if (paymentTimeRemaining === 300) {
       alert('⚠️ 支付时间仅剩5分钟，请尽快完成支付！');
     }
   }, 1000);
@@ -1447,12 +1453,22 @@ function confirmPayment() {
   saveAndRedirect();
 }
 
-// 保存数据并跳转
+// ★★★ 核心修复：保存数据并跳转 ★★★
 function saveAndRedirect() {
   // 更新交易状态
   transactionData.status = 'PAID';
   transactionData.paymentTime = new Date().toISOString();
-  transactionData.remainingTime = timeRemaining;
+  
+  // ★★★ 关键修复：不要传递支付倒计时作为remainingTime ★★★
+  // 删除这行，让第三个页面根据托管期限自行计算
+  // transactionData.remainingTime = paymentTimeRemaining;  ❌ 删除这行
+  
+  // ★★★ 可选：如果想保留支付倒计时信息，用不同的字段名 ★★★
+  transactionData.paymentCountdownRemaining = paymentTimeRemaining;  // 记录支付页面的剩余时间
+  
+  // ★★★ 确保托管期限被正确传递 ★★★
+  console.log('保存前的托管期限:', transactionData.escrowPeriod, '小时');
+  console.log('完整的交易数据:', transactionData);
   
   // 保存到sessionStorage和localStorage
   sessionStorage.setItem('currentTransaction', JSON.stringify(transactionData));
