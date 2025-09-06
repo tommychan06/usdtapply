@@ -372,7 +372,6 @@
     background:rgba(59,130,246,0.05);
   }
   
-  /* ★★★ 修复下拉选项框样式 ★★★ */
   select{
     width:100%;
     padding:12px 40px 12px 14px;
@@ -414,7 +413,6 @@
     color:white;
   }
   
-  /* Firefox 专门修复 */
   @-moz-document url-prefix(){
     select{
       background-color:var(--bg-hover) !important;
@@ -426,7 +424,6 @@
     }
   }
   
-  /* Webkit内核浏览器修复 */
   @media screen and (-webkit-min-device-pixel-ratio:0){
     select option{
       background-color:#131825 !important;
@@ -712,11 +709,275 @@
   .transaction-id{
     font-family:'Courier New', monospace;
     color:var(--text-muted);
+    font-size:11px;
   }
   
   .transaction-amount{
     font-weight:600;
     color:var(--primary);
+  }
+  
+  /* ========== 统一的弹窗样式 ========== */
+  
+  /* 弹窗遮罩层 */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeInModal 0.3s ease;
+  }
+  
+  /* 弹窗容器 */
+  .modal-container {
+    background: var(--bg-card);
+    background-image: radial-gradient(circle at top left, rgba(59,130,246,0.05), transparent),
+                      radial-gradient(circle at bottom right, rgba(16,185,129,0.05), transparent);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 90%;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 100px rgba(59, 130, 246, 0.1);
+    animation: slideUpModal 0.3s ease;
+  }
+  
+  /* 弹窗大小变体 */
+  .modal-container.small {
+    max-width: 400px;
+  }
+  
+  .modal-container.medium {
+    max-width: 600px;
+  }
+  
+  .modal-container.large {
+    max-width: 800px;
+  }
+  
+  /* 弹窗头部 */
+  .modal-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .modal-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
+  }
+  
+  .modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+  }
+  
+  .modal-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  
+  /* 弹窗内容 */
+  .modal-body {
+    margin-bottom: 24px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+  
+  .modal-info-section {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--bg-hover);
+    border-radius: 12px;
+  }
+  
+  .modal-info-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-secondary);
+  }
+  
+  .modal-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  
+  .modal-info-row:last-child {
+    border-bottom: none;
+  }
+  
+  /* 弹窗动作按钮 */
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  
+  .modal-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    outline: none;
+  }
+  
+  .modal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .modal-btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+  
+  .modal-btn-primary:hover {
+    background: var(--primary-dark);
+  }
+  
+  .modal-btn-secondary {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+  
+  .modal-btn-secondary:hover {
+    border-color: var(--primary);
+    background: rgba(59, 130, 246, 0.1);
+  }
+  
+  .modal-btn-success {
+    background: var(--success);
+    color: white;
+  }
+  
+  .modal-btn-warning {
+    background: var(--warning);
+    color: white;
+  }
+  
+  .modal-btn-danger {
+    background: var(--danger);
+    color: white;
+  }
+  
+  /* Toast 通知样式 */
+  .toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    z-index: 2000;
+    animation: slideInRightToast 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    max-width: 400px;
+  }
+  
+  .toast-icon {
+    font-size: 20px;
+  }
+  
+  .toast-message {
+    flex: 1;
+    color: var(--text-primary);
+  }
+  
+  .toast-close {
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+  }
+  
+  .toast-close:hover {
+    opacity: 1;
+  }
+  
+  .toast.success {
+    border-color: var(--success);
+    background: linear-gradient(to right, rgba(16, 185, 129, 0.1), var(--bg-card));
+  }
+  
+  .toast.warning {
+    border-color: var(--warning);
+    background: linear-gradient(to right, rgba(245, 158, 11, 0.1), var(--bg-card));
+  }
+  
+  .toast.error {
+    border-color: var(--danger);
+    background: linear-gradient(to right, rgba(239, 68, 68, 0.1), var(--bg-card));
+  }
+  
+  .toast.info {
+    border-color: var(--info);
+    background: linear-gradient(to right, rgba(6, 182, 212, 0.1), var(--bg-card));
+  }
+  
+  /* 动画 */
+  @keyframes fadeInModal {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideUpModal {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideInRightToast {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   
   @media (max-width:968px){
@@ -732,6 +993,10 @@
     }
     .login-btn{
       flex:1;
+    }
+    .modal-container {
+      max-width: 95%;
+      padding: 24px;
     }
   }
   
@@ -750,11 +1015,12 @@
       flex-direction:column;
       text-align:center;
     }
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    .modal-container {
+      padding: 20px;
+    }
+    .modal-actions {
+      flex-direction: column;
+    }
   }
 </style>
 </head>
@@ -934,15 +1200,15 @@
           <div class="limit-values">
             <div class="limit-item">
               <span class="limit-label">单笔</span>
-              <span class="limit-amount">$50,000</span>
+              <span class="limit-amount">$150,000</span>
             </div>
             <div class="limit-item">
               <span class="limit-label">每日</span>
-              <span class="limit-amount">$500,000</span>
+              <span class="limit-amount">$1,000,000</span>
             </div>
             <div class="limit-item">
               <span class="limit-label">每月</span>
-              <span class="limit-amount">$10,000,000</span>
+              <span class="limit-amount">$50,000,000</span>
             </div>
           </div>
         </div>
@@ -962,7 +1228,7 @@
             <span class="fee-value" id="feeNetwork">1.00 USDT</span>
           </div>
           <div class="fee-row">
-            <span class="fee-label">风险保证金（可退）</span>
+            <span class="fee-label">风险保证金</span>
             <span class="fee-value" id="feeDeposit">0.00 USDT</span>
           </div>
           <div class="fee-row total">
@@ -1030,27 +1296,7 @@
       <div class="card live-transactions">
         <h3 style="font-size:16px;margin-bottom:16px;">📊 实时交易动态</h3>
         <div id="liveTransactions">
-          <div class="transaction-item">
-            <span class="transaction-status status-active"></span>
-            <div class="transaction-info">
-              <div class="transaction-id">TX#7F9A...3D2E</div>
-              <div><span class="transaction-amount">500 USDT</span> • 刚刚</div>
-            </div>
-          </div>
-          <div class="transaction-item">
-            <span class="transaction-status status-active"></span>
-            <div class="transaction-info">
-              <div class="transaction-id">TX#8B3C...9A1F</div>
-              <div><span class="transaction-amount">1,200 USDT</span> • 2分钟前</div>
-            </div>
-          </div>
-          <div class="transaction-item">
-            <span class="transaction-status status-active"></span>
-            <div class="transaction-info">
-              <div class="transaction-id">TX#5D2E...7C4B</div>
-              <div><span class="transaction-amount">89 USDT</span> • 5分钟前</div>
-            </div>
-          </div>
+          <!-- 动态交易列表 -->
         </div>
       </div>
     </div>
@@ -1064,12 +1310,118 @@ let riskScore = 25;
 let currentUserAddress = '';
 let isLoggedIn = false;
 
-// 示例钱包地址（用于测试）
-const exampleAddresses = {
-  TRC20: 'TN8Rf5PbEXe4XZDGt5H7dQBWoAMphDpg8K',
-  ERC20: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4',
-  BEP20: '0x8617E340b3D01FA5f11f306f4090FD50E238070D'
-};
+// ========== 统一的弹窗系统 ==========
+
+// 显示自定义弹窗
+function showModal(options) {
+  const {
+    icon = '',
+    title = '提示',
+    subtitle = '',
+    content = '',
+    type = 'info',
+    size = 'small',
+    buttons = [
+      { text: '确定', type: 'primary', action: () => closeModal() }
+    ],
+    onClose = null
+  } = options;
+  
+  const iconMap = {
+    success: '✅',
+    warning: '⚠️',
+    error: '❌',
+    info: 'ℹ️',
+    question: '❓'
+  };
+  
+  const modalHTML = `
+    <div id="customModal" class="modal-overlay">
+      <div class="modal-container ${size}">
+        ${icon || iconMap[type] ? `
+          <div class="modal-header">
+            <span class="modal-icon">${icon || iconMap[type]}</span>
+            <div class="modal-title">${title}</div>
+            ${subtitle ? `<div class="modal-subtitle">${subtitle}</div>` : ''}
+          </div>
+        ` : `
+          <div class="modal-header">
+            <div class="modal-title">${title}</div>
+            ${subtitle ? `<div class="modal-subtitle">${subtitle}</div>` : ''}
+          </div>
+        `}
+        
+        ${content ? `<div class="modal-body">${content}</div>` : ''}
+        
+        <div class="modal-actions">
+          ${buttons.map((btn, index) => `
+            <button class="modal-btn modal-btn-${btn.type || 'secondary'}" 
+                    onclick="handleModalAction(${index})">
+              ${btn.text}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  
+  // 保存按钮动作
+  window.modalButtons = buttons;
+  window.modalOnClose = onClose;
+}
+
+// 处理弹窗按钮动作
+function handleModalAction(index) {
+  const button = window.modalButtons[index];
+  if (button.action) {
+    button.action();
+  }
+  if (!button.preventClose) {
+    closeModal();
+  }
+}
+
+// 关闭弹窗
+function closeModal() {
+  const modal = document.getElementById('customModal');
+  if (modal) {
+    modal.remove();
+    if (window.modalOnClose) {
+      window.modalOnClose();
+    }
+  }
+}
+
+// 显示 Toast 通知
+function showToast(message, type = 'info', duration = 3000) {
+  const iconMap = {
+    success: '✅',
+    warning: '⚠️',
+    error: '❌',
+    info: 'ℹ️'
+  };
+  
+  const toastHTML = `
+    <div class="toast ${type}" id="toast-${Date.now()}">
+      <span class="toast-icon">${iconMap[type]}</span>
+      <span class="toast-message">${message}</span>
+      <span class="toast-close" onclick="this.parentElement.remove()">✕</span>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', toastHTML);
+  
+  const toast = document.body.lastElementChild;
+  setTimeout(() => {
+    if (toast && toast.parentElement) {
+      toast.remove();
+    }
+  }, duration);
+}
+
+// ========== 业务逻辑 ==========
 
 // 页面加载时初始化
 window.addEventListener('DOMContentLoaded', function() {
@@ -1089,16 +1441,13 @@ window.addEventListener('DOMContentLoaded', function() {
   // 初始化其他功能
   updateFees();
   startLiveUpdates();
+  initializeLiveTransactions();
 });
 
 // 验证钱包地址格式
 function isValidWalletAddress(address) {
-  // TRC-20 地址：以T开头，长度34位，包含字母数字
   const trc20Pattern = /^T[A-Za-z0-9]{33}$/;
-  
-  // ERC-20/BEP-20 地址：以0x开头，长度42位，包含十六进制字符
   const erc20Pattern = /^0x[a-fA-F0-9]{40}$/;
-  
   return trc20Pattern.test(address) || erc20Pattern.test(address);
 }
 
@@ -1112,82 +1461,100 @@ function detectAddressType(address) {
   return 'Unknown';
 }
 
-// 登入功能 - 固定信誉分为80，KYC为L1
+// 登入功能
 function handleLogin() {
   const addressInput = document.getElementById('walletAddress');
   const address = addressInput.value.trim();
   
   if (!address) {
-    alert('请输入钱包地址');
+    showModal({
+      type: 'warning',
+      title: '请输入钱包地址',
+      content: '请在输入框中填写您的USDT钱包地址',
+      buttons: [
+        { 
+          text: '确定', 
+          type: 'primary',
+          action: () => {
+            document.getElementById('walletAddress').focus();
+          }
+        }
+      ]
+    });
     return;
   }
   
-  // ★★★ 验证钱包地址格式 ★★★
   if (!isValidWalletAddress(address)) {
-    const exampleAddresses = 
-      '支持的钱包地址格式：\n\n' +
-      '• TRC-20 (波场): 以T开头，34位\n' +
-      '  示例: TN8Rf5PbEXe4XZDGt5H7dQBWoAMphDpg8K\n\n' +
-      '• ERC-20 (以太坊): 以0x开头，42位\n' +
-      '  示例: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4\n\n' +
-      '• BEP-20 (币安链): 以0x开头，42位\n' +
-      '  示例: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4\n\n' +
-      '请检查您的钱包地址格式是否正确！';
-    alert(exampleAddresses);
+    showModal({
+      type: 'error',
+      title: '钱包地址格式错误',
+      content: `支持的钱包地址格式：
+
+• TRC-20 (波场): 以T开头，34位
+  示例: TN8Rf5PbEXe4XZDGt5H7dQBWoAMphDpg8K
+
+• ERC-20 (以太坊): 以0x开头，42位
+  示例: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4
+
+• BEP-20 (币安链): 以0x开头，42位
+  示例: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4
+
+请检查您的钱包地址格式是否正确！`,
+      size: 'medium',
+      buttons: [
+        { text: '重新输入', type: 'primary' }
+      ]
+    });
     return;
   }
   
-  // 检测地址类型
   const addressType = detectAddressType(address);
   console.log('钱包地址类型:', addressType);
   
-  // 保存地址并设置登录状态
   currentUserAddress = address;
   isLoggedIn = true;
   
-  // 锁定输入框
   addressInput.disabled = true;
-  
-  // 显示登录状态
   document.getElementById('loginStatusBadge').classList.add('show');
   
-  // 更新用户地址显示
   const shortAddress = address.substring(0, 6) + '...' + address.substring(address.length - 4);
   document.getElementById('userAddressDisplay').textContent = shortAddress;
   document.getElementById('userAddressDisplay').title = address;
   
-  // ★★★ 核心：设置固定的信誉分80和KYC L1 ★★★
   document.getElementById('userScore').textContent = '80';
   document.getElementById('kycLevel').textContent = '1';
   
-  // 显示成功提示（包含地址类型）
-  setTimeout(() => {
-    alert(`登录成功！\n\n钱包地址类型：${addressType}\n钱包地址：${shortAddress}\n\n欢迎使用易趣SafePay担保交易平台`);
-  }, 300);
+  showModal({
+    type: 'success',
+    title: '登录成功',
+    content: `钱包地址类型：${addressType}
+钱包地址：${shortAddress}
+
+欢迎使用易趣SafePay担保交易平台`,
+    buttons: [
+      { text: '开始使用', type: 'primary' }
+    ]
+  });
 }
 
 // 重新登入功能
 function handleReset() {
-  // 重置登录状态
   isLoggedIn = false;
   currentUserAddress = '';
   
-  // 解锁并清空输入框
   const addressInput = document.getElementById('walletAddress');
   addressInput.value = '';
   addressInput.disabled = false;
   
-  // 隐藏登录状态
   document.getElementById('loginStatusBadge').classList.remove('show');
-  
-  // 重置显示
   document.getElementById('userAddressDisplay').textContent = '未登录';
   document.getElementById('userAddressDisplay').title = '';
   document.getElementById('userScore').textContent = '--';
   document.getElementById('kycLevel').textContent = '-';
   
-  // 聚焦输入框
   addressInput.focus();
+  
+  showToast('已退出登录', 'info');
 }
 
 // 角色选择
@@ -1202,7 +1569,6 @@ function selectRole(role, element) {
 function checkAddress(address) {
   if (!address || address.length < 20) return;
   
-  // ★★★ 先验证地址格式 ★★★
   if (!isValidWalletAddress(address)) {
     document.getElementById('addressWarning').innerHTML = 
       '⚠️ 无效的钱包地址格式！请输入正确的TRC-20、ERC-20或BEP-20地址';
@@ -1228,9 +1594,7 @@ function checkAddress(address) {
       document.getElementById('addressRisk').style.color = 'var(--success)';
     }
     
-    // 对方信誉也固定为80分
     document.getElementById('counterpartyRep').textContent = '80 分';
-    
     updateRiskAssessment();
   }, 1000);
 }
@@ -1274,16 +1638,14 @@ function updateRiskAssessment() {
   updateFees();
 }
 
-// ★★★ 修复：更新费用函数 ★★★
+// 更新费用
 function updateFees() {
   const amount = parseFloat(document.getElementById('amount').value) || 0;
   const network = document.getElementById('network').value;
   
-  // 计算服务费（根据风险评分）
   let serviceFeeRate = riskScore < 40 ? 0.005 : riskScore < 70 ? 0.007 : 0.01;
   const serviceFee = amount * serviceFeeRate;
   
-  // 计算网络费
   const networkFees = {
     'TRC20': 1,
     'ERC20': 5,
@@ -1291,13 +1653,10 @@ function updateFees() {
   };
   const networkFee = networkFees[network] || 1;
   
-  // 计算保证金（低/中风险固定5 USDT，高风险按比例）
   const deposit = amount === 0 ? 0 : (riskScore > 70 ? amount * 0.05 : 5);
   
-  // 计算总额
   const totalAmount = amount + serviceFee + networkFee + deposit;
   
-  // 更新页面显示
   document.getElementById('feeAmount').textContent = amount.toFixed(2) + ' USDT';
   document.getElementById('feeService').textContent = serviceFee.toFixed(2) + ' USDT';
   document.getElementById('feeNetwork').textContent = networkFee.toFixed(2) + ' USDT';
@@ -1308,8 +1667,20 @@ function updateFees() {
 // 保存草稿
 function saveDraft() {
   if (!isLoggedIn) {
-    alert('请先登录钱包地址');
-    document.getElementById('walletAddress').focus();
+    showModal({
+      type: 'warning',
+      title: '请先登录',
+      content: '请先登录钱包地址后再保存草稿',
+      buttons: [
+        { 
+          text: '去登录', 
+          type: 'primary',
+          action: () => {
+            document.getElementById('walletAddress').focus();
+          }
+        }
+      ]
+    });
     return;
   }
   
@@ -1325,65 +1696,139 @@ function saveDraft() {
   };
   
   localStorage.setItem('escrowDraft', JSON.stringify(formData));
-  alert('草稿已保存');
+  showToast('草稿已保存', 'success');
 }
 
-// ★★★ 核心修复：提交表单函数 ★★★
+// 提交表单
 function handleFormSubmit(e) {
   e.preventDefault();
   
   if (!isLoggedIn) {
-    alert('请先登录钱包地址');
-    document.getElementById('walletAddress').focus();
+    showModal({
+      type: 'warning',
+      title: '请先登录',
+      content: '请先登录钱包地址后再创建交易',
+      buttons: [
+        { 
+          text: '去登录', 
+          type: 'primary',
+          action: () => {
+            document.getElementById('walletAddress').focus();
+          }
+        }
+      ]
+    });
     return;
   }
   
-  // ★★★ 验证对方钱包地址格式 ★★★
   const counterpartyAddress = document.getElementById('counterpartyAddress').value.trim();
   if (!counterpartyAddress) {
-    alert('请输入对方钱包地址');
-    document.getElementById('counterpartyAddress').focus();
+    showModal({
+      type: 'error',
+      title: '请输入对方钱包地址',
+      content: '对方钱包地址是必填项',
+      buttons: [
+        { 
+          text: '确定', 
+          type: 'primary',
+          action: () => {
+            document.getElementById('counterpartyAddress').focus();
+          }
+        }
+      ]
+    });
     return;
   }
   
   if (!isValidWalletAddress(counterpartyAddress)) {
-    alert('对方钱包地址格式无效！\n\n请确保地址格式正确：\n• TRC-20: T开头，34位\n• ERC-20/BEP-20: 0x开头，42位');
-    document.getElementById('counterpartyAddress').focus();
+    showModal({
+      type: 'error',
+      title: '对方钱包地址格式无效',
+      content: '请确保地址格式正确：\n• TRC-20: T开头，34位\n• ERC-20/BEP-20: 0x开头，42位',
+      buttons: [
+        { 
+          text: '重新输入', 
+          type: 'primary',
+          action: () => {
+            document.getElementById('counterpartyAddress').focus();
+          }
+        }
+      ]
+    });
     return;
   }
   
   const amount = parseFloat(document.getElementById('amount').value);
   
-  // 只检查最小金额
   if (!amount || amount < 10) {
-    alert('最小交易金额为 10 USDT');
-    document.getElementById('amount').focus();
+    showModal({
+      type: 'error',
+      title: '交易金额错误',
+      content: '最小交易金额为 10 USDT',
+      buttons: [
+        { 
+          text: '确定', 
+          type: 'primary',
+          action: () => {
+            document.getElementById('amount').focus();
+          }
+        }
+      ]
+    });
     return;
   }
   
-  // 验证描述
   const description = document.getElementById('description').value.trim();
   if (description.length < 30) {
-    alert('交易描述至少需要30个字符，请详细描述交易内容');
-    document.getElementById('description').focus();
+    showModal({
+      type: 'error',
+      title: '描述过短',
+      content: '交易描述至少需要30个字符，请详细描述交易内容',
+      buttons: [
+        { 
+          text: '去完善', 
+          type: 'primary',
+          action: () => {
+            document.getElementById('description').focus();
+          }
+        }
+      ]
+    });
     return;
   }
   
-  // 高风险警告
   if (riskScore > 70) {
-    if (!confirm(`⚠️ 风险提示\n\n当前交易风险评分：${riskScore}\n建议谨慎交易。是否继续？`)) {
-      return;
-    }
+    showModal({
+      type: 'warning',
+      icon: '⚠️',
+      title: '风险提示',
+      content: `当前交易风险评分：${riskScore}
+建议谨慎交易。是否继续？`,
+      buttons: [
+        { text: '取消', type: 'secondary' },
+        { 
+          text: '继续交易', 
+          type: 'warning',
+          action: () => processTransaction()
+        }
+      ]
+    });
+    return;
   }
   
-  // ★★★ 计算所有费用 ★★★
+  processTransaction();
+}
+
+// 处理交易
+function processTransaction() {
+  const amount = parseFloat(document.getElementById('amount').value);
   const network = document.getElementById('network').value;
+  const counterpartyAddress = document.getElementById('counterpartyAddress').value.trim();
+  const description = document.getElementById('description').value.trim();
   
-  // 计算服务费（根据风险评分）
   let serviceFeeRate = riskScore < 40 ? 0.005 : riskScore < 70 ? 0.007 : 0.01;
   const serviceFee = amount * serviceFeeRate;
   
-  // 计算网络费
   const networkFees = {
     'TRC20': 1,
     'ERC20': 5,
@@ -1391,41 +1836,27 @@ function handleFormSubmit(e) {
   };
   const networkFee = networkFees[network] || 1;
   
-  // 计算保证金（低/中风险固定5 USDT，高风险按比例）
   const deposit = riskScore > 70 ? amount * 0.05 : 5;
-  
-  // 计算总额
   const totalAmount = amount + serviceFee + networkFee + deposit;
   
-  console.log('费用计算:', {
+  const txId = 'ESC' + Date.now().toString(36).toUpperCase();
+  
+  const transaction = {
+    id: txId,
+    role: currentRole,
+    userAddress: currentUserAddress,
+    userScore: 80,
+    counterpartyAddress: counterpartyAddress,
+    counterpartyScore: 80,
     amount: amount,
     serviceFee: serviceFee,
     networkFee: networkFee,
     deposit: deposit,
     totalAmount: totalAmount,
-    riskScore: riskScore
-  });
-  
-  // 生成交易ID
-  const txId = 'ESC' + Date.now().toString(36).toUpperCase();
-  
-  // ★★★ 创建包含所有费用信息的交易对象 ★★★
-  const transaction = {
-    id: txId,
-    role: currentRole,
-    userAddress: currentUserAddress,
-    userScore: 80,  // 用户信誉分
-    counterpartyAddress: counterpartyAddress,  // 使用验证过的地址
-    counterpartyScore: 80,  // 对方信誉分
-    amount: amount,
-    serviceFee: serviceFee,      // ✅ 服务费
-    networkFee: networkFee,      // ✅ 网络费
-    deposit: deposit,            // ✅ 保证金
-    totalAmount: totalAmount,    // ✅ 总额
     network: network,
     escrowPeriod: document.getElementById('escrowPeriod').value,
     transactionType: document.getElementById('transactionType').value,
-    description: description,  // 使用验证过的描述
+    description: description,
     riskScore: riskScore,
     status: 'CREATED',
     createdAt: new Date().toISOString()
@@ -1433,47 +1864,169 @@ function handleFormSubmit(e) {
   
   console.log('保存的交易数据:', transaction);
   
-  // 保存到sessionStorage用于页面间传递数据
   sessionStorage.setItem('currentTransaction', JSON.stringify(transaction));
-  
-  // 同时保存到localStorage以便持久化
   localStorage.setItem('latestTransaction', JSON.stringify(transaction));
   
-  // 显示成功提示（包含费用明细）
-  alert(`交易创建成功！\n\n交易ID: ${txId}\n交易金额: ${amount.toFixed(2)} USDT\n服务费: ${serviceFee.toFixed(2)} USDT\n网络费: ${networkFee.toFixed(2)} USDT\n保证金: ${deposit.toFixed(2)} USDT\n总计: ${totalAmount.toFixed(2)} USDT\n\n即将跳转到支付页面...`);
+  // 显示费用明细弹窗
+  const feeDetails = `
+    <div class="modal-info-section">
+      <div class="modal-info-title">费用明细</div>
+      <div class="modal-info-row">
+        <span>交易金额</span>
+        <span>${amount.toFixed(2)} USDT</span>
+      </div>
+      <div class="modal-info-row">
+        <span>服务费</span>
+        <span>${serviceFee.toFixed(2)} USDT</span>
+      </div>
+      <div class="modal-info-row">
+        <span>网络费</span>
+        <span>${networkFee.toFixed(2)} USDT</span>
+      </div>
+      <div class="modal-info-row">
+        <span>保证金</span>
+        <span>${deposit.toFixed(2)} USDT</span>
+      </div>
+      <div class="modal-info-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px;font-weight:600;">
+        <span>总计</span>
+        <span style="color:var(--primary);">${totalAmount.toFixed(2)} USDT</span>
+      </div>
+    </div>
+  `;
   
-  // 跳转到第二个页面
-  setTimeout(() => {
-    window.location.href = './dbjy1.html';
-  }, 500); // 延迟500毫秒让用户看到提示
+  showModal({
+    type: 'success',
+    title: '交易创建成功',
+    subtitle: `交易ID: ${txId}`,
+    content: feeDetails,
+    size: 'medium',
+    buttons: [
+      { 
+        text: '前往支付', 
+        type: 'primary',
+        action: () => {
+          window.location.href = './dbjy1.html';
+        }
+      }
+    ]
+  });
+}
+
+// 初始化实时交易
+function initializeLiveTransactions() {
+  const container = document.getElementById('liveTransactions');
+  if (!container) return;
+  
+  // 初始交易数据
+  const initialTransactions = [
+    { address: 'TN8Rf5Pb...g8K', amount: 500.00, time: '刚刚' },
+    { address: '0x742d35...bEb4', amount: 1200.00, time: '2分钟前' },
+    { address: 'TWqkE8Vt...3nH', amount: 89.99, time: '5分钟前' }
+  ];
+  
+  initialTransactions.forEach(tx => {
+    const item = createTransactionItem(tx.address, tx.amount, tx.time);
+    container.insertAdjacentHTML('beforeend', item);
+  });
+}
+
+// 创建交易项
+function createTransactionItem(address, amount, time) {
+  return `
+    <div class="transaction-item" style="animation: fadeIn 0.5s">
+      <span class="transaction-status status-active"></span>
+      <div class="transaction-info">
+        <div class="transaction-id">${address}</div>
+        <div><span class="transaction-amount">${amount.toFixed(2)} USDT</span> • ${time}</div>
+      </div>
+    </div>
+  `;
+}
+
+// 生成随机地址
+function generateRandomAddress() {
+  const networks = ['TRC20', 'ERC20', 'BEP20'];
+  const network = networks[Math.floor(Math.random() * networks.length)];
+  
+  if (network === 'TRC20') {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789';
+    let middle = '';
+    for (let i = 0; i < 4; i++) {
+      middle += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    let end = '';
+    for (let i = 0; i < 3; i++) {
+      end += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return `T${middle}...${end}`;
+  } else {
+    const hex = '0123456789abcdef';
+    let middle = '';
+    for (let i = 0; i < 6; i++) {
+      middle += hex.charAt(Math.floor(Math.random() * hex.length));
+    }
+    let end = '';
+    for (let i = 0; i < 4; i++) {
+      end += hex.charAt(Math.floor(Math.random() * hex.length));
+    }
+    return `0x${middle}...${end}`;
+  }
+}
+
+// 生成随机金额
+function generateRandomAmount() {
+  const ranges = [
+    { min: 50, max: 200, decimal: true },
+    { min: 200, max: 500, decimal: true },
+    { min: 500, max: 1000, decimal: false },
+    { min: 1000, max: 3000, decimal: false },
+    { min: 3000, max: 10000, decimal: false },
+    { min: 100, max: 999, decimal: true },
+    { min: 50, max: 499, decimal: true }
+  ];
+  
+  const range = ranges[Math.floor(Math.random() * ranges.length)];
+  const base = Math.floor(Math.random() * (range.max - range.min) + range.min);
+  
+  if (range.decimal && Math.random() > 0.3) {
+    const decimal = Math.floor(Math.random() * 99);
+    return base + decimal / 100;
+  }
+  
+  return base;
 }
 
 // 实时交易更新
 function startLiveUpdates() {
   setInterval(() => {
-    const amounts = [50, 100, 200, 500, 1000, 2500, 5000];
-    const amount = amounts[Math.floor(Math.random() * amounts.length)];
-    const txId = Math.random().toString(36).substr(2, 4).toUpperCase();
-    
-    const newTransaction = `
-      <div class="transaction-item" style="animation: fadeIn 0.5s">
-        <span class="transaction-status status-active"></span>
-        <div class="transaction-info">
-          <div class="transaction-id">TX#${txId}...${Math.random().toString(36).substr(2, 4).toUpperCase()}</div>
-          <div><span class="transaction-amount">${amount} USDT</span> • 刚刚</div>
-        </div>
-      </div>
-    `;
-    
     const container = document.getElementById('liveTransactions');
-    if (container) {
-      container.insertAdjacentHTML('afterbegin', newTransaction);
-      
-      while (container.children.length > 5) {
-        container.removeChild(container.lastChild);
+    if (!container) return;
+    
+    const address = generateRandomAddress();
+    const amount = generateRandomAmount();
+    const newTransaction = createTransactionItem(address, amount, '刚刚');
+    
+    container.insertAdjacentHTML('afterbegin', newTransaction);
+    
+    // 更新时间
+    const items = container.querySelectorAll('.transaction-item');
+    items.forEach((item, index) => {
+      if (index === 1) {
+        item.querySelector('.transaction-info > div:last-child').innerHTML = 
+          item.querySelector('.transaction-info > div:last-child').innerHTML.replace(/[^•]+$/, ' 2分钟前');
+      } else if (index === 2) {
+        item.querySelector('.transaction-info > div:last-child').innerHTML = 
+          item.querySelector('.transaction-info > div:last-child').innerHTML.replace(/[^•]+$/, ' 5分钟前');
+      } else if (index === 3) {
+        item.querySelector('.transaction-info > div:last-child').innerHTML = 
+          item.querySelector('.transaction-info > div:last-child').innerHTML.replace(/[^•]+$/, ' 8分钟前');
       }
+    });
+    
+    while (container.children.length > 5) {
+      container.removeChild(container.lastChild);
     }
-  }, 8000);
+  }, Math.random() * 5000 + 5000); // 5-10秒随机
 }
 </script>
 
