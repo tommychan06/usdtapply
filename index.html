@@ -1158,8 +1158,8 @@
         </div>
         
         <div class="form-group">
-          <label>交易描述 <span class="required">*</span></label>
-          <textarea id="description" placeholder="详细描述交易内容，便于争议处理（至少30字）" minlength="30"></textarea>
+          <label>交易描述</label>
+          <textarea id="description" placeholder="详细描述交易内容，便于争议处理"></textarea>
         </div>
         
         <!-- 风险评估 -->
@@ -1490,13 +1490,13 @@ function handleLogin() {
       title: '钱包地址格式错误',
       content: `支持的钱包地址格式：
 
-• TRC-20 (波场): 以T开头，34位
+- TRC-20 (波场): 以T开头，34位
   示例: TN8Rf5PbEXe4XZDGt5H7dQBWoAMphDpg8K
 
-• ERC-20 (以太坊): 以0x开头，42位
+- ERC-20 (以太坊): 以0x开头，42位
   示例: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4
 
-• BEP-20 (币安链): 以0x开头，42位
+- BEP-20 (币安链): 以0x开头，42位
   示例: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4
 
 请检查您的钱包地址格式是否正确！`,
@@ -1778,24 +1778,8 @@ function handleFormSubmit(e) {
     return;
   }
   
+  // 不再对描述进行必填验证
   const description = document.getElementById('description').value.trim();
-  if (description.length < 30) {
-    showModal({
-      type: 'error',
-      title: '描述过短',
-      content: '交易描述至少需要30个字符，请详细描述交易内容',
-      buttons: [
-        { 
-          text: '去完善', 
-          type: 'primary',
-          action: () => {
-            document.getElementById('description').focus();
-          }
-        }
-      ]
-    });
-    return;
-  }
   
   if (riskScore > 70) {
     showModal({
@@ -1856,7 +1840,7 @@ function processTransaction() {
     network: network,
     escrowPeriod: document.getElementById('escrowPeriod').value,
     transactionType: document.getElementById('transactionType').value,
-    description: description,
+    description: description || '暂无描述',  // 如果为空则设置默认值
     riskScore: riskScore,
     status: 'CREATED',
     createdAt: new Date().toISOString()
