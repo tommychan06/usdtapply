@@ -1098,7 +1098,7 @@
             transform: none !important;
         }
         
-        /* 支付部分 */
+        /* 支付部分 - 针对370x370二维码优化 */
         .payment-info {
             background: rgba(255, 215, 0, 0.03);
             border: 1px solid rgba(255, 215, 0, 0.2);
@@ -1109,19 +1109,29 @@
         
         .qr-container {
             background: white;
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 320px;          /* 优化后的容器宽度 */
+            height: 320px;         /* 优化后的容器高度 */
+            border-radius: 16px;   /* 稍微增大圆角 */
+            margin: 0 auto 25px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            overflow: hidden;      /* 防止二维码溢出 */
         }
         
         .qr-image {
-            width: 220px;
-            height: 220px;
-            margin: 0 auto;
-            display: block;
-            border-radius: 8px;
+            width: 300px;          /* 适配370x370的二维码 */
+            height: 300px;
+            border-radius: 12px;
+            object-fit: cover;     /* 裁剪多余的白边 */
+            object-position: center;
+            transition: transform 0.3s;
+        }
+        
+        .qr-image:hover {
+            transform: scale(1.02); /* 轻微放大效果 */
         }
         
         .wallet-address {
@@ -1295,7 +1305,7 @@
             color: var(--gold-dark);
         }
         
-        /* 响应式 */
+        /* 响应式设计 - 针对二维码区域优化 */
         @media (max-width: 768px) {
             .logo {
                 font-size: 36px;
@@ -1315,6 +1325,30 @@
             
             .form-buttons {
                 flex-direction: column;
+            }
+            
+            /* 移动端二维码优化 */
+            .qr-container {
+                width: 280px;      /* 移动端减小尺寸 */
+                height: 280px;
+                margin: 0 auto 20px;
+            }
+            
+            .qr-image {
+                width: 260px;      /* 对应调整图片尺寸 */
+                height: 260px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .qr-container {
+                width: 240px;      /* 小屏幕进一步优化 */
+                height: 240px;
+            }
+            
+            .qr-image {
+                width: 220px;
+                height: 220px;
             }
         }
         
@@ -1410,7 +1444,7 @@
     
     <!-- 头部 -->
     <header class="header">
-        <div class="logo">企业优惠券系统</div>
+        <div class="logo">安全教学测试与演示文件，没有任何实际意义！</div>
         <div class="tagline">安全 • 合规 • 专业</div>
     </header>
     
