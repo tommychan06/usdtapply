@@ -1,0 +1,2304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SafePay - 智能交易管理中心</title>
+<style>
+  :root{
+    --bg-dark:#0a0e1a;
+    --bg-card:#131825;
+    --bg-hover:#1a2235;
+    --border:#2a3245;
+    --text-primary:#ffffff;
+    --text-secondary:#94a3b8;
+    --text-muted:#64748b;
+    --primary:#3b82f6;
+    --primary-dark:#2563eb;
+    --success:#10b981;
+    --warning:#f59e0b;
+    --danger:#ef4444;
+    --info:#06b6d4;
+  }
+  
+  *{margin:0;padding:0;box-sizing:border-box}
+  
+  body{
+    background:var(--bg-dark);
+    background-image:radial-gradient(circle at 20% 80%, #1e40af15 0%, transparent 50%),
+                     radial-gradient(circle at 80% 20%, #7c3aed15 0%, transparent 50%);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    color:var(--text-primary);
+    min-height:100vh;
+  }
+  
+  .container{
+    max-width:1400px;
+    margin:0 auto;
+    padding:24px;
+  }
+  
+  /* 头部 */
+  .header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:32px;
+  }
+  
+  .breadcrumb{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    color:var(--text-muted);
+  }
+  
+  .breadcrumb a{
+    color:var(--text-muted);
+    text-decoration:none;
+    transition:color 0.3s;
+  }
+  
+  .breadcrumb a:hover{
+    color:var(--primary);
+  }
+  
+  .header-actions{
+    display:flex;
+    gap:12px;
+  }
+  
+  .header-btn{
+    padding:8px 16px;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--text-primary);
+    font-size:13px;
+    cursor:pointer;
+    transition:all 0.3s;
+  }
+  
+  .header-btn:hover{
+    background:var(--bg-hover);
+    border-color:var(--primary);
+  }
+  
+  /* 主布局 */
+  .main-layout{
+    display:grid;
+    grid-template-columns:300px 1fr 380px;
+    gap:24px;
+  }
+  
+  .card{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:24px;
+  }
+  
+  /* 交易状态卡片 */
+  .status-card{
+    margin-bottom:24px;
+  }
+  
+  .status-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+  }
+  
+  .status-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 16px;
+    border-radius:24px;
+    font-size:13px;
+    font-weight:600;
+  }
+  
+  .status-escrowed{
+    background:rgba(59,130,246,0.1);
+    color:var(--primary);
+    border:1px solid rgba(59,130,246,0.3);
+  }
+  
+  .status-delivering{
+    background:rgba(6,182,212,0.1);
+    color:var(--info);
+    border:1px solid rgba(6,182,212,0.3);
+  }
+  
+  .status-disputed{
+    background:rgba(245,158,11,0.1);
+    color:var(--warning);
+    border:1px solid rgba(245,158,11,0.3);
+  }
+  
+  .status-completed{
+    background:rgba(16,185,129,0.1);
+    color:var(--success);
+    border:1px solid rgba(16,185,129,0.3);
+  }
+  
+  /* 时间线 */
+  .timeline{
+    position:relative;
+    padding-left:32px;
+  }
+  
+  .timeline-line{
+    position:absolute;
+    left:12px;
+    top:20px;
+    bottom:0;
+    width:2px;
+    background:var(--border);
+  }
+  
+  .timeline-item{
+    position:relative;
+    padding-bottom:24px;
+  }
+  
+  .timeline-dot{
+    position:absolute;
+    left:-20px;
+    top:4px;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:var(--bg-card);
+    border:2px solid var(--border);
+  }
+  
+  .timeline-item.completed .timeline-dot{
+    background:var(--success);
+    border-color:var(--success);
+  }
+  
+  .timeline-item.active .timeline-dot{
+    background:var(--primary);
+    border-color:var(--primary);
+    box-shadow:0 0 0 6px rgba(59,130,246,0.1);
+  }
+  
+  .timeline-time{
+    font-size:11px;
+    color:var(--text-muted);
+    margin-bottom:4px;
+  }
+  
+  .timeline-title{
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:4px;
+  }
+  
+  .timeline-desc{
+    font-size:12px;
+    color:var(--text-secondary);
+  }
+  
+  /* 交易信息 */
+  .info-section{
+    margin-bottom:24px;
+  }
+  
+  .info-title{
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:12px;
+    color:var(--text-secondary);
+  }
+  
+  .info-grid{
+    display:grid;
+    gap:12px;
+  }
+  
+  .info-item{
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    background:var(--bg-hover);
+    border-radius:8px;
+    font-size:13px;
+  }
+  
+  .info-label{
+    color:var(--text-muted);
+  }
+  
+  .info-value{
+    color:var(--text-primary);
+    font-weight:500;
+  }
+  
+  /* 操作面板 */
+  .action-panel{
+    background:linear-gradient(135deg, rgba(59,130,246,0.05), rgba(16,185,129,0.05));
+    border:1px solid rgba(59,130,246,0.2);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:24px;
+    margin-top:32px;
+  }
+  
+  .action-title{
+    font-size:16px;
+    font-weight:600;
+    margin-bottom:16px;
+  }
+  
+  .action-buttons{
+    display:grid;
+    gap:12px;
+  }
+  
+  .action-btn{
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.3s;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  
+  .action-btn:hover{
+    transform:translateX(4px);
+    box-shadow:0 4px 12px rgba(0,0,0,0.2);
+  }
+  
+  .btn-confirm{
+    background:var(--success);
+    color:white;
+  }
+  
+  .btn-dispute{
+    background:var(--warning);
+    color:white;
+  }
+  
+  .btn-cancel{
+    background:var(--danger);
+    color:white;
+  }
+  
+  .btn-extend{
+    background:var(--info);
+    color:white;
+  }
+  
+  /* 聊天窗口 */
+  .chat-container{
+    display:flex;
+    flex-direction:column;
+    height:600px;
+    margin-bottom:20px;
+  }
+  
+  .chat-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-bottom:16px;
+    margin-bottom:16px;
+    border-bottom:1px solid var(--border);
+  }
+  
+  .chat-status{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+  }
+  
+  .online-dot{
+    width:8px;
+    height:8px;
+    background:var(--success);
+    border-radius:50%;
+    animation:pulse 2s infinite;
+  }
+  
+  .chat-messages{
+    flex:1;
+    overflow-y:auto;
+    padding:16px;
+    background:var(--bg-hover);
+    border-radius:12px;
+    margin-bottom:16px;
+  }
+  
+  .message{
+    margin-bottom:16px;
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+  }
+  
+  .message-avatar{
+    width:32px;
+    height:32px;
+    background:var(--primary);
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:bold;
+    flex-shrink:0;
+  }
+  
+  .message-content{
+    flex:1;
+    max-width:70%;
+  }
+  
+  .message-name{
+    font-size:11px;
+    color:var(--text-muted);
+    margin-bottom:4px;
+  }
+  
+  .message-text{
+    background:var(--bg-card);
+    padding:10px 14px;
+    border-radius:12px;
+    font-size:13px;
+    line-height:1.5;
+  }
+  
+  .message.self{
+    flex-direction:row-reverse;
+  }
+  
+  .message.self .message-content{
+    align-items:flex-end;
+  }
+  
+  .message.self .message-text{
+    background:rgba(59,130,246,0.2);
+  }
+  
+  .system-message{
+    text-align:center;
+    margin:16px 0;
+  }
+  
+  .system-text{
+    display:inline-block;
+    padding:6px 12px;
+    background:rgba(245,158,11,0.1);
+    border-radius:20px;
+    font-size:11px;
+    color:var(--warning);
+  }
+  
+  .chat-input-area{
+    display:flex;
+    gap:12px;
+  }
+  
+  .chat-input{
+    flex:1;
+    padding:12px;
+    background:var(--bg-hover);
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--text-primary);
+    font-size:13px;
+  }
+  
+  .send-btn{
+    padding:12px 24px;
+    background:var(--primary);
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+    transition:all 0.3s;
+  }
+  
+  .send-btn:hover{
+    background:var(--primary-dark);
+  }
+  
+  /* 争议面板 */
+  .dispute-panel{
+    background:rgba(245,158,11,0.05);
+    border:1px solid rgba(245,158,11,0.2);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:24px;
+  }
+  
+  .dispute-header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:16px;
+  }
+  
+  .dispute-icon{
+    font-size:24px;
+  }
+  
+  .dispute-title{
+    font-size:16px;
+    font-weight:600;
+    color:var(--warning);
+  }
+  
+  .dispute-info{
+    font-size:13px;
+    color:var(--text-secondary);
+    line-height:1.6;
+    margin-bottom:16px;
+  }
+  
+  /* 证据上传 */
+  .evidence-upload{
+    background:var(--bg-hover);
+    border:2px dashed var(--border);
+    border-radius:12px;
+    padding:20px;
+    text-align:center;
+    cursor:pointer;
+    transition:all 0.3s;
+    margin-bottom:16px;
+  }
+  
+  .evidence-upload:hover{
+    border-color:var(--primary);
+    background:rgba(59,130,246,0.05);
+  }
+  
+  .evidence-list{
+    display:grid;
+    gap:8px;
+  }
+  
+  .evidence-item{
+    display:flex;
+    align-items:center;
+    padding:12px;
+    background:var(--bg-hover);
+    border-radius:8px;
+    font-size:13px;
+  }
+  
+  .evidence-icon{
+    margin-right:12px;
+    font-size:20px;
+  }
+  
+  .evidence-info{
+    flex:1;
+  }
+  
+  .evidence-name{
+    font-weight:500;
+    margin-bottom:2px;
+  }
+  
+  .evidence-size{
+    font-size:11px;
+    color:var(--text-muted);
+  }
+  
+  /* 保护机制提示 */
+  .protection-notice{
+    background:rgba(16,185,129,0.05);
+    border:1px solid rgba(16,185,129,0.2);
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:24px;
+  }
+  
+  .protection-header{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  
+  .protection-title{
+    font-size:14px;
+    font-weight:600;
+    color:var(--success);
+  }
+  
+  .protection-list{
+    font-size:12px;
+    color:var(--text-secondary);
+    line-height:1.8;
+    padding-left:24px;
+  }
+  
+  /* 自动处理倒计时 */
+  .auto-process{
+    background:var(--bg-hover);
+    border-radius:12px;
+    padding:16px;
+    text-align:center;
+  }
+  
+  .auto-process-title{
+    font-size:13px;
+    color:var(--text-secondary);
+    margin-bottom:8px;
+  }
+  
+  .auto-process-time{
+    font-size:24px;
+    font-weight:700;
+    color:var(--primary);
+    margin-bottom:8px;
+  }
+  
+  .auto-process-action{
+    font-size:12px;
+    color:var(--text-muted);
+  }
+  
+  /* 交易详情卡片 */
+  .detail-card{
+    background:var(--bg-hover);
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:16px;
+  }
+  
+  .detail-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px;
+  }
+  
+  .detail-title{
+    font-size:14px;
+    font-weight:600;
+  }
+  
+  .detail-grid{
+    display:grid;
+    gap:8px;
+  }
+  
+  .detail-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    padding:6px 0;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+  }
+  
+  .detail-row:last-child{
+    border-bottom:none;
+  }
+  
+  /* ========== 统一的弹窗样式 ========== */
+  
+  /* 弹窗遮罩层 */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  /* 弹窗容器 */
+  .modal-container {
+    background: var(--bg-card);
+    background-image: radial-gradient(circle at top left, rgba(59,130,246,0.05), transparent),
+                      radial-gradient(circle at bottom right, rgba(16,185,129,0.05), transparent);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 90%;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 100px rgba(59, 130, 246, 0.1);
+    animation: slideUp 0.3s ease;
+  }
+  
+  /* 弹窗大小变体 */
+  .modal-container.small {
+    max-width: 400px;
+  }
+  
+  .modal-container.medium {
+    max-width: 600px;
+  }
+  
+  .modal-container.large {
+    max-width: 800px;
+  }
+  
+  /* 弹窗头部 */
+  .modal-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .modal-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
+  }
+  
+  .modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+  }
+  
+  .modal-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  
+  /* 弹窗内容 */
+  .modal-body {
+    margin-bottom: 24px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  
+  /* 弹窗信息块 */
+  .modal-info-section {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--bg-hover);
+    border-radius: 12px;
+  }
+  
+  .modal-info-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-secondary);
+  }
+  
+  .modal-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  
+  .modal-info-row:last-child {
+    border-bottom: none;
+  }
+  
+  .modal-info-label {
+    color: var(--text-muted);
+  }
+  
+  .modal-info-value {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+  
+  /* 弹窗动作按钮 */
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  
+  .modal-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    outline: none;
+  }
+  
+  .modal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .modal-btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+  
+  .modal-btn-primary:hover {
+    background: var(--primary-dark);
+  }
+  
+  .modal-btn-secondary {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+  
+  .modal-btn-secondary:hover {
+    border-color: var(--primary);
+    background: rgba(59, 130, 246, 0.1);
+  }
+  
+  .modal-btn-success {
+    background: var(--success);
+    color: white;
+  }
+  
+  .modal-btn-warning {
+    background: var(--warning);
+    color: white;
+  }
+  
+  .modal-btn-danger {
+    background: var(--danger);
+    color: white;
+  }
+  
+  /* 输入框和文本域 */
+  .modal-input,
+  .modal-textarea,
+  .modal-select {
+    width: 100%;
+    padding: 12px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 13px;
+    margin-bottom: 16px;
+    transition: all 0.3s;
+  }
+  
+  .modal-input:focus,
+  .modal-textarea:focus,
+  .modal-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(59, 130, 246, 0.05);
+  }
+  
+  .modal-textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+  
+  .modal-label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+  
+  /* 评分星星 */
+  .modal-rating {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 20px 0;
+  }
+  
+  .modal-star {
+    font-size: 32px;
+    cursor: pointer;
+    transition: all 0.3s;
+    opacity: 0.3;
+  }
+  
+  .modal-star:hover {
+    transform: scale(1.2);
+  }
+  
+  .modal-star.active {
+    opacity: 1;
+    animation: starPulse 0.5s ease;
+  }
+  
+  /* Toast 通知样式 */
+  .toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    z-index: 2000;
+    animation: slideInRight 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+  
+  .toast-icon {
+    font-size: 20px;
+  }
+  
+  .toast-message {
+    flex: 1;
+    color: var(--text-primary);
+  }
+  
+  .toast-close {
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+  }
+  
+  .toast-close:hover {
+    opacity: 1;
+  }
+  
+  .toast.success {
+    border-color: var(--success);
+    background: linear-gradient(to right, rgba(16, 185, 129, 0.1), var(--bg-card));
+  }
+  
+  .toast.warning {
+    border-color: var(--warning);
+    background: linear-gradient(to right, rgba(245, 158, 11, 0.1), var(--bg-card));
+  }
+  
+  .toast.error {
+    border-color: var(--danger);
+    background: linear-gradient(to right, rgba(239, 68, 68, 0.1), var(--bg-card));
+  }
+  
+  .toast.info {
+    border-color: var(--info);
+    background: linear-gradient(to right, rgba(6, 182, 212, 0.1), var(--bg-card));
+  }
+  
+  /* 动画 */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes starPulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.3);
+    }
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+  
+  /* 响应式 */
+  @media (max-width:1200px){
+    .main-layout{
+      grid-template-columns:1fr;
+    }
+    .chat-container{
+      height:400px;
+    }
+  }
+  
+  @media (max-width:640px){
+    .header{
+      flex-direction:column;
+      gap:16px;
+    }
+    .action-buttons{
+      grid-template-columns:1fr;
+    }
+    .modal-container {
+      max-width: 95%;
+      padding: 24px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- 头部 -->
+  <div class="header">
+    <div class="breadcrumb">
+      <a href="./dbjy1.html">首页</a>
+      <span>/</span>
+      <a href="./dbjy1.html">我的交易</a>
+      <span>/</span>
+      <span id="breadcrumbTxId">--</span>
+    </div>
+    <div class="header-actions">
+      <button class="header-btn" onclick="exportReceipt()">📄 输出凭证</button>
+      <button class="header-btn" onclick="contactSupport()">💬 联系客服</button>
+      <button class="header-btn" onclick="contactSupport()">❓ 获取帮助</button>
+    </div>
+  </div>
+  
+  <div class="main-layout">
+    <!-- 左侧状态栏 -->
+    <div>
+      <!-- 交易状态 -->
+      <div class="card status-card">
+        <div class="status-header">
+          <h3 style="font-size:16px;">交易状态</h3>
+          <span class="status-badge status-escrowed" id="statusBadge">
+            🔒 托管中
+          </span>
+        </div>
+        
+        <!-- 时间线 -->
+        <div class="timeline">
+          <div class="timeline-line"></div>
+          
+          <div class="timeline-item completed">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time" id="createTimeTimeline">--</div>
+            <div class="timeline-title">创建交易</div>
+            <div class="timeline-desc" id="createDesc">--</div>
+          </div>
+          
+          <div class="timeline-item completed">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time" id="paymentTimeTimeline">--</div>
+            <div class="timeline-title">支付完成</div>
+            <div class="timeline-desc" id="paymentDesc">-- USDT</div>
+          </div>
+          
+          <div class="timeline-item completed">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time" id="verifyTimeTimeline">--</div>
+            <div class="timeline-title">链上验证</div>
+            <div class="timeline-desc" id="blockConfirmDesc">19个区块确认</div>
+          </div>
+          
+          <div class="timeline-item active">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">进行中...</div>
+            <div class="timeline-title">资金托管</div>
+            <div class="timeline-desc">等待交易完成</div>
+          </div>
+          
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">-</div>
+            <div class="timeline-title">确认收货</div>
+            <div class="timeline-desc" id="roleConfirmDesc">--</div>
+          </div>
+          
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">-</div>
+            <div class="timeline-title">资金释放</div>
+            <div class="timeline-desc" id="roleReleaseDesc">--</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 自动处理倒计时 -->
+      <div class="card">
+        <div class="auto-process">
+          <div class="auto-process-title">⏱️ 自动处理倒计时</div>
+          <div class="auto-process-time" id="autoProcessTime">--:--:--</div>
+          <div class="auto-process-action" id="autoProcessAction">--</div>
+        </div>
+      </div>
+      
+      <!-- 保护机制 -->
+      <div class="protection-notice">
+        <div class="protection-header">
+          <span>🛡️</span>
+          <span class="protection-title" id="protectionTitle">买家保护计划</span>
+        </div>
+        <ul class="protection-list" id="protectionList">
+          <li>72小时无条件退款保障</li>
+          <li>卖方需提供发货证明</li>
+          <li>争议优先保护买方权益</li>
+          <li>平台承担仲裁责任</li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- 中间主要内容 -->
+    <div>
+      <!-- 聊天窗口 -->
+      <div class="card chat-container">
+        <div class="chat-header">
+          <h3 style="font-size:16px;">💬 交易沟通</h3>
+          <div class="chat-status">
+            <span class="online-dot"></span>
+            <span>对方在线</span>
+          </div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+          <div class="system-message">
+            <span class="system-text" id="chatInitMessage">交易已创建，双方可开始沟通</span>
+          </div>
+          
+          <div class="system-message">
+            <span class="system-text">系统提示：请在平台内完成交易，注意保护个人信息</span>
+          </div>
+        </div>
+        
+        <div class="chat-input-area">
+          <input type="text" class="chat-input" id="messageInput" placeholder="输入消息...">
+          <button class="send-btn" onclick="sendMessage()">发送</button>
+        </div>
+      </div>
+      
+      <!-- 操作面板 -->
+      <div class="action-panel">
+        <h3 class="action-title">⚡ 交易操作</h3>
+        <div class="action-buttons">
+          <button class="action-btn btn-confirm" onclick="confirmReceived()">
+            ✅ 确认收货并释放资金
+          </button>
+          <button class="action-btn btn-dispute" onclick="openDispute()">
+            ⚖️ 发起争议申请
+          </button>
+          <button class="action-btn btn-extend" onclick="extendPeriod()">
+            ⏰ 延长托管期限
+          </button>
+          <button class="action-btn btn-cancel" onclick="requestCancel()">
+            ❌ 申请取消交易
+          </button>
+        </div>
+      </div>
+      
+      <!-- 争议面板（初始隐藏） -->
+      <div class="dispute-panel" id="disputePanel" style="display:none;">
+        <div class="dispute-header">
+          <span class="dispute-icon">⚖️</span>
+          <span class="dispute-title">争议处理中心</span>
+        </div>
+        <div class="dispute-info">
+          请选择争议原因并提供相关证据，平台将在24小时内介入处理
+        </div>
+        
+        <div style="margin-bottom:16px;">
+          <label style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;display:block;">
+            争议原因
+          </label>
+          <select class="modal-select" id="disputeReason">
+            <option>未收到商品</option>
+            <option>商品与描述不符</option>
+            <option>商品质量问题</option>
+            <option>卖方失联</option>
+            <option>其他原因</option>
+          </select>
+        </div>
+        
+        <div style="margin-bottom:16px;">
+          <label style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;display:block;">
+            详细说明
+          </label>
+          <textarea class="modal-textarea" id="disputeDetail" placeholder="请详细描述问题..."></textarea>
+        </div>
+        
+        <div class="evidence-upload" onclick="document.getElementById('evidenceFile').click()">
+          <div style="font-size:24px;">📎</div>
+          <div style="margin-top:8px;font-size:13px;">点击上传证据材料</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+            支持图片、视频、文档等格式
+          </div>
+          <input type="file" id="evidenceFile" style="display:none;" multiple>
+        </div>
+        
+        <div class="evidence-list" id="evidenceList">
+          <!-- 证据列表动态插入 -->
+        </div>
+        
+        <div style="display:flex;gap:12px;margin-top:16px;">
+          <button class="modal-btn modal-btn-secondary" onclick="closeDispute()">
+            取消
+          </button>
+          <button class="modal-btn modal-btn-warning" onclick="submitDispute()">
+            提交争议
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 右侧详情栏 -->
+    <div>
+      <!-- 交易详情 -->
+      <div class="card">
+        <h3 style="font-size:16px;margin-bottom:20px;">📋 交易详情</h3>
+        
+        <div class="detail-card">
+          <div class="detail-header">
+            <span class="detail-title">基本信息</span>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">交易编号</span>
+              <span style="font-family:monospace;" id="txIdShort">--</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">创建时间</span>
+              <span id="createTimeDetail">--</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">交易类型</span>
+              <span id="txTypeDetail">--</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">托管期限</span>
+              <span id="escrowPeriodDetail">--</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-header">
+            <span class="detail-title">交易双方</span>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">买方</span>
+              <span style="font-family:monospace;" id="buyerAddress">--</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">买方信誉</span>
+              <span style="color:var(--success);" id="buyerRep">⭐ --</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">卖方</span>
+              <span style="font-family:monospace;" id="sellerAddress">--</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">卖方信誉</span>
+              <span style="color:var(--success);" id="sellerRep">⭐ --</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-header">
+            <span class="detail-title">资金信息</span>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">交易金额</span>
+              <span id="txAmount">-- USDT</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">服务费</span>
+              <span id="serviceFee">-- USDT</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">网络费</span>
+              <span id="networkFee">-- USDT</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">保证金</span>
+              <span id="depositAmount">-- USDT</span>
+            </div>
+            <div class="detail-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px;">
+              <span style="color:var(--text-muted);font-weight:600;">托管总额</span>
+              <span style="color:var(--primary);font-weight:700;" id="totalAmount">-- USDT</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-header">
+            <span class="detail-title">区块链信息</span>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">网络</span>
+              <span id="networkType">--</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">支付哈希</span>
+              <span style="font-family:monospace;font-size:10px;" id="txHashShort" title="">--</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">托管合约</span>
+              <span style="font-family:monospace;font-size:10px;" id="escrowContract">--</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">确认数</span>
+              <span style="color:var(--success);" id="confirmations">-- 确认</span>
+            </div>
+            <div class="detail-row">
+              <span style="color:var(--text-muted);">验证状态</span>
+              <span id="verificationStatusDisplay">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// 全局变量
+let disputeOpen = false;
+let autoReleaseTimer;
+let timeRemaining = 259200; // 默认72小时（秒）
+let transactionData = {}; // 存储交易数据
+
+// 交易类型映射
+const transactionTypeMap = {
+  'goods': '实物商品',
+  'digital': '数字商品',
+  'service': '服务类',
+  'other': '其他'
+};
+
+// 托管期限映射
+const escrowPeriodMap = {
+  '24': '24小时',
+  '72': '72小时',
+  '168': '7天',
+  '360': '15天'
+};
+
+// 网络类型映射
+const networkTypeMap = {
+  'TRC20': 'TRC-20',
+  'ERC20': 'ERC-20',
+  'BEP20': 'BEP-20'
+};
+
+// ========== 统一的弹窗系统 ==========
+
+// 显示自定义弹窗
+function showModal(options) {
+  const {
+    icon = '',
+    title = '提示',
+    subtitle = '',
+    content = '',
+    type = 'info',
+    size = 'medium',
+    buttons = [
+      { text: '确定', type: 'primary', action: () => closeModal() }
+    ],
+    onClose = null
+  } = options;
+  
+  const iconMap = {
+    success: '✅',
+    warning: '⚠️',
+    error: '❌',
+    info: 'ℹ️',
+    question: '❓'
+  };
+  
+  const modalHTML = `
+    <div id="customModal" class="modal-overlay">
+      <div class="modal-container ${size}">
+        ${icon || iconMap[type] ? `
+          <div class="modal-header">
+            <span class="modal-icon">${icon || iconMap[type]}</span>
+            <div class="modal-title">${title}</div>
+            ${subtitle ? `<div class="modal-subtitle">${subtitle}</div>` : ''}
+          </div>
+        ` : `
+          <div class="modal-header">
+            <div class="modal-title">${title}</div>
+            ${subtitle ? `<div class="modal-subtitle">${subtitle}</div>` : ''}
+          </div>
+        `}
+        
+        ${content ? `<div class="modal-body">${content}</div>` : ''}
+        
+        <div class="modal-actions">
+          ${buttons.map((btn, index) => `
+            <button class="modal-btn modal-btn-${btn.type || 'secondary'}" 
+                    onclick="handleModalAction(${index})">
+              ${btn.text}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  
+  // 保存按钮动作
+  window.modalButtons = buttons;
+  window.modalOnClose = onClose;
+}
+
+// 处理弹窗按钮动作
+function handleModalAction(index) {
+  const button = window.modalButtons[index];
+  if (button.action) {
+    button.action();
+  }
+  if (!button.preventClose) {
+    closeModal();
+  }
+}
+
+// 关闭弹窗
+function closeModal() {
+  const modal = document.getElementById('customModal');
+  if (modal) {
+    modal.remove();
+    if (window.modalOnClose) {
+      window.modalOnClose();
+    }
+  }
+}
+
+// 显示 Toast 通知
+function showToast(message, type = 'info', duration = 3000) {
+  const iconMap = {
+    success: '✅',
+    warning: '⚠️',
+    error: '❌',
+    info: 'ℹ️'
+  };
+  
+  const toastHTML = `
+    <div class="toast ${type}" id="toast-${Date.now()}">
+      <span class="toast-icon">${iconMap[type]}</span>
+      <span class="toast-message">${message}</span>
+      <span class="toast-close" onclick="this.parentElement.remove()">✕</span>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', toastHTML);
+  
+  const toast = document.body.lastElementChild;
+  setTimeout(() => {
+    if (toast && toast.parentElement) {
+      toast.remove();
+    }
+  }, duration);
+}
+
+// 替换原生 alert
+window.customAlert = function(message, type = 'info') {
+  showModal({
+    type: type,
+    title: type === 'success' ? '成功' : type === 'error' ? '错误' : type === 'warning' ? '警告' : '提示',
+    content: message,
+    size: 'small',
+    buttons: [
+      { text: '确定', type: 'primary' }
+    ]
+  });
+};
+
+// 替换原生 confirm
+window.customConfirm = function(message, onConfirm, onCancel) {
+  showModal({
+    type: 'question',
+    title: '确认',
+    content: message,
+    size: 'small',
+    buttons: [
+      { text: '取消', type: 'secondary', action: onCancel },
+      { text: '确定', type: 'primary', action: onConfirm }
+    ]
+  });
+};
+
+// 替换原生 prompt
+window.customPrompt = function(message, defaultValue = '', onSubmit) {
+  const inputId = 'prompt-input-' + Date.now();
+  
+  showModal({
+    type: 'question',
+    title: '输入',
+    content: `
+      <div>${message}</div>
+      <input type="text" class="modal-input" id="${inputId}" value="${defaultValue}" style="margin-top:16px;">
+    `,
+    size: 'small',
+    buttons: [
+      { text: '取消', type: 'secondary' },
+      { 
+        text: '确定', 
+        type: 'primary',
+        action: () => {
+          const value = document.getElementById(inputId).value;
+          if (onSubmit) onSubmit(value);
+        }
+      }
+    ]
+  });
+  
+  // 聚焦输入框
+  setTimeout(() => {
+    const input = document.getElementById(inputId);
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  }, 100);
+};
+
+// ========== 业务逻辑 ==========
+
+// 联系客服功能
+function contactSupport() {
+  showModal({
+    icon: '💬',
+    title: '联系客服',
+    content: '即将跳转到 Telegram 客服...',
+    type: 'info',
+    size: 'small',
+    buttons: [
+      { text: '取消', type: 'secondary' },
+      { 
+        text: '确定', 
+        type: 'primary',
+        action: () => window.open('https://t.me/tommy_chan', '_blank')
+      }
+    ]
+  });
+}
+
+// 输出凭证功能
+function exportReceipt() {
+  const receiptContent = `
+    <div class="modal-info-section">
+      <div class="modal-info-title">基本信息</div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">交易编号</span>
+        <span class="modal-info-value">${transactionData.id || '--'}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">创建时间</span>
+        <span class="modal-info-value">${transactionData.createdAt ? formatDateTimeShort(new Date(transactionData.createdAt)) : '--'}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">交易类型</span>
+        <span class="modal-info-value">${transactionTypeMap[transactionData.transactionType] || '--'}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">托管期限</span>
+        <span class="modal-info-value">${escrowPeriodMap[transactionData.escrowPeriod] || '--'}</span>
+      </div>
+    </div>
+    
+    <div class="modal-info-section">
+      <div class="modal-info-title">交易双方</div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">买方地址</span>
+        <span class="modal-info-value" style="font-family:monospace;font-size:11px;">${transactionData.role === 'buyer' ? transactionData.userAddress : transactionData.counterpartyAddress || '--'}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">买方信誉</span>
+        <span class="modal-info-value">${transactionData.role === 'buyer' ? transactionData.userScore : transactionData.counterpartyScore || '--'}分</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">卖方地址</span>
+        <span class="modal-info-value" style="font-family:monospace;font-size:11px;">${transactionData.role === 'seller' ? transactionData.userAddress : transactionData.counterpartyAddress || '--'}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">卖方信誉</span>
+        <span class="modal-info-value">${transactionData.role === 'seller' ? transactionData.userScore : transactionData.counterpartyScore || '--'}分</span>
+      </div>
+    </div>
+    
+    <div class="modal-info-section">
+      <div class="modal-info-title">资金信息</div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">交易金额</span>
+        <span class="modal-info-value">${parseFloat(transactionData.amount || 0).toFixed(2)} USDT</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">服务费</span>
+        <span class="modal-info-value">${parseFloat(transactionData.serviceFee || 0).toFixed(2)} USDT</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">网络费</span>
+        <span class="modal-info-value">${parseFloat(transactionData.networkFee || 0).toFixed(2)} USDT</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">保证金</span>
+        <span class="modal-info-value">${parseFloat(transactionData.deposit || 0).toFixed(2)} USDT</span>
+      </div>
+      <div class="modal-info-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px;font-weight:600;">
+        <span class="modal-info-label">托管总额</span>
+        <span class="modal-info-value" style="color:var(--primary);">${parseFloat(transactionData.totalAmount || 0).toFixed(2)} USDT</span>
+      </div>
+    </div>
+    
+    <div class="modal-info-section">
+      <div class="modal-info-title">区块链信息</div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">网络类型</span>
+        <span class="modal-info-value">${networkTypeMap[transactionData.network] || '--'}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">支付哈希</span>
+        <span class="modal-info-value" style="font-family:monospace;font-size:10px;">${transactionData.txHash || generateTxHash()}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">托管合约</span>
+        <span class="modal-info-value" style="font-family:monospace;font-size:10px;">${generateEscrowContract(transactionData.network, transactionData.id)}</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">区块确认</span>
+        <span class="modal-info-value">${calculateConfirmations(transactionData.paymentTime, transactionData.network)} 确认</span>
+      </div>
+      <div class="modal-info-row">
+        <span class="modal-info-label">验证状态</span>
+        <span class="modal-info-value" style="color:var(--success);">✅ 已验证</span>
+      </div>
+    </div>
+    
+    <div class="modal-info-section">
+      <div class="modal-info-title">交易描述</div>
+      <div style="padding:8px 0;font-size:12px;line-height:1.6;color:var(--text-secondary);">
+        ${transactionData.description || '暂无描述'}
+      </div>
+    </div>
+  `;
+  
+  showModal({
+    icon: '🔒',
+    title: 'SafePay 交易凭证',
+    subtitle: `交易编号: ${transactionData.id || '--'}`,
+    content: receiptContent,
+    size: 'large',
+    buttons: [
+      { text: '关闭', type: 'secondary' },
+      { 
+        text: '打印凭证', 
+        type: 'primary',
+        action: () => {
+          window.print();
+        },
+        preventClose: true
+      }
+    ]
+  });
+}
+
+// 生成交易哈希
+function generateTxHash() {
+  const chars = '0123456789abcdef';
+  let hash = '0x';
+  for (let i = 0; i < 64; i++) {
+    hash += chars[Math.floor(Math.random() * 16)];
+  }
+  return hash;
+}
+
+// 初始化
+document.addEventListener('DOMContentLoaded', function() {
+  // 读取传输的数据
+  let savedData = sessionStorage.getItem('currentTransaction');
+  
+  if (!savedData) {
+    savedData = localStorage.getItem('latestTransaction');
+  }
+  
+  if (savedData) {
+    try {
+      transactionData = JSON.parse(savedData);
+      
+      console.log('加载的交易数据:', transactionData);
+      
+      // 动态更新页面
+      updatePageWithTransactionData(transactionData);
+      
+      // 计算托管剩余时间
+      calculateRemainingTime(transactionData);
+      
+    } catch (e) {
+      console.error('解析交易数据失败:', e);
+      customAlert('交易数据加载失败，请重试', 'error');
+      setTimeout(() => {
+        window.location.href = './dbjy1.html';
+      }, 2000);
+      return;
+    }
+  } else {
+    customAlert('未找到交易信息，请重新创建订单', 'warning');
+    setTimeout(() => {
+      window.location.href = './dbjy1.html';
+    }, 2000);
+    return;
+  }
+  
+  // 启动倒计时和其他功能
+  startAutoReleaseTimer();
+  setupWebSocket();
+  
+  // 启动客服消息发送定时器
+  startCustomerServiceMessages();
+});
+
+// 客服消息定时发送
+function startCustomerServiceMessages() {
+  const customerServiceMessages = [
+    '现在开始交易',
+    {
+      isDescriptionMessage: true,
+      content: `<strong>交易内容（备注）：</strong><br><span id="chatTransactionDesc">${transactionData.description || '暂无交易描述'}</span>`
+    }
+  ];
+  
+  let messageIndex = 0;
+  
+  setTimeout(() => {
+    const sendNextMessage = () => {
+      if (messageIndex < customerServiceMessages.length) {
+        const messageData = customerServiceMessages[messageIndex];
+        
+        let messageText;
+        if (typeof messageData === 'object' && messageData.isDescriptionMessage) {
+          messageText = messageData.content;
+        } else {
+          messageText = messageData;
+        }
+        
+        receiveMessage({
+          type: 'service',
+          text: messageText
+        });
+        
+        messageIndex++;
+        
+        if (messageIndex < customerServiceMessages.length) {
+          setTimeout(sendNextMessage, 5000);
+        }
+      }
+    };
+    
+    sendNextMessage();
+  }, 5000);
+}
+
+// 更新页面数据
+function updatePageWithTransactionData(data) {
+  console.log('更新页面数据:', data);
+  
+  // 更新面包屑导航
+  document.getElementById('breadcrumbTxId').textContent = data.id || 'ESC--';
+  
+  // 更新时间线
+  if (data.createdAt) {
+    const createDate = new Date(data.createdAt);
+    document.getElementById('createTimeTimeline').textContent = formatDateTime(createDate);
+    document.getElementById('createTimeDetail').textContent = formatDateTimeShort(createDate);
+  }
+  
+  // 更新创建描述
+  const roleText = data.role === 'buyer' ? '买方' : '卖方';
+  document.getElementById('createDesc').textContent = `${roleText}发起担保交易`;
+  
+  // 更新支付信息
+  if (data.paymentTime) {
+    const payDate = new Date(data.paymentTime);
+    document.getElementById('paymentTimeTimeline').textContent = formatDateTime(payDate);
+  }
+  
+  // 修复：正确计算并显示支付金额
+  const totalForDisplay = parseFloat(data.totalAmount) || 
+    (parseFloat(data.amount || 0) + parseFloat(data.serviceFee || 0) + 
+     parseFloat(data.networkFee || 0) + parseFloat(data.deposit || 0));
+  document.getElementById('paymentDesc').textContent = totalForDisplay.toFixed(2) + ' USDT';
+  
+  // 更新验证时间
+  if (data.verificationTime) {
+    const verifyDate = new Date(data.verificationTime);
+    verifyDate.setSeconds(verifyDate.getSeconds() + 60);
+    document.getElementById('verifyTimeTimeline').textContent = formatDateTime(verifyDate);
+  }
+  
+  // 更新角色相关描述
+  if (data.role === 'buyer') {
+    document.getElementById('roleConfirmDesc').textContent = '买方确认';
+    document.getElementById('roleReleaseDesc').textContent = '支付给卖方';
+    document.getElementById('protectionTitle').textContent = '买家保护计划';
+    document.getElementById('autoProcessAction').textContent = '超时后将自动释放给卖方';
+  } else {
+    document.getElementById('roleConfirmDesc').textContent = '卖方确认';
+    document.getElementById('roleReleaseDesc').textContent = '支付给买方';
+    document.getElementById('protectionTitle').textContent = '卖家保护计划';
+    document.getElementById('autoProcessAction').textContent = '超时后将自动退款给买方';
+  }
+  
+  // 更新交易详情
+  document.getElementById('txIdShort').textContent = 
+    data.id ? (data.id.length > 12 ? data.id.substring(0, 10) + '...' : data.id) : '--';
+  
+  // 交易类型
+  document.getElementById('txTypeDetail').textContent = 
+    transactionTypeMap[data.transactionType] || data.transactionType || '--';
+  
+  // 托管期限
+  document.getElementById('escrowPeriodDetail').textContent = 
+    escrowPeriodMap[data.escrowPeriod] || data.escrowPeriod + '小时' || '--';
+  
+  // 更新交易双方地址和信誉分
+  if (data.role === 'buyer') {
+    // 买方是用户自己
+    const buyerAddr = data.userAddress || '--';
+    document.getElementById('buyerAddress').textContent = 
+      buyerAddr.length > 10 ? buyerAddr.substring(0, 4) + '...' + buyerAddr.substring(buyerAddr.length - 4) : buyerAddr;
+    
+    const buyerScore = data.userScore || 80;
+    document.getElementById('buyerRep').textContent = '⭐ ' + buyerScore + '分';
+    
+    // 卖方是对方
+    const sellerAddr = data.counterpartyAddress || '--';
+    document.getElementById('sellerAddress').textContent = 
+      sellerAddr.length > 10 ? sellerAddr.substring(0, 4) + '...' + sellerAddr.substring(sellerAddr.length - 4) : sellerAddr;
+    
+    const sellerScore = data.counterpartyScore || 80;
+    document.getElementById('sellerRep').textContent = '⭐ ' + sellerScore + '分';
+  } else {
+    // 卖方是用户自己
+    const sellerAddr = data.userAddress || '--';
+    document.getElementById('sellerAddress').textContent = 
+      sellerAddr.length > 10 ? sellerAddr.substring(0, 4) + '...' + sellerAddr.substring(sellerAddr.length - 4) : sellerAddr;
+    
+    const sellerScore = data.userScore || 80;
+    document.getElementById('sellerRep').textContent = '⭐ ' + sellerScore + '分';
+    
+    // 买方是对方
+    const buyerAddr = data.counterpartyAddress || '--';
+    document.getElementById('buyerAddress').textContent = 
+      buyerAddr.length > 10 ? buyerAddr.substring(0, 4) + '...' + buyerAddr.substring(buyerAddr.length - 4) : buyerAddr;
+    
+    const buyerScore = data.counterpartyScore || 80;
+    document.getElementById('buyerRep').textContent = '⭐ ' + buyerScore + '分';
+  }
+  
+  // 更新资金信息
+  const amount = parseFloat(data.amount) || 0;
+  const serviceFee = parseFloat(data.serviceFee) || 0;
+  const networkFee = parseFloat(data.networkFee) || 0;
+  const deposit = parseFloat(data.deposit) || 0;
+  
+  console.log('金额详情:', {amount, serviceFee, networkFee, deposit});
+  
+  // 显示各项费用
+  document.getElementById('txAmount').textContent = amount.toFixed(2) + ' USDT';
+  document.getElementById('serviceFee').textContent = serviceFee.toFixed(2) + ' USDT';
+  document.getElementById('networkFee').textContent = networkFee.toFixed(2) + ' USDT';
+  document.getElementById('depositAmount').textContent = deposit.toFixed(2) + ' USDT';
+  
+  // 计算并显示托管总额
+  const calculatedTotal = amount + serviceFee + networkFee + deposit;
+  const finalTotal = data.totalAmount ? parseFloat(data.totalAmount) : calculatedTotal;
+  
+  console.log('总额计算:', {calculatedTotal, dataTotal: data.totalAmount, finalTotal});
+  
+  document.getElementById('totalAmount').textContent = finalTotal.toFixed(2) + ' USDT';
+  
+  // 更新区块链信息
+  document.getElementById('networkType').textContent = 
+    networkTypeMap[data.network] || data.network || '--';
+  
+  // 更新交易哈希
+  if (data.txHash) {
+    const hash = data.txHash;
+    const shortHash = hash.length > 16 ? 
+      hash.substring(0, 8) + '...' + hash.substring(hash.length - 6) : hash;
+    document.getElementById('txHashShort').textContent = shortHash;
+    document.getElementById('txHashShort').title = hash;
+  } else {
+    const hash = generateTxHash();
+    const shortHash = hash.substring(0, 8) + '...' + hash.substring(hash.length - 6);
+    document.getElementById('txHashShort').textContent = shortHash;
+    document.getElementById('txHashShort').title = hash;
+  }
+  
+  // 生成托管合约地址
+  const escrowContract = generateEscrowContract(data.network, data.id);
+  document.getElementById('escrowContract').textContent = escrowContract;
+  
+  // 计算确认数
+  const confirmations = calculateConfirmations(data.paymentTime, data.network);
+  document.getElementById('confirmations').textContent = confirmations + ' 确认';
+  document.getElementById('blockConfirmDesc').textContent = confirmations + '个区块确认';
+  
+  // 显示验证状态
+  if (data.verificationStatus === 'SUCCESS') {
+    document.getElementById('verificationStatusDisplay').innerHTML = 
+      '<span style="color:var(--success);">✅ 已验证</span>';
+  } else if (data.verificationStatus === 'PENDING') {
+    document.getElementById('verificationStatusDisplay').innerHTML = 
+      '<span style="color:var(--warning);">⏳ 验证中</span>';
+  } else {
+    document.getElementById('verificationStatusDisplay').innerHTML = 
+      '<span style="color:var(--text-muted);">待验证</span>';
+  }
+}
+
+// 辅助函数
+function generateEscrowContract(network, txId) {
+  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  let hash = '';
+  
+  const seed = txId ? txId.replace(/[^0-9A-Z]/gi, '') : Date.now().toString();
+  
+  for (let i = 0; i < 8; i++) {
+    const index = (seed.charCodeAt(i % seed.length) + i * 7) % chars.length;
+    hash += chars[index];
+  }
+  
+  if (network === 'TRC20') {
+    return `T${hash.substring(0, 4)}...${hash.substring(4, 8)}`;
+  } else if (network === 'ERC20' || network === 'BEP20') {
+    return `0x${hash.substring(0, 4).toLowerCase()}...${hash.substring(4, 8).toLowerCase()}`;
+  } else {
+    return `T${hash.substring(0, 4)}...${hash.substring(4, 8)}`;
+  }
+}
+
+function calculateConfirmations(paymentTime, network) {
+  if (!paymentTime) return 19;
+  
+  const blockTimes = {
+    'TRC20': 3,
+    'ERC20': 15,
+    'BEP20': 3
+  };
+  
+  const blockTime = blockTimes[network] || 3;
+  const payTime = new Date(paymentTime).getTime();
+  const now = Date.now();
+  const elapsed = Math.floor((now - payTime) / 1000);
+  const confirmations = Math.floor(elapsed / blockTime);
+  
+  return Math.max(19, confirmations);
+}
+
+function calculateRemainingTime(data) {
+  const escrowHours = parseInt(data.escrowPeriod) || 72;
+  const totalSeconds = escrowHours * 3600;
+  
+  if (data.remainingTime) {
+    timeRemaining = data.remainingTime;
+  } else if (data.paymentTime) {
+    const payTime = new Date(data.paymentTime).getTime();
+    const now = Date.now();
+    const elapsed = Math.floor((now - payTime) / 1000);
+    timeRemaining = Math.max(0, totalSeconds - elapsed);
+  } else {
+    timeRemaining = totalSeconds;
+  }
+}
+
+function formatDateTime(date) {
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  }).replace(/\//g, '-');
+}
+
+function formatDateTimeShort(date) {
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).replace(/\//g, '-');
+}
+
+// 自动释放倒计时
+function startAutoReleaseTimer() {
+  autoReleaseTimer = setInterval(() => {
+    if (timeRemaining <= 0) {
+      clearInterval(autoReleaseTimer);
+      handleAutoRelease();
+      return;
+    }
+    
+    timeRemaining--;
+    const hours = Math.floor(timeRemaining / 3600);
+    const minutes = Math.floor((timeRemaining % 3600) / 60);
+    const seconds = timeRemaining % 60;
+    
+    document.getElementById('autoProcessTime').textContent = 
+      `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    // 提醒通知
+    if (timeRemaining === 86400) {
+      showToast('托管期限剩余24小时', 'warning');
+    } else if (timeRemaining === 3600) {
+      showToast('托管期限剩余1小时，请尽快确认', 'warning');
+    }
+  }, 1000);
+}
+
+// 自动释放处理
+function handleAutoRelease() {
+  const roleText = transactionData.role === 'buyer' ? '卖方' : '买方';
+  customConfirm(
+    `托管期限已到，系统将自动释放资金给${roleText}。\n\n如有问题请立即发起争议！`,
+    () => {
+      updateTransactionStatus('AUTO_RELEASED');
+      showToast('资金已自动释放', 'success');
+    }
+  );
+}
+
+// WebSocket连接
+function setupWebSocket() {
+  console.log('WebSocket connected');
+  
+  setTimeout(() => {
+    const sellerMessage = {
+      type: 'seller',
+      text: '现在可以交易了吗？'
+    };
+    
+    receiveMessage(sellerMessage);
+  }, 30000);
+}
+
+// 发送消息
+function sendMessage() {
+  const input = document.getElementById('messageInput');
+  const message = input.value.trim();
+  
+  if (!message) return;
+  
+  const messagesContainer = document.getElementById('chatMessages');
+  const messageHTML = `
+    <div class="message self">
+      <div class="message-avatar">我</div>
+      <div class="message-content">
+        <div class="message-name">我</div>
+        <div class="message-text">${message}</div>
+      </div>
+    </div>
+  `;
+  
+  messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  
+  input.value = '';
+  
+  if (message.includes('客服') || message.includes('帮助')) {
+    setTimeout(() => {
+      receiveMessage({
+        type: 'service',
+        text: '您好，客服正在为您服务。请问有什么可以帮助您的？'
+      });
+    }, 2000);
+  }
+}
+
+// 接收消息
+function receiveMessage(data) {
+  const messagesContainer = document.getElementById('chatMessages');
+  
+  if (data.type === 'system') {
+    const messageHTML = `
+      <div class="system-message">
+        <span class="system-text">${data.text}</span>
+      </div>
+    `;
+    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+  } else if (data.type === 'service') {
+    const messageHTML = `
+      <div class="message">
+        <div class="message-avatar" style="background:var(--warning);">客服</div>
+        <div class="message-content">
+          <div class="message-name">客服KF0531</div>
+          <div class="message-text">${data.text}</div>
+        </div>
+      </div>
+    `;
+    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+  } else if (data.type === 'seller') {
+    const messageHTML = `
+      <div class="message">
+        <div class="message-avatar">卖</div>
+        <div class="message-content">
+          <div class="message-name">卖方</div>
+          <div class="message-text">${data.text}</div>
+        </div>
+      </div>
+    `;
+    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+  } else {
+    const messageHTML = `
+      <div class="message">
+        <div class="message-avatar">${data.type === 'buyer' ? '买' : '卖'}</div>
+        <div class="message-content">
+          <div class="message-name">${data.type === 'buyer' ? '买方' : '卖方'}</div>
+          <div class="message-text">${data.text}</div>
+        </div>
+      </div>
+    `;
+    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+  }
+  
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// 确认收货
+function confirmReceived() {
+  const actionText = transactionData.role === 'buyer' ? '商品/服务' : '付款';
+  const releaseText = transactionData.role === 'buyer' ? '卖方' : '买方';
+  
+  customConfirm(
+    `确认已收到${actionText}？\n\n确认后资金将立即释放给${releaseText}，此操作不可撤销。`,
+    () => {
+      showRatingDialog();
+    }
+  );
+}
+
+// 显示评价对话框
+function showRatingDialog() {
+  const ratingHTML = `
+    <div class="modal-rating">
+      ${[1,2,3,4,5].map(i => `
+        <span class="modal-star" id="star-${i}" onclick="setRating(${i})">⭐</span>
+      `).join('')}
+    </div>
+    <textarea class="modal-textarea" id="ratingComment" placeholder="分享您的交易体验..."></textarea>
+  `;
+  
+  showModal({
+    icon: '⭐',
+    title: '为本次交易评价',
+    content: ratingHTML,
+    size: 'small',
+    buttons: [
+      { text: '取消', type: 'secondary' },
+      { 
+        text: '提交评价', 
+        type: 'success',
+        action: () => {
+          submitRating();
+        }
+      }
+    ]
+  });
+}
+
+// 设置评分
+function setRating(rating) {
+  for (let i = 1; i <= 5; i++) {
+    const star = document.getElementById(`star-${i}`);
+    if (star) {
+      star.className = i <= rating ? 'modal-star active' : 'modal-star';
+    }
+  }
+}
+
+// 提交评价
+function submitRating() {
+  closeModal();
+  
+  updateTransactionStatus('COMPLETED');
+  
+  document.getElementById('statusBadge').innerHTML = '✅ 已完成';
+  document.getElementById('statusBadge').className = 'status-badge status-completed';
+  
+  const releaseText = transactionData.role === 'buyer' ? '卖方' : '买方';
+  
+  showToast('交易完成！感谢您的评价！', 'success');
+  
+  setTimeout(() => {
+    customAlert(`资金已释放给${releaseText}。\n交易圆满完成！`, 'success');
+  }, 500);
+}
+
+// 打开争议
+function openDispute() {
+  document.getElementById('disputePanel').style.display = 'block';
+  disputeOpen = true;
+}
+
+// 关闭争议
+function closeDispute() {
+  document.getElementById('disputePanel').style.display = 'none';
+  disputeOpen = false;
+}
+
+// 提交争议
+function submitDispute() {
+  customConfirm(
+    '确定要提交争议申请吗？\n\n提交后，资金将继续冻结，平台将在24小时内介入处理。',
+    () => {
+      updateTransactionStatus('DISPUTED');
+      
+      document.getElementById('statusBadge').innerHTML = '⚖️ 争议中';
+      document.getElementById('statusBadge').className = 'status-badge status-disputed';
+      
+      receiveMessage({
+        type: 'system',
+        text: '争议已提交，客服将在24小时内介入处理'
+      });
+      
+      closeDispute();
+      
+      showToast('争议申请已提交！客服将在24小时内联系双方进行处理。', 'warning');
+    }
+  );
+}
+
+// 延长期限
+function extendPeriod() {
+  customPrompt('请输入要延长的天数（1-7）：', '3', (days) => {
+    if (days && !isNaN(days) && days >= 1 && days <= 7) {
+      const roleText = transactionData.role === 'buyer' ? '买方' : '卖方';
+      const otherRole = transactionData.role === 'buyer' ? '卖方' : '买方';
+      
+      receiveMessage({
+        type: 'system',
+        text: `${roleText}申请延长托管期限 ${days} 天，等待${otherRole}确认`
+      });
+      
+      showToast('延长申请已发送给对方，需要对方同意后生效。', 'info');
+    } else {
+      showToast('请输入有效的天数（1-7）', 'error');
+    }
+  });
+}
+
+// 申请取消
+function requestCancel() {
+  customConfirm(
+    '确定要申请取消交易吗？\n\n需要对方同意才能取消。',
+    () => {
+      const roleText = transactionData.role === 'buyer' ? '买方' : '卖方';
+      const otherRole = transactionData.role === 'buyer' ? '卖方' : '买方';
+      
+      receiveMessage({
+        type: 'system',
+        text: `${roleText}申请取消交易，等待${otherRole}确认`
+      });
+      
+      showToast('取消申请已发送，需要对方同意后交易才会取消。', 'info');
+    }
+  );
+}
+
+// 更新交易状态
+function updateTransactionStatus(status) {
+  transactionData.status = status;
+  transactionData.updatedAt = new Date().toISOString();
+  
+  if (!transactionData.statusHistory) {
+    transactionData.statusHistory = [];
+  }
+  transactionData.statusHistory.push({
+    status: status,
+    timestamp: new Date().toISOString(),
+    reason: 'User action'
+  });
+  
+  sessionStorage.setItem('currentTransaction', JSON.stringify(transactionData));
+  localStorage.setItem('latestTransaction', JSON.stringify(transactionData));
+}
+
+// 显示通知
+function showNotification(message) {
+  console.log('Notification:', message);
+  
+  receiveMessage({
+    type: 'system',
+    text: message
+  });
+}
+
+// 证据上传
+document.getElementById('evidenceFile').addEventListener('change', function(e) {
+  const files = e.target.files;
+  const evidenceList = document.getElementById('evidenceList');
+  
+  for (let file of files) {
+    const evidenceHTML = `
+      <div class="evidence-item">
+        <span class="evidence-icon">📄</span>
+        <div class="evidence-info">
+          <div class="evidence-name">${file.name}</div>
+          <div class="evidence-size">${(file.size / 1024).toFixed(2)} KB</div>
+        </div>
+      </div>
+    `;
+    evidenceList.insertAdjacentHTML('beforeend', evidenceHTML);
+  }
+  
+  showToast('证据文件已添加', 'success');
+});
+
+// 回车发送消息
+document.getElementById('messageInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    sendMessage();
+  }
+});
+</script>
+</body>
+</html>

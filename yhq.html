@@ -1,0 +1,2480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>易渠API优惠券购买</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f3460;
+            --gold: #ffd700;
+            --gold-dark: #ffb347;
+            --success: #00d4aa;
+            --danger: #ff4757;
+            --warning: #ffa502;
+            --text: #ffffff;
+            --text-secondary: #b8bcc8;
+            --usdt: #26a17b;
+            --telegram: #0088cc;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-gold: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+            --gradient-telegram: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0e27;
+            min-height: 100vh;
+            color: var(--text);
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 背景动画 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundMove 20s ease infinite;
+        }
+        
+        @keyframes backgroundMove {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-20px, -20px) rotate(120deg); }
+            66% { transform: translate(20px, -10px) rotate(240deg); }
+        }
+        
+        /* 头部 */
+        .header {
+            padding: 60px 0 40px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--gradient-gold);
+            border-radius: 2px;
+        }
+        
+        .logo {
+            font-size: 48px;
+            font-weight: 900;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+        
+        .tagline {
+            color: var(--text-secondary);
+            font-size: 16px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+        
+        /* 重要条款 */
+        .terms-section {
+            max-width: 1200px;
+            margin: 40px auto 50px;
+            padding: 0 20px;
+        }
+        
+        .terms-container {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.03) 0%, rgba(255, 215, 0, 0.01) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .terms-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gradient-gold);
+        }
+        
+        .terms-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .terms-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        
+        .terms-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .terms-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .term-highlight {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(255, 215, 0, 0.05);
+            border-left: 3px solid var(--gold);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .term-highlight:hover {
+            background: rgba(255, 215, 0, 0.08);
+            transform: translateX(5px);
+        }
+        
+        .term-highlight-icon {
+            color: var(--gold);
+            font-size: 20px;
+        }
+        
+        .term-highlight-text {
+            font-size: 14px;
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        .term-highlight-text strong {
+            color: var(--gold);
+        }
+        
+        .terms-footer {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        /* 容器 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* 优惠券网格 */
+        .vouchers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        .voucher-card {
+            background: rgba(22, 33, 62, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid transparent;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        
+        .voucher-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-gold);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+        
+        .voucher-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--gold);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2);
+        }
+        
+        .voucher-card:hover::before {
+            opacity: 0.05;
+        }
+        
+        .voucher-card:nth-child(1) .voucher-header {
+            background: var(--gradient-1);
+        }
+        
+        .voucher-card:nth-child(2) .voucher-header {
+            background: var(--gradient-2);
+        }
+        
+        .voucher-card:nth-child(3) .voucher-header {
+            background: var(--gradient-3);
+        }
+        
+        .voucher-header {
+            padding: 35px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .voucher-header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .voucher-value {
+            font-size: 56px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .voucher-label {
+            color: rgba(255,255,255,0.9);
+            font-size: 18px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .voucher-body {
+            padding: 35px 30px;
+        }
+        
+        .features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+        
+        .features li {
+            padding: 12px 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            transition: color 0.3s;
+        }
+        
+        .features li:hover {
+            color: var(--text);
+        }
+        
+        .features li::before {
+            content: '✦';
+            color: var(--gold);
+            font-size: 18px;
+        }
+        
+        .price-section {
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .usdt-price {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--usdt);
+        }
+        
+        .usdt-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--usdt);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 0 4px 15px rgba(38, 161, 123, 0.3);
+        }
+        
+        .exchange-rate {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+        }
+        
+        .discount-badge {
+            display: inline-block;
+            background: var(--gradient-gold);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .purchase-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--gradient-gold);
+            color: var(--primary);
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .purchase-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .purchase-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .purchase-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+        
+        .limited-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--gradient-gold);
+            color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+            z-index: 2;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* 自定义提示框 */
+        .custom-alert {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            animation: fadeIn 0.3s;
+        }
+        
+        .custom-alert.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .alert-box {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.3s;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .alert-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+        
+        .alert-icon.error {
+            background: rgba(255, 71, 87, 0.2);
+            color: var(--danger);
+            border: 2px solid var(--danger);
+        }
+        
+        .alert-icon.success {
+            background: rgba(0, 212, 170, 0.2);
+            color: var(--success);
+            border: 2px solid var(--success);
+        }
+        
+        .alert-icon.warning {
+            background: rgba(255, 165, 2, 0.2);
+            color: var(--warning);
+            border: 2px solid var(--warning);
+        }
+        
+        .alert-title {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+        
+        .alert-message {
+            text-align: center;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .alert-button {
+            width: 100%;
+            padding: 12px;
+            background: var(--gradient-gold);
+            color: var(--primary);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .alert-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+        }
+        
+        /* 验证进度弹窗 */
+        .verification-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .verification-modal.show {
+            display: flex;
+        }
+        
+        .verification-box {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 550px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .verification-title {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 35px;
+        }
+        
+        .verification-steps {
+            margin-bottom: 30px;
+        }
+        
+        .verify-step {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(255, 215, 0, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .verify-step.active {
+            background: rgba(255, 215, 0, 0.08);
+            border-color: var(--gold);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+        
+        .verify-step.completed {
+            background: rgba(0, 212, 170, 0.08);
+            border-color: var(--success);
+        }
+        
+        .verify-step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .verify-step-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 22px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .verify-step.active .verify-step-icon {
+            background: var(--gradient-gold);
+            color: var(--primary);
+            border-color: var(--gold);
+            animation: rotating 1s linear infinite;
+        }
+        
+        .verify-step.completed .verify-step-icon {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+            animation: none;
+        }
+        
+        @keyframes rotating {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .verify-step-content {
+            flex: 1;
+        }
+        
+        .verify-step-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text);
+            margin-bottom: 5px;
+        }
+        
+        .verify-step-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .verify-step-status {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            min-height: 20px;
+            transition: all 0.3s;
+        }
+        
+        .verify-step-status.success {
+            color: var(--success);
+            font-weight: 500;
+        }
+        
+        /* 验证成功弹窗 */
+        .success-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2100;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .success-modal.show {
+            display: flex;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 20px;
+            padding: 50px 40px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            animation: scaleInSuccess 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        @keyframes scaleInSuccess {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .verify-success-animation {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+        
+        .success-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--success), #00b894);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 40px rgba(0, 212, 170, 0.4);
+        }
+        
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .success-checkmark {
+            font-size: 60px;
+            color: white;
+            animation: checkmarkDraw 0.8s ease-in-out 0.3s forwards;
+            opacity: 0;
+        }
+        
+        @keyframes checkmarkDraw {
+            to {
+                opacity: 1;
+                transform: scale(1.1) rotate(5deg);
+            }
+        }
+        
+        .verify-success-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--success);
+            margin-bottom: 10px;
+        }
+        
+        .verify-success-text {
+            font-size: 16px;
+            color: var(--text);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .verify-continue-btn {
+            padding: 16px 50px;
+            background: var(--gradient-gold);
+            color: var(--primary);
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .verify-continue-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
+        }
+        
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: block;
+        }
+        
+        .modal-content {
+            max-width: 650px;
+            margin: 40px auto;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            padding: 35px;
+            background: rgba(255, 215, 0, 0.05);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            position: relative;
+        }
+        
+        .modal-title {
+            font-size: 28px;
+            font-weight: bold;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 35px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 50%;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-close:hover {
+            background: var(--gradient-gold);
+            color: var(--primary);
+            transform: rotate(90deg);
+        }
+        
+        .modal-body {
+            padding: 35px;
+        }
+        
+        /* 步骤指示器 */
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-weight: bold;
+            font-size: 18px;
+            transition: all 0.3s;
+            color: var(--text-secondary);
+        }
+        
+        .step.active .step-number {
+            background: var(--gradient-gold);
+            border-color: var(--gold);
+            color: var(--primary);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+        
+        .step.completed .step-number {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .step-line {
+            position: absolute;
+            top: 25px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255, 215, 0, 0.1);
+            z-index: 0;
+        }
+        
+        /* 表单 */
+        .form-section {
+            display: none;
+        }
+        
+        .form-section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text);
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        .form-label span {
+            color: var(--danger);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255, 215, 0, 0.03);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--gold);
+            background: rgba(255, 215, 0, 0.05);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+        }
+        
+        .form-input.error {
+            border-color: var(--danger);
+            background: rgba(255, 71, 87, 0.05);
+        }
+        
+        .form-hint {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        
+        .upload-area {
+            border: 2px dashed rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 215, 0, 0.02);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--gold);
+            background: rgba(255, 215, 0, 0.05);
+        }
+        
+        .upload-area.has-image {
+            border-color: var(--success);
+            background: rgba(0, 212, 170, 0.05);
+            padding: 20px;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            color: var(--text);
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .upload-hint {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 200px;
+            margin: 0 auto;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 35px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--text);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: var(--gold);
+        }
+        
+        .btn-primary {
+            background: var(--gradient-gold);
+            color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* 支付部分 */
+        .payment-info {
+            background: rgba(255, 215, 0, 0.03);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .qr-container {
+            background: white;
+            width: 320px;
+            height: 320px;
+            border-radius: 16px;
+            margin: 0 auto 25px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .qr-image {
+            width: 300px;
+            height: 300px;
+            border-radius: 12px;
+            object-fit: cover;
+            object-position: center;
+            transition: transform 0.3s;
+        }
+        
+        .qr-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .wallet-address {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 16px 70px 16px 16px;
+            border-radius: 10px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--success);
+            position: relative;
+            border: 1px solid rgba(38, 161, 123, 0.3);
+        }
+        
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 8px 16px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: #00b894;
+            transform: translateY(-50%) scale(1.05);
+        }
+        
+        .copy-btn.copied {
+            background: var(--gold);
+            color: var(--primary);
+        }
+        
+        .amount-display {
+            background: var(--gradient-gold);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .amount-label {
+            color: var(--primary);
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .amount-value {
+            font-size: 42px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .timer {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .timer-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .timer-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--danger);
+        }
+        
+        /* 提示信息 */
+        .notice {
+            background: rgba(255, 215, 0, 0.05);
+            border-left: 4px solid var(--gold);
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .notice-title {
+            font-weight: bold;
+            color: var(--gold);
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .notice-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        /* 成功消息 */
+        .success-message {
+            text-align: center;
+            padding: 50px;
+        }
+        
+        .success-icon {
+            font-size: 72px;
+            color: var(--success);
+            margin-bottom: 25px;
+            animation: successPulse 1s ease;
+        }
+        
+        @keyframes successPulse {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .success-title {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: var(--text);
+            font-weight: bold;
+        }
+        
+        .success-text {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        
+        .order-number {
+            color: var(--gold);
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 18px;
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+
+        /* 优惠券代码样式 */
+        .voucher-code-section {
+            margin: 20px 0;
+            background: rgba(0, 212, 170, 0.05);
+            border: 1px solid rgba(0, 212, 170, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        /* 优惠券生效提示 - 红色提示框 */
+        .voucher-activation-notice {
+            background: rgba(255, 71, 87, 0.15);
+            border: 2px solid var(--danger);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .voucher-activation-notice-text {
+            color: var(--danger);
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.6;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .voucher-code-label {
+            color: var(--success);
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .voucher-code-container {
+            position: relative;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 10px;
+            padding: 16px 70px 16px 16px;
+        }
+
+        .voucher-code {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--success);
+            word-break: break-all;
+            line-height: 1.8;
+            letter-spacing: 2px;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .voucher-copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 8px 16px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .voucher-copy-btn:hover {
+            background: #00b894;
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .voucher-copy-btn.copied {
+            background: var(--gold);
+            color: var(--primary);
+        }
+
+        /* 联系客服按钮 */
+        .contact-support {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .telegram-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: var(--gradient-telegram);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+        }
+
+        .telegram-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 136, 204, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+        .telegram-icon {
+            font-size: 18px;
+        }
+        
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            margin-top: 80px;
+        }
+        
+        .footer-links {
+            margin-top: 20px;
+        }
+        
+        .footer-links a {
+            color: var(--gold);
+            text-decoration: none;
+            margin: 0 15px;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--gold-dark);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 36px;
+            }
+            
+            .vouchers-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .terms-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                margin: 20px auto;
+            }
+            
+            .form-buttons {
+                flex-direction: column;
+            }
+            
+            .qr-container {
+                width: 280px;
+                height: 280px;
+                margin: 0 auto 20px;
+            }
+            
+            .qr-image {
+                width: 260px;
+                height: 260px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .qr-container {
+                width: 240px;
+                height: 240px;
+            }
+            
+            .qr-image {
+                width: 220px;
+                height: 220px;
+            }
+        }
+        
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 215, 0, 0.3);
+            border-top: 3px solid var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 自定义提示框 -->
+    <div class="custom-alert" id="customAlert">
+        <div class="alert-box">
+            <div class="alert-icon" id="alertIcon">!</div>
+            <div class="alert-title" id="alertTitle">提示</div>
+            <div class="alert-message" id="alertMessage">消息内容</div>
+            <button class="alert-button" onclick="closeAlert()">确定</button>
+        </div>
+    </div>
+    
+    <!-- 验证进度弹窗 -->
+    <div class="verification-modal" id="verificationModal">
+        <div class="verification-box">
+            <div class="verification-title">身份验证中</div>
+            <div class="verification-steps" id="verificationSteps">
+                <!-- 安全检测 -->
+                <div class="verify-step" id="step-security">
+                    <div class="verify-step-header">
+                        <div class="verify-step-icon">🛡️</div>
+                        <div class="verify-step-content">
+                            <div class="verify-step-title">安全检测</div>
+                            <div class="verify-step-desc">系统环境安全检测</div>
+                        </div>
+                    </div>
+                    <div class="verify-step-status" id="status-security"></div>
+                </div>
+                
+                <!-- 实名验证 -->
+                <div class="verify-step" id="step-identity">
+                    <div class="verify-step-header">
+                        <div class="verify-step-icon">👤</div>
+                        <div class="verify-step-content">
+                            <div class="verify-step-title">实名验证</div>
+                            <div class="verify-step-desc">身份信息核验</div>
+                        </div>
+                    </div>
+                    <div class="verify-step-status" id="status-identity"></div>
+                </div>
+                
+                <!-- 资格审核 -->
+                <div class="verify-step" id="step-eligibility">
+                    <div class="verify-step-header">
+                        <div class="verify-step-icon">📋</div>
+                        <div class="verify-step-content">
+                            <div class="verify-step-title">资格审核</div>
+                            <div class="verify-step-desc">购买资格综合评估</div>
+                        </div>
+                    </div>
+                    <div class="verify-step-status" id="status-eligibility"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 验证成功弹窗 -->
+    <div class="success-modal" id="successModal">
+        <div class="success-box">
+            <div class="verify-success-animation">
+                <div class="success-circle">
+                    <div class="success-checkmark">✓</div>
+                </div>
+            </div>
+            <div class="verify-success-title">验证通过</div>
+            <div class="verify-success-text">
+                您的身份验证已成功完成<br>
+                现在可以进行USDT支付
+            </div>
+            <button class="verify-continue-btn" onclick="continueToPayment()">进入支付页面</button>
+        </div>
+    </div>
+    
+    <!-- 头部 -->
+    <header class="header">
+        <div class="logo">API接口优惠券购买平台</div>
+        <div class="tagline">安全 • 合规 • 专业</div>
+    </header>
+    
+    <!-- 重要条款 -->
+    <div class="terms-section">
+        <div class="terms-container">
+            <div class="terms-header">
+                <div class="terms-icon">⚠️</div>
+                <div class="terms-title">重要条款与说明</div>
+            </div>
+            <div class="terms-content">
+                <div class="term-highlight">
+                    <span class="term-highlight-icon">🔒</span>
+                    <span class="term-highlight-text">
+                        <strong>限购政策：</strong>每个身份证限购一次
+                    </span>
+                </div>
+                <div class="term-highlight">
+                    <span class="term-highlight-icon">💰</span>
+                    <span class="term-highlight-text">
+                        <strong>支付方式：</strong>仅支持TRC-20 USDT
+                    </span>
+                </div>
+                <div class="term-highlight">
+                    <span class="term-highlight-icon">⚖️</span>
+                    <span class="term-highlight-text">
+                        <strong>合法用途：</strong>禁止洗钱等非法活动
+                    </span>
+                </div>
+                <div class="term-highlight">
+                    <span class="term-highlight-icon">⏱️</span>
+                    <span class="term-highlight-text">
+                        <strong>即时生效：</strong>购买后立即发放
+                    </span>
+                </div>
+                <div class="term-highlight">
+                    <span class="term-highlight-icon">🔐</span>
+                    <span class="term-highlight-text">
+                        <strong>数据加密：</strong>银行级安全保护
+                    </span>
+                </div>
+                <div class="term-highlight">
+                    <span class="term-highlight-icon">📞</span>
+                    <span class="term-highlight-text">
+                        <strong>客服支持：</strong>7×24小时在线
+                    </span>
+                </div>
+                <div class="term-highlight">
+                    <span class="term-highlight-icon">🔄</span>
+                    <span class="term-highlight-text">
+                        <strong>退款政策：</strong>未使用可7天无理由退款
+                    </span>
+                </div>
+                <div class="term-highlight">
+                    <span class="term-highlight-icon">📊</span>
+                    <span class="term-highlight-text">
+                        <strong>透明定价：</strong>无隐藏费用，实时汇率
+                    </span>
+                </div>
+            </div>
+            <div class="terms-footer">
+                本平台已获得相关经营许可，所有交易记录可追溯，个人信息采用银行级加密存储<br>
+                购买即表示同意我们的服务条款和隐私政策
+            </div>
+        </div>
+    </div>
+    
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 优惠券列表 -->
+        <div class="vouchers-grid">
+            <!-- $100 优惠券 -->
+            <div class="voucher-card">
+                <div class="voucher-header">
+                    <div class="voucher-value">$100</div>
+                    <div class="voucher-label">标准优惠券</div>
+                </div>
+                <div class="voucher-body">
+                    <ul class="features">
+                        <li>全平台通用优惠券</li>
+                        <li>有效期6个月</li>
+                        <li>可累积使用</li>
+                        <li>专属客服支持</li>
+                        <li>支持分次使用</li>
+                    </ul>
+                    <div class="price-section">
+                        <div class="usdt-price">
+                            <span class="usdt-icon">₮</span>
+                            <span>100 USDT</span>
+                        </div>
+                        <div class="exchange-rate">标准价格 • 无优惠</div>
+                    </div>
+                    <button class="purchase-btn" onclick="openPurchaseModal('standard', 100, 100)">
+                        立即购买
+                    </button>
+                </div>
+            </div>
+            
+            <!-- $1000 优惠券 -->
+            <div class="voucher-card">
+                <span class="limited-badge">热销</span>
+                <div class="voucher-header">
+                    <div class="voucher-value">$1,000</div>
+                    <div class="voucher-label">高级优惠券</div>
+                </div>
+                <div class="voucher-body">
+                    <ul class="features">
+                        <li>全平台通用优惠券</li>
+                        <li>有效期12个月</li>
+                        <li>额外赠送5%积分</li>
+                        <li>VIP专属客服</li>
+                        <li>优先处理订单</li>
+                    </ul>
+                    <div class="price-section">
+                        <div class="usdt-price">
+                            <span class="usdt-icon">₮</span>
+                            <span>980 USDT</span>
+                        </div>
+                        <div class="exchange-rate">
+                            限时特惠
+                            <span class="discount-badge">省20 USDT</span>
+                        </div>
+                    </div>
+                    <button class="purchase-btn" onclick="openPurchaseModal('premium', 1000, 980)">
+                        立即购买
+                    </button>
+                </div>
+            </div>
+            
+            <!-- $10000 优惠券 -->
+            <div class="voucher-card">
+                <span class="limited-badge">限量</span>
+                <div class="voucher-header">
+                    <div class="voucher-value">$10,000</div>
+                    <div class="voucher-label">企业优惠券</div>
+                </div>
+                <div class="voucher-body">
+                    <ul class="features">
+                        <li>全平台通用优惠券</li>
+                        <li>有效期24个月</li>
+                        <li>额外赠送10%积分</li>
+                        <li>1对1专属经理</li>
+                        <li>定制化服务方案</li>
+                    </ul>
+                    <div class="price-section">
+                        <div class="usdt-price">
+                            <span class="usdt-icon">₮</span>
+                            <span>9,500 USDT</span>
+                        </div>
+                        <div class="exchange-rate">
+                            企业特惠
+                            <span class="discount-badge">省500 USDT</span>
+                        </div>
+                    </div>
+                    <button class="purchase-btn" onclick="openPurchaseModal('enterprise', 10000, 9500)">
+                        立即购买
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>© 2024 易渠交易支付公司 版权所有</p>
+        <div class="footer-links">
+            <a href="#">服务条款</a>
+            <a href="#">隐私政策</a>
+            <a href="#">联系我们</a>
+            <a href="#">帮助中心</a>
+        </div>
+    </footer>
+    
+    <!-- 购买模态框 -->
+    <div class="modal" id="purchaseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">购买优惠券</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- 步骤指示器 -->
+                <div class="step-indicator">
+                    <div class="step-line"></div>
+                    <div class="step active" id="step1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">身份验证</div>
+                    </div>
+                    <div class="step" id="step2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">USDT支付</div>
+                    </div>
+                    <div class="step" id="step3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">完成购买</div>
+                    </div>
+                </div>
+                
+                <!-- 步骤1：身份验证 -->
+                <div class="form-section active" id="section1">
+                    <form id="identityForm">
+                        <div class="form-group">
+                            <label class="form-label">真实姓名 <span>*</span></label>
+                            <input type="text" class="form-input" id="name" required placeholder="请输入您的真实姓名">
+                            <div class="form-hint">请输入2-6个中文字符</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">身份证号码 <span>*</span></label>
+                            <input type="text" class="form-input" id="idNumber" required placeholder="请输入18位身份证号码" maxlength="18">
+                            <div class="form-hint">请输入有效的中国大陆身份证号码</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">手机号码 <span>*</span></label>
+                            <input type="tel" class="form-input" id="phone" required placeholder="请输入11位手机号码" maxlength="11">
+                            <div class="form-hint">请输入有效的中国大陆手机号码</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">身份证正面照片 <span>*</span></label>
+                            <div class="upload-area" id="uploadArea1">
+                                <div class="upload-icon">📷</div>
+                                <div class="upload-text">点击上传身份证正面</div>
+                                <div class="upload-hint">支持 JPG/PNG 格式，最大 5MB</div>
+                                <input type="file" class="file-input" id="idCardFront" accept="image/*">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">身份证反面照片 <span>*</span></label>
+                            <div class="upload-area" id="uploadArea2">
+                                <div class="upload-icon">📷</div>
+                                <div class="upload-text">点击上传身份证反面</div>
+                                <div class="upload-hint">支持 JPG/PNG 格式，最大 5MB</div>
+                                <input type="file" class="file-input" id="idCardBack" accept="image/*">
+                            </div>
+                        </div>
+                        
+                        <div class="notice">
+                            <div class="notice-title">隐私保护承诺</div>
+                            <div class="notice-text">
+                                您的个人信息将严格加密保存，仅用于购买验证，我们承诺不会泄露或滥用您的隐私信息
+                            </div>
+                        </div>
+                        
+                        <div class="form-buttons">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                            <button type="button" class="btn btn-primary" id="nextBtn" onclick="startVerification()">
+                                下一步
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- 步骤2：支付 -->
+                <div class="form-section" id="section2">
+                    <div class="amount-display">
+                        <div class="amount-label">支付金额</div>
+                        <div class="amount-value" id="paymentAmount">100 USDT</div>
+                    </div>
+                    
+                    <div class="timer">
+                        <div class="timer-label">支付倒计时</div>
+                        <div class="timer-value" id="countdown">30:00</div>
+                    </div>
+                    
+                    <div class="payment-info">
+                        <div class="qr-container">
+                            <img src="./usdt_trc20_qr.png" alt="USDT TRC-20 支付二维码" class="qr-image">
+                        </div>
+                        
+                        <div style="text-align: center; margin-bottom: 10px; color: var(--text-secondary);">
+                            请使用 TRC-20 网络转账
+                        </div>
+                        
+                        <div class="wallet-address">
+                            TS2Vo4PC8ynQefcTcmgkgRZPWn1K1xAoC1
+                            <button class="copy-btn" onclick="copyAddress(this)">复制</button>
+                        </div>
+                        
+                        <div class="notice">
+                            <div class="notice-title">支付注意事项</div>
+                            <div class="notice-text">
+                                • 请确保使用TRC-20网络，其他网络转账将无法到账<br>
+                                • 转账金额必须与订单金额完全一致<br>
+                                • 支付完成后系统将在1-3分钟内自动确认<br>
+                                • 如有问题请联系在线客服
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="backToIdentity()">上一步</button>
+                        <button type="button" class="btn btn-primary" id="confirmBtn" onclick="confirmPayment()">
+                            我已完成支付
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 步骤3：完成 -->
+                <div class="form-section" id="section3">
+                    <div class="success-message">
+                        <div class="success-icon">✓</div>
+                        <div class="success-title">购买成功！</div>
+                        <div class="success-text">
+                            恭喜您成功购买优惠券！<br>
+                            <br>
+                            订单号：<div class="order-number" id="orderNumber">ORD20240101000001</div>
+                            <br>
+                            
+                            <!-- 优惠券代码部分 -->
+                            <div class="voucher-code-section">
+                                <!-- 红色激活提示 -->
+                                <div class="voucher-activation-notice">
+                                    <div class="voucher-activation-notice-text">
+                                        官方将在确认收到您的款项后，生效您的优惠券代码，大约10-15分钟
+                                    </div>
+                                </div>
+                                
+                                <div class="voucher-code-label">电子优惠券代码</div>
+                                <div class="voucher-code-container">
+                                    <div class="voucher-code" id="voucherCode"></div>
+                                    <button class="voucher-copy-btn" onclick="copyVoucherCode(this)">复制</button>
+                                </div>
+                            </div>
+                            
+                            请务必保密您的优惠券代码，切勿向任何第三方泄露<br>
+                            如发现代码被盗用，请立即联系客服处理
+                        </div>
+
+                        <!-- 联系客服部分 -->
+                        <div class="contact-support">
+                            <a href="https://t.me/tommy_chan" target="_blank" class="telegram-btn">
+                                <span class="telegram-icon">📱</span>
+                                联系客服 (Telegram)
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-primary" onclick="closeModal()">完成</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量
+        let currentPurchase = {
+            type: '',
+            value: 0,
+            price: 0
+        };
+        
+        let purchaseHistory = [];
+        let countdownInterval = null;
+        let isProcessing = false;
+        let verificationData = null;
+        let statusInterval = null;
+        let generatedVoucherCode = '';
+        
+        // 验证步骤详细信息
+        const verificationDetails = {
+            security: [
+                '正在检测系统环境...',
+                '检查IP地址安全性...',
+                '验证设备指纹信息...',
+                '反欺诈系统扫描中...',
+                '综合风险评估中...',
+                '安全检测通过'
+            ],
+            identity: [
+                '正在验证身份证信息...',
+                '姓名信息核验中...',
+                '身份证号码格式检查...',
+                '照片真实性验证...',
+                '公安系统联网核查...',
+                '实名验证成功'
+            ],
+            eligibility: [
+                '检查购买历史记录...',
+                '验证购买限制条件...',
+                '审核账户状态...',
+                '评估信用等级...',
+                '检查黑名单数据库...',
+                '分析交易风险...',
+                '验证支付资格...',
+                '综合风险评估中...',
+                '资格审核通过'
+            ]
+        };
+        
+        // 生成256位随机优惠券代码
+        function generateVoucherCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 256; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+        
+        // 复制优惠券代码
+        function copyVoucherCode(btn) {
+            const voucherCode = document.getElementById('voucherCode').textContent;
+            
+            const tempInput = document.createElement('input');
+            tempInput.value = voucherCode;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                document.execCommand('copy');
+                btn.textContent = '已复制';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = '复制';
+                    btn.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                showAlert('复制失败，请手动复制代码', 'warning');
+            }
+            
+            document.body.removeChild(tempInput);
+        }
+        
+        // 自定义提示框
+        function showAlert(message, type = 'error', title = '') {
+            const alertDiv = document.getElementById('customAlert');
+            const alertIcon = document.getElementById('alertIcon');
+            const alertTitle = document.getElementById('alertTitle');
+            const alertMessage = document.getElementById('alertMessage');
+            
+            // 设置图标和样式
+            alertIcon.className = 'alert-icon ' + type;
+            if (type === 'error') {
+                alertIcon.innerHTML = '✕';
+                alertTitle.textContent = title || '错误提示';
+            } else if (type === 'success') {
+                alertIcon.innerHTML = '✓';
+                alertTitle.textContent = title || '成功';
+            } else if (type === 'warning') {
+                alertIcon.innerHTML = '!';
+                alertTitle.textContent = title || '警告';
+            }
+            
+            alertMessage.textContent = message;
+            alertDiv.classList.add('show');
+        }
+        
+        function closeAlert() {
+            document.getElementById('customAlert').classList.remove('show');
+        }
+        
+        // 验证中文姓名
+        function validateChineseName(name) {
+            const reg = /^[\u4e00-\u9fa5]{2,6}$/;
+            return reg.test(name);
+        }
+        
+        // 验证身份证号码
+        function validateIdCard(idCard) {
+            const reg = /^[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]$/;
+            if (!reg.test(idCard)) {
+                return false;
+            }
+            
+            const factors = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2];
+            const checkCodes = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'];
+            
+            let sum = 0;
+            for (let i = 0; i < 17; i++) {
+                sum += parseInt(idCard[i]) * factors[i];
+            }
+            
+            const checkCode = checkCodes[sum % 11];
+            return idCard[17].toUpperCase() === checkCode;
+        }
+        
+        // 验证手机号
+        function validatePhone(phone) {
+            const reg = /^1[3-9]\d{9}$/;
+            return reg.test(phone);
+        }
+        
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', function() {
+            const saved = localStorage.getItem('purchaseHistory');
+            if (saved) {
+                purchaseHistory = JSON.parse(saved);
+            }
+            
+            setupUploadAreas();
+            
+            document.getElementById('idCardFront').addEventListener('change', function(e) {
+                handleFileUpload(e, 'uploadArea1');
+            });
+            
+            document.getElementById('idCardBack').addEventListener('change', function(e) {
+                handleFileUpload(e, 'uploadArea2');
+            });
+            
+            document.getElementById('purchaseModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+            
+            // 输入框实时验证
+            document.getElementById('name').addEventListener('blur', function() {
+                if (this.value && !validateChineseName(this.value)) {
+                    this.classList.add('error');
+                    showAlert('请输入2-6个中文字符的真实姓名', 'warning', '姓名格式错误');
+                } else {
+                    this.classList.remove('error');
+                }
+            });
+            
+            document.getElementById('idNumber').addEventListener('blur', function() {
+                if (this.value && !validateIdCard(this.value)) {
+                    this.classList.add('error');
+                    showAlert('请输入有效的18位身份证号码', 'warning', '身份证格式错误');
+                } else {
+                    this.classList.remove('error');
+                }
+            });
+            
+            document.getElementById('phone').addEventListener('blur', function() {
+                if (this.value && !validatePhone(this.value)) {
+                    this.classList.add('error');
+                    showAlert('请输入有效的11位手机号码', 'warning', '手机号格式错误');
+                } else {
+                    this.classList.remove('error');
+                }
+            });
+        });
+        
+        // 设置上传区域
+        function setupUploadAreas() {
+            document.getElementById('uploadArea1').addEventListener('click', function(e) {
+                if (!e.target.matches('input')) {
+                    document.getElementById('idCardFront').click();
+                }
+            });
+            
+            document.getElementById('uploadArea2').addEventListener('click', function(e) {
+                if (!e.target.matches('input')) {
+                    document.getElementById('idCardBack').click();
+                }
+            });
+        }
+        
+        // 打开购买模态框
+        function openPurchaseModal(type, value, price) {
+            currentPurchase = { type, value, price };
+            document.getElementById('paymentAmount').textContent = price + ' USDT';
+            document.getElementById('purchaseModal').classList.add('active');
+            resetForm();
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            if (statusInterval) {
+                clearInterval(statusInterval);
+            }
+            document.getElementById('purchaseModal').classList.remove('active');
+            resetForm();
+        }
+        
+        // 重置表单
+        function resetForm() {
+            document.getElementById('identityForm').reset();
+            
+            document.querySelectorAll('.form-input').forEach(input => {
+                input.classList.remove('error');
+            });
+            
+            const area1 = document.getElementById('uploadArea1');
+            area1.classList.remove('has-image');
+            area1.innerHTML = `
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">点击上传身份证正面</div>
+                <div class="upload-hint">支持 JPG/PNG 格式，最大 5MB</div>
+                <input type="file" class="file-input" id="idCardFront" accept="image/*">
+            `;
+            
+            const area2 = document.getElementById('uploadArea2');
+            area2.classList.remove('has-image');
+            area2.innerHTML = `
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">点击上传身份证反面</div>
+                <div class="upload-hint">支持 JPG/PNG 格式，最大 5MB</div>
+                <input type="file" class="file-input" id="idCardBack" accept="image/*">
+            `;
+            
+            document.getElementById('idCardFront').addEventListener('change', function(e) {
+                handleFileUpload(e, 'uploadArea1');
+            });
+            
+            document.getElementById('idCardBack').addEventListener('change', function(e) {
+                handleFileUpload(e, 'uploadArea2');
+            });
+            
+            showSection(1);
+            isProcessing = false;
+            verificationData = null;
+            
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            if (statusInterval) {
+                clearInterval(statusInterval);
+            }
+        }
+        
+        // 处理文件上传
+        function handleFileUpload(event, areaId) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                showAlert('请选择有效的图片文件（JPG/PNG格式）', 'warning', '文件格式错误');
+                event.target.value = '';
+                return;
+            }
+            
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                showAlert('图片大小不能超过5MB，请压缩后重新上传', 'warning', '文件过大');
+                event.target.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const area = document.getElementById(areaId);
+                area.classList.add('has-image');
+                area.innerHTML = `
+                    <img src="${e.target.result}" class="preview-image" alt="预览">
+                    <div class="upload-hint" style="margin-top: 15px; color: var(--success);">
+                        ✓ 上传成功，点击可重新选择
+                    </div>
+                `;
+                
+                const newInput = document.createElement('input');
+                newInput.type = 'file';
+                newInput.className = 'file-input';
+                newInput.id = areaId === 'uploadArea1' ? 'idCardFront' : 'idCardBack';
+                newInput.accept = 'image/*';
+                newInput.addEventListener('change', function(e) {
+                    handleFileUpload(e, areaId);
+                });
+                area.appendChild(newInput);
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // 开始验证流程
+        function startVerification() {
+            if (isProcessing) return;
+            
+            const name = document.getElementById('name').value.trim();
+            const idNumber = document.getElementById('idNumber').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            
+            if (!name) {
+                showAlert('请输入您的真实姓名', 'warning', '信息不完整');
+                return;
+            }
+            if (!validateChineseName(name)) {
+                showAlert('姓名格式不正确，请输入2-6个中文字符', 'error', '验证失败');
+                document.getElementById('name').classList.add('error');
+                return;
+            }
+            
+            if (!idNumber) {
+                showAlert('请输入您的身份证号码', 'warning', '信息不完整');
+                return;
+            }
+            if (!validateIdCard(idNumber)) {
+                showAlert('身份证号码无效，请检查后重新输入', 'error', '验证失败');
+                document.getElementById('idNumber').classList.add('error');
+                return;
+            }
+            
+            if (!phone) {
+                showAlert('请输入您的手机号码', 'warning', '信息不完整');
+                return;
+            }
+            if (!validatePhone(phone)) {
+                showAlert('手机号码格式不正确，请输入有效的11位手机号', 'error', '验证失败');
+                document.getElementById('phone').classList.add('error');
+                return;
+            }
+            
+            if (purchaseHistory.includes(idNumber)) {
+                showAlert('该身份证已购买过优惠券，每个身份证限购一次', 'error', '购买限制');
+                return;
+            }
+            
+            const hasImage1 = document.getElementById('uploadArea1').classList.contains('has-image');
+            const hasImage2 = document.getElementById('uploadArea2').classList.contains('has-image');
+            
+            if (!hasImage1 || !hasImage2) {
+                showAlert('请上传身份证正反面照片', 'warning', '信息不完整');
+                return;
+            }
+            
+            verificationData = { name, idNumber, phone };
+            showVerificationModal();
+        }
+        
+        // 显示验证弹窗
+        function showVerificationModal() {
+            const modal = document.getElementById('verificationModal');
+            modal.classList.add('show');
+            
+            document.querySelectorAll('.verify-step').forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+            
+            document.getElementById('status-security').textContent = '';
+            document.getElementById('status-identity').textContent = '';
+            document.getElementById('status-eligibility').textContent = '';
+            
+            runVerificationSteps();
+        }
+        
+        // 运行验证步骤
+        async function runVerificationSteps() {
+            const steps = [
+                { id: 'security', duration: 7000 },
+                { id: 'identity', duration: 7000 },
+                { id: 'eligibility', duration: 15000 }
+            ];
+            
+            for (let step of steps) {
+                await processVerificationStep(step.id, step.duration);
+            }
+            
+            setTimeout(() => {
+                document.getElementById('verificationModal').classList.remove('show');
+                showSuccessModal();
+            }, 500);
+        }
+        
+        // 处理单个验证步骤
+        function processVerificationStep(stepId, duration) {
+            return new Promise(resolve => {
+                const stepElement = document.getElementById(`step-${stepId}`);
+                const statusElement = document.getElementById(`status-${stepId}`);
+                const details = verificationDetails[stepId];
+                
+                stepElement.classList.add('active');
+                
+                let currentIndex = 0;
+                const interval = duration / details.length;
+                
+                const intervalId = setInterval(() => {
+                    if (currentIndex < details.length) {
+                        statusElement.textContent = details[currentIndex];
+                        
+                        if (currentIndex === details.length - 1) {
+                            statusElement.classList.add('success');
+                        }
+                        
+                        currentIndex++;
+                    } else {
+                        clearInterval(intervalId);
+                        
+                        stepElement.classList.remove('active');
+                        stepElement.classList.add('completed');
+                        stepElement.querySelector('.verify-step-icon').innerHTML = '✓';
+                        
+                        resolve();
+                    }
+                }, interval);
+            });
+        }
+        
+        // 显示成功弹窗
+        function showSuccessModal() {
+            const modal = document.getElementById('successModal');
+            modal.classList.add('show');
+        }
+        
+        // 继续到支付页面
+        function continueToPayment() {
+            document.getElementById('successModal').classList.remove('show');
+            showSection(2);
+            startCountdown();
+        }
+        
+        // 返回身份验证
+        function backToIdentity() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            showSection(1);
+        }
+        
+        // 确认支付 - 30秒等待时间
+        function confirmPayment() {
+            if (isProcessing) return;
+            
+            const confirmBtn = document.getElementById('confirmBtn');
+            confirmBtn.innerHTML = '确认中<span class="loading"></span>';
+            confirmBtn.disabled = true;
+            isProcessing = true;
+            
+            // 30秒等待时间
+            setTimeout(() => {
+                if (verificationData) {
+                    purchaseHistory.push(verificationData.idNumber);
+                    localStorage.setItem('purchaseHistory', JSON.stringify(purchaseHistory));
+                }
+                
+                // 生成订单号
+                const now = new Date();
+                const orderNum = 'ORD' + now.getFullYear() + 
+                    String(now.getMonth() + 1).padStart(2, '0') +
+                    String(now.getDate()).padStart(2, '0') +
+                    String(now.getHours()).padStart(2, '0') +
+                    String(now.getMinutes()).padStart(2, '0') +
+                    String(now.getSeconds()).padStart(2, '0') +
+                    String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+                
+                document.getElementById('orderNumber').textContent = orderNum;
+                
+                // 生成并显示优惠券代码
+                generatedVoucherCode = generateVoucherCode();
+                document.getElementById('voucherCode').textContent = generatedVoucherCode;
+                
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                }
+                
+                confirmBtn.innerHTML = '我已完成支付';
+                confirmBtn.disabled = false;
+                isProcessing = false;
+                
+                showSection(3);
+            }, 30000); // 30秒等待时间
+        }
+        
+        // 显示指定步骤
+        function showSection(num) {
+            document.querySelectorAll('.step').forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index < num - 1) {
+                    step.classList.add('completed');
+                } else if (index === num - 1) {
+                    step.classList.add('active');
+                }
+            });
+            
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById('section' + num).classList.add('active');
+        }
+        
+        // 复制地址
+        function copyAddress(btn) {
+            const address = 'TS2Vo4PC8ynQefcTcmgkgRZPWn1K1xAoC1';
+            
+            const tempInput = document.createElement('input');
+            tempInput.value = address;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                document.execCommand('copy');
+                btn.textContent = '已复制';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = '复制';
+                    btn.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                showAlert('复制失败，请手动复制地址', 'warning');
+            }
+            
+            document.body.removeChild(tempInput);
+        }
+        
+        // 倒计时
+        function startCountdown() {
+            let seconds = 1800;
+            
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            countdownInterval = setInterval(() => {
+                const minutes = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                const display = `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                document.getElementById('countdown').textContent = display;
+                
+                seconds--;
+                
+                if (seconds < 0) {
+                    clearInterval(countdownInterval);
+                    showAlert('支付超时，请重新下单', 'warning', '超时提醒');
+                    setTimeout(() => {
+                        closeModal();
+                    }, 2000);
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

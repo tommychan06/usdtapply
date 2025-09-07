@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账号交易</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #2a2a2a;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #4fc3f7;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: #333;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        select optgroup {
+            font-weight: bold;
+            background: #444;
+            color: #4fc3f7;
+        }
+
+        select option {
+            background: #333;
+            color: #fff;
+            padding: 5px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #4fc3f7;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #29b6f6;
+            transform: translateY(-2px);
+        }
+
+        .contact {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+        }
+
+        .contact-item {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .contact-item:last-child {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            width: 90%;
+            border: 1px solid #444;
+        }
+
+        .modal-header {
+            color: #4fc3f7;
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .modal-body {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .countdown {
+            color: #e74c3c;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .modal-footer {
+            color: #f39c12;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💼 社交账号交易</h1>
+        
+        <form onsubmit="submitForm(event)">
+            <div class="form-group">
+                <label>平台类型</label>
+                <select id="account-type" onchange="updateSubTypes()" required>
+                    <option value="">选择平台类型</option>
+                    <option value="微信">微信账号</option>
+                    <option value="支付宝">支付宝账号</option>
+                    <option value="抖音">抖音账号</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>账号类别</label>
+                <select id="sub-type" onchange="updatePrice()" required>
+                    <option value="">选择具体类别</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>购买数量</label>
+                <select id="quantity" onchange="updatePrice()" required>
+                    <option value="">选择数量</option>
+                    <option value="1个">1个</option>
+                    <option value="5个">5个</option>
+                    <option value="10个">10个</option>
+                    <option value="20个">20个</option>
+                    <option value="50个">50个</option>
+                    <option value="100个">100个</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>价格</label>
+                <div id="price-display" style="padding: 12px; border: 1px solid #444; border-radius: 8px; background: #333; color: #4fc3f7; font-size: 18px; font-weight: bold; text-align: center;">
+                    请先选择账号类型和数量
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>接收邮箱</label>
+                <input type="email" id="email" placeholder="请输入接收账号信息的邮箱地址" required style="width: 100%; padding: 12px; border: 1px solid #444; border-radius: 8px; background: #333; color: #fff; font-size: 16px;">
+            </div>
+
+            <button type="submit" class="submit-btn">前往易渠USDT支付订单</button>
+            <div style="text-align: center; color: #f39c12; font-size: 14px; margin-top: 10px;">
+                💡 请在钱包的DApp浏览器中打开此页面，否则将无法支付
+            </div>
+        </form>
+
+        <div class="contact">
+            <div class="contact-item">
+                <strong>Telegram：</strong> <a href="https://t.me/tommy_chan" target="_blank" style="color: #4fc3f7; text-decoration: none;">@tommy_chan</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5秒倒计时弹窗 -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                ⚠️ 支付提醒
+            </div>
+            <div class="modal-body">
+                您即将跳转到易渠USDT支付平台<br>
+                请确保在钱包的DApp浏览器中操作
+            </div>
+            <div class="countdown" id="countdown">5</div>
+            <div class="modal-footer">
+                💡 倒计时结束后自动跳转支付页面
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateSubTypes() {
+            const accountType = document.getElementById('account-type').value;
+            const subTypeSelect = document.getElementById('sub-type');
+            
+            // 清空子类选项
+            subTypeSelect.innerHTML = '<option value="">选择具体类别</option>';
+            
+            if (accountType) {
+                let options = [];
+                switch(accountType) {
+                    case '微信':
+                        options = [
+                            '1年期微信账号',
+                            '2年期微信账号',
+                            '5年期微信账号',
+                            '老号微信账号'
+                        ];
+                        break;
+                    case '支付宝':
+                        options = [
+                            '实名支付宝账号',
+                            '企业支付宝账号',
+                            '高信用支付宝'
+                        ];
+                        break;
+                    case '抖音':
+                        options = [
+                            '万粉抖音账号',
+                            '十万粉抖音账号',
+                            '实名抖音账号',
+                            '企业抖音账号'
+                        ];
+                        break;
+                }
+                
+                options.forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.textContent = option;
+                    subTypeSelect.appendChild(optionElement);
+                });
+            }
+            updatePrice(); // 更新价格显示
+        }
+
+        function updatePrice() {
+            const accountType = document.getElementById('account-type').value;
+            const subType = document.getElementById('sub-type').value;
+            const quantity = document.getElementById('quantity').value;
+            const priceDisplay = document.getElementById('price-display');
+            
+            if (!accountType || !subType || !quantity) {
+                priceDisplay.textContent = '请先选择账号类型和数量';
+                return;
+            }
+            
+            // 价格表 (USDT)
+            const prices = {
+                '1年期微信账号': 6.94,
+                '2年期微信账号': 11.11,
+                '5年期微信账号': 20.83,
+                '老号微信账号': 27.78,
+                '实名支付宝账号': 13.89,
+                '企业支付宝账号': 41.67,
+                '高信用支付宝': 25.00,
+                '万粉抖音账号': 69.44,
+                '十万粉抖音账号': 208.33,
+                '实名抖音账号': 11.11,
+                '企业抖音账号': 55.56
+            };
+            
+            const unitPrice = prices[subType] || 0;
+            const quantityNum = parseInt(quantity);
+            const totalPrice = (unitPrice * quantityNum).toFixed(2);
+            
+            priceDisplay.innerHTML = `单价：${unitPrice} USDT × ${quantity} = <span style="color: #e74c3c;">${totalPrice} USDT</span>`;
+        }
+
+        function submitForm(event) {
+            event.preventDefault();
+            const accountType = document.getElementById('account-type').value;
+            const subType = document.getElementById('sub-type').value;
+            const quantity = document.getElementById('quantity').value;
+            const email = document.getElementById('email').value.trim();
+            
+            if (!accountType || !subType || !quantity || !email) {
+                alert('请完整填写所有信息');
+                return;
+            }
+            
+            // 验证邮箱格式
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('请输入正确的邮箱地址');
+                return;
+            }
+            
+            // 获取价格信息
+            const prices = {
+                '1年期微信账号': 6.94,
+                '2年期微信账号': 11.11,
+                '5年期微信账号': 20.83,
+                '老号微信账号': 27.78,
+                '实名支付宝账号': 13.89,
+                '企业支付宝账号': 41.67,
+                '高信用支付宝': 25.00,
+                '万粉抖音账号': 69.44,
+                '十万粉抖音账号': 208.33,
+                '实名抖音账号': 11.11,
+                '企业抖音账号': 55.56
+            };
+            
+            const unitPrice = prices[subType] || 0;
+            const quantityNum = parseInt(quantity);
+            const totalPrice = (unitPrice * quantityNum).toFixed(2);
+            
+            // 生成备注信息，包含邮箱
+            const memo = `${subType} x ${quantity} | 邮箱: ${email}`;
+            
+            // 构建跳转到USDT支付页面的URL参数
+            const params = new URLSearchParams({
+                merchant: '购买数据',
+                amount: totalPrice,
+                memo: memo
+            });
+            
+            // 显示5秒倒计时弹窗
+            showPaymentModal(`./jy.html?${params.toString()}`);
+        }
+
+        function showPaymentModal(redirectUrl) {
+            const modal = document.getElementById('paymentModal');
+            const countdownElement = document.getElementById('countdown');
+            
+            // 显示弹窗
+            modal.style.display = 'block';
+            
+            let countdown = 5;
+            countdownElement.textContent = countdown;
+            
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                countdownElement.textContent = countdown;
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                    modal.style.display = 'none';
+                    // 跳转到支付页面
+                    window.location.href = redirectUrl;
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
